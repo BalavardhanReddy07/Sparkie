@@ -30,6 +30,9 @@ global class AFA_ProcessTopicSelection {
 
         @InvocableVariable(label='Is Insurance Selected')
         global Boolean IsInsuranceSelected;
+
+        // In processTopicSelection loop
+        out.IsTopicSubmitted = req.inputs.IsTopicSubmitted == true;
     }
 
     @InvocableMethod(label='Topic Selection Process' description='Receives the user topic selection from the LWC and returns boolean flags so the Agent Script can route to the correct subagent.')
