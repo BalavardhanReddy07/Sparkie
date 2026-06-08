@@ -38,5 +38,19 @@ export default class ProcessTopicSelection extends LightningElement {
         new CustomEvent("valuechange", { detail: { value: payload } })
     );
 }
+    // When CLT submits without any topic clicked,
+// fire valuechange with all false but IsTopicSubmitted true
+handleSubmitWithNoSelection() {
+    if (!this.selectedTopic) {
+        const payload = {
+            IsProductSelected:   false,
+            IsInsuranceSelected: false,
+            IsTopicSubmitted:    true
+        };
+        this.dispatchEvent(
+            new CustomEvent("valuechange", { detail: { value: payload } })
+        );
+    }
+}
     
 }
