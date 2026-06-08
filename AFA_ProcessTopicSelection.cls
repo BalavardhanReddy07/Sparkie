@@ -1,11 +1,6 @@
 @JsonAccess(serializable='always' deserializable='always')
 global class AFA_ProcessTopicSelection {
 
-    /**
-     * Input schema — mirrors the Custom Lightning Type CLT_ProcessTopicSelection.
-     * The LWC dispatches { IsProductSelected: Boolean, IsInsuranceSelected: Boolean }
-     * through the "valuechange" event, which Agentforce serialises into this class.
-     */
     @JsonAccess(serializable='always' deserializable='always')
     global class TopicSelectionInput {
         @AuraEnabled
@@ -13,16 +8,17 @@ global class AFA_ProcessTopicSelection {
 
         @AuraEnabled
         global Boolean IsInsuranceSelected;
+
+        @AuraEnabled
+        global Boolean IsTopicSubmitted;        // ← added here
     }
 
-    /** Wrapper that Agentforce passes into the @InvocableMethod. */
     @JsonAccess(serializable='always' deserializable='always')
     global class InputRequest {
         @InvocableVariable(label='Topic Selection Input' required=true)
         global TopicSelectionInput inputs;
     }
 
-    /** Output returned to the Agent so it can branch in the Agent Script. */
     @JsonAccess(serializable='always' deserializable='always')
     global class ActionOutput {
         @InvocableVariable(label='Is Product Selected')
@@ -31,8 +27,8 @@ global class AFA_ProcessTopicSelection {
         @InvocableVariable(label='Is Insurance Selected')
         global Boolean IsInsuranceSelected;
 
-        // In processTopicSelection loop
-        out.IsTopicSubmitted = req.inputs.IsTopicSubmitted == true;
+        @InvocableVariable(label='Is Topic Submitted')  // ← added here
+        global Boolean IsTopicSubmitted;
     }
 
     @InvocableMethod(label='Topic Selection Process' description='Receives the user topic selection from the LWC and returns boolean flags so the Agent Script can route to the correct subagent.')
@@ -43,11 +39,13 @@ global class AFA_ProcessTopicSelection {
             ActionOutput out = new ActionOutput();
 
             if (req.inputs != null) {
-                out.IsProductSelected  = req.inputs.IsProductSelected  == true;
+                out.IsProductSelected   = req.inputs.IsProductSelected  == true;
                 out.IsInsuranceSelected = req.inputs.IsInsuranceSelected == true;
+                out.IsTopicSubmitted    = req.inputs.IsTopicSubmitted    == true;
             } else {
-                out.IsProductSelected  = false;
+                out.IsProductSelected   = false;
                 out.IsInsuranceSelected = false;
+                out.IsTopicSubmitted    = false; // ← added here
             }
 
             results.add(out);
