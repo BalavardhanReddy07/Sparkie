@@ -26,17 +26,17 @@ export default class ProcessTopicSelection extends LightningElement {
 
     /* ── Handler: select topic and immediately dispatch value ── */
     handleTopicClick(event) {
-        this.selectedTopic = event.currentTarget.dataset.value;
+    this.selectedTopic = event.currentTarget.dataset.value;
 
-        const payload = {
-            IsProductSelected:   this.selectedTopic === 'Product',
-            IsInsuranceSelected: this.selectedTopic === 'Insurance'
-        };
+    const payload = {
+        IsProductSelected:   this.selectedTopic === 'Product',
+        IsInsuranceSelected: this.selectedTopic === 'Insurance',
+        IsTopicSubmitted:    true    // ← CLT submit means user is done
+    };
 
-        this.dispatchEvent(
-            new CustomEvent("valuechange", {
-                detail: { value: payload }
-            })
-        );
-    }
+    this.dispatchEvent(
+        new CustomEvent("valuechange", { detail: { value: payload } })
+    );
+}
+    
 }
