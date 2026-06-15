@@ -1,3 +1,19 @@
+get productOptions() {
+    return this.products.map((item) => {
+        const parts = item.split(" -- ");
+        const schemeCategory = parts[0] ? parts[0].trim() : item;
+        const accountNumber  = parts[1] ? parts[1].trim() : "";
+        const label = accountNumber
+            ? `${schemeCategory} -- ${accountNumber}`
+            : schemeCategory;
+        return { label: label, value: schemeCategory };
+    });
+}
+
+
+
+
+=======================================================================
 How the Interview Started
 How the Interview Started
 Bala Reddy (0059j00000QLTDM) started the flow interview.
