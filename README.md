@@ -373,6 +373,54 @@ export default class MenuFilter extends LightningElement {
 }
 
 
-    }
+Example :
+
+Member Summary
+Member Name: Aaira Farina
+
+Age: 37
+
+First Nation Post Code: false
+
+Product List:
+
+Product Name: LGIAsuper Accumulation
+
+Account Name: 435870436
+
+Scheme Category: Kiwisaver R/Os
+
+Designation: Accumulation
+
+Status: Closed
+
+
+Product Name: LGIAsuper Accumulation
+
+Account Name: 435863187
+
+Scheme Category: ES Public Offer
+
+Designation: Accumulation
+
+Status: Active
+
+
+
+Case Details:
+
+Death Claim: No
+Disability and Terminal Claim: No
+Partner: No
+Complaint: No
+Enquiry: No
+Return Mail: No
+Third Party Authority: No
+Total and Permanent Disability Claim: No
+Death Benefit Claim: No
+Terminal Illness Claim: No
+Select a product for your questions.
+Kiwisaver R/Os
+ES Public Offer
 
 }
