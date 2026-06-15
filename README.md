@@ -419,6 +419,44 @@ Third Party Authority: No
 Total and Permanent Disability Claim: No
 Death Benefit Claim: No
 Terminal Illness Claim: No
+
+Open Case Summary:
+*Cases filtered by Record Type != 'Enquiry'  AND Record Type != 'Partner'  AND Record Type != 'Return Main' and Status != 'Closed', showing each Record Type Name with a Yes/No indicator.
+
+Acceptance Criteria 2:
+GIVEN	I am a Salesforce Business User (with agentforce access)
+WHEN	I have submitted a valid Client ID                                                                                                   THEN Sparkie must source the member summary details directly from the member's Salesforce record
+AND	Sparkie must not display data from unrelated members or external sources
+
+ 
+
+NOTE: Death Claim record type is inactive. Do not get the record type in query.
+
+Cases to search
+
+Case Record Type
+
+Status NOT EQUAL To
+
+Complaint
+
+Closed
+
+Third Party Authority
+
+Closed
+
+Death Benefit Claim,
+
+Total and Permanent Disability Claim
+
+Terminal Illness Claim
+
+Claim Closed
+
+Disability and Terminal Claim
+
+Claim Closed, Claim Cancelled
 Select a product for your questions.
 Kiwisaver R/Os
 ES Public Offer
