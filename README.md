@@ -1,5 +1,8 @@
-get productOptions() {
-    return this.products.map((item) => {
+
+
+
+    get productOptions() {
+     return this.products.map((item) => {
         // Step 1: Split off the Scheme Category (after " -- ")
         const mainParts = item.split(" -- ");
         const displayPart = mainParts[0] ? mainParts[0].trim() : item;
@@ -13,4 +16,4 @@ get productOptions() {
             value: schemeCategory
         };
     });
-}
+    }
