@@ -1,3 +1,224 @@
+    import { api, LightningElement, track } from "lwc";
+
+        export default class MenuFilter extends LightningElement {
+        
+            // ─── API: readOnly ───────────────────────────────────────────────────────
+            @api
+            get readOnly() {
+                return this._readOnly;
+            }
+            set readOnly(value) {
+                this._readOnly = value;
+            }
+            _readOnly = false;
+        
+            // ─── API: value (used by Agentforce to read/set component state) ─────────
+            @api
+            get value() {
+                return this._value;
+            }
+            set value(value) {
+                this._value = value;
+                if (value) {
+                    this.existingMember = value.existingMember || false;
+                    this.isSelected     = value.existingMember || false;
+                    this.memberId       = value.memberId       || "";
+                    this.selectedSchemeCategory = value.selectedSchemeCategory || "";
+                    this.memberSummary = value.memberSummary || "";
+                    this.products = value.products || [];
+                }
+            }
+            _value;
+        
+            // ─── Internal State ──────────────────────────────────────────────────────
+            existingMember  = false;
+            memberId        = "";
+            isSelected      = false;
+        
+            @track memberSummary  = "";      // plain-text summary returned by flow
+            @track products       = [];      // array of product name strings
+            @track selectedSchemeCategory = "";
+        
+            isLoading    = false;
+            runFlow      = false;
+            errorMessage = "";
+        
+            // ─── Flow input variables ────────────────────────────────────────────────
+            get flowInputVariables() {
+                return [
+                    { name: "memberId", type: "String", value: this.memberId }
+                ];
+            }
+        
+            // ─── Computed helpers ────────────────────────────────────────────────────
+            get isExistingMember() {
+                return this.existingMember === true;
+            }
+        
+            get isFetchDisabled() {
+                return !this.memberId || this.memberId.trim() === "" || this.isLoading || this.readOnly;
+            }
+        
+            get hasMemberSummary() {
+                return !!this.memberSummary;
+            }
+        
+            get hasProducts() {
+                return this.products && this.products.length > 0;
+            }
+        
+            /** Map products array → radio-group options */
+            get productOptions() {
+                return this.products.map((item) => {
+                // Step 1: Split off the Scheme Category (after " -- ")
+                const mainParts = item.split(" -- ");
+                const displayPart = mainParts[0] ? mainParts[0].trim() : item;
+                const schemeCategory = mainParts[1] ? mainParts[1].trim() : "";
+        
+                // Step 2: displayPart is "AccountNumber - Designation" — use as-is for label
+                const label = displayPart;
+        
+                return {
+                    label: label,
+                    value: schemeCategory
+                };
+            });
+            }   
+        
+        
+            // ─── Step 1: Toggle member-specific button ───────────────────────────────
+            handleExistingMemberChange() {
+                this.isSelected     = !this.isSelected;
+                this.existingMember = this.isSelected;
+        
+                // Reset downstream state when toggled off
+                if (!this.existingMember) {
+                    this.memberId        = "";
+                    this.memberSummary   = "";
+                    this.products        = [];
+                    this.selectedSchemeCategory = "";
+                    this.runFlow         = false;
+                    this.errorMessage    = "";
+                }
+        
+                this.dispatchValueChangeEvent();
+            }
+        
+            // ─── Step 2: Member ID input change ─────────────────────────────────────
+            handleInputChange(event) {
+                event.stopPropagation();
+                const { name, value } = event.target;
+                this[name] = value;
+        
+                // Clear stale summary when member ID changes
+                this.memberSummary   = "";
+                this.products        = [];
+                this.selectedSchemeCategory = "";
+                this.runFlow         = false;
+                this.errorMessage    = "";
+        
+                this.dispatchValueChangeEvent();
+            }
+        
+            // ─── Step 3: Launch the flow to fetch member summary ────────────────────
+            handleGetSummary() {
+                if (!this.memberId || this.memberId.trim() === "") return;
+        
+                this.isLoading    = true;
+                this.errorMessage = "";
+                this.memberSummary   = "";
+                this.products        = [];
+                this.selectedSchemeCategory = "";
+                this.runFlow         = false;   // reset so flow rerenders fresh
+        
+                // Use a micro-task delay to allow the DOM to clear the old flow first
+                // eslint-disable-next-line @lwc/lwc/no-async-operation
+                setTimeout(() => {
+                    this.runFlow = true;
+                }, 0);
+            }
+        
+            // ─── Step 3b: Handle flow completion ────────────────────────────────────
+            /**
+             * The flow must have two output variables:
+             *   - MemberSummary  (String) – human-readable summary text
+             *   - ProductNames   (String) – comma-separated product names
+             *                               e.g. "Plan A,Plan B,Plan C"
+             */
+            handleFlowStatusChange(event) {
+                const { status, outputVariables } = event.detail;
+        
+                if (status === "FINISHED" || status === "FINISHED_SCREEN") {
+                    this.isLoading = false;
+                    this.runFlow   = false;
+        
+                    if (outputVariables && outputVariables.length > 0) {
+                        const summaryVar  = outputVariables.find((v) => v.name === "memberSummaryResponse");
+                        const productsVar = outputVariables.find((v) => v.name === "schemeCategoryList");
+        
+                        this.memberSummary = summaryVar  ? summaryVar.value  : "Summary not available.";
+        
+                        if (productsVar && productsVar.value) {
+        
+                            let rawValue = productsVar.value;
+        
+                            if (Array.isArray(rawValue)) {
+                                this.products = rawValue;
+                            } else {
+                                // ✅ Remove enclosing brackets [ ]
+                                rawValue = rawValue.replace(/^\[|\]$/g, "");
+        
+                                // ✅ Split and trim safely
+                                this.products = rawValue
+                                    .split(",")
+                                    .map((p) => p.trim())
+                                    .filter(Boolean);
+                            }
+                        }
+                    } else {
+                        this.memberSummary = "No summary returned by the flow.";
+                    }
+        
+                } else if (status === "ERROR") {
+                    this.isLoading    = false;
+                    this.runFlow      = false;
+                    this.errorMessage = "Failed to retrieve member summary. Please try again.";
+                }
+            }
+        
+            // ─── Step 4: Product selection ───────────────────────────────────────────
+            handleProductChange(event) {
+                this.selectedSchemeCategory = event.detail.value;
+                this.dispatchValueChangeEvent();
+            }
+        
+            // ─── Dispatch value back to Agentforce (same pattern as original) ────────
+            dispatchValueChangeEvent() {
+                const currentValue = {
+                    existingMember:  this.existingMember,
+                    memberId:        this.memberId,
+                    memberSummary:   this.memberSummary,
+                    selectedSchemeCategory: this.selectedSchemeCategory,
+                    products: this.products,
+                }
+                this._value = currentValue;
+                this.dispatchEvent(
+                    new CustomEvent("valuechange", {
+                        detail: {
+                            value: {
+                                existingMember:  this.existingMember,
+                                memberId:        this.memberId,
+                                memberSummary:   this.memberSummary,
+                                selectedSchemeCategory: this.selectedSchemeCategory,
+                            },
+                        },
+                    })
+                );
+            }
+        }
+
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////
 Topic_Document_Mapping__c Object
 fields : 
 Active	Active__c	Checkbox		False	
