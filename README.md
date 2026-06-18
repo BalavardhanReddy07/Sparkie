@@ -1,3 +1,31 @@
+            /**
+     * BrighterLibraryDocInputSchema
+     *
+     * Global Apex class with @InvocableVariable annotations, designed to be used
+     * as the backing type for the BrighterLibraryDocInput Lightning Type
+     * (Agentforce Custom Input component).
+     *
+     * This class is intentionally kept separate from BrighterLibraryDocController
+     * so the controller can remain "public with sharing" for its @AuraEnabled
+     * LWC wire methods, while this schema satisfies the Lightning Type requirement
+     * of being global with @InvocableVariable properties.
+     */
+    @JsonAccess(serializable='always' deserializable='always')
+    global class BrighterLibraryDocInputSchema {
+    
+        @InvocableVariable(label='Selected Document IDs' description='List of selected Document_Detail__c record IDs' required=false)
+        global List<String> selectedIds;
+    
+        @InvocableVariable(label='Selected File Paths' description='Data Cloud file paths for the selected documents' required=false)
+        global List<String> selectedFilePaths;
+    
+        @InvocableVariable(label='Selected Document Names' description='Human-readable names of the selected documents' required=false)
+        global List<String> selectedDocumentNames;
+    }
+
+
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////
     import { api, LightningElement, track } from "lwc";
 
         export default class MenuFilter extends LightningElement {
