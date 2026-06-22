@@ -44,21 +44,25 @@ public with sharing class AF_GetL2DocumentsService {
      *   "lightning:type": "@apexClassType/c__AF_GetL2DocumentsService$L2DocumentRequest"
      */
     public class L2DocumentRequest {
+        @AuraEnabled
         @InvocableVariable(label='Scheme Category'
             description='The scheme category already captured earlier in the conversation.'
             required=true)
         public String schemeCategory;
 
+        @AuraEnabled
         @InvocableVariable(label='Selected Topic'
             description='The L1 topic already captured earlier in the conversation.'
             required=true)
         public String selectedTopic;
 
+        @AuraEnabled
         @InvocableVariable(label='Selected Document Name'
             description='Name of the L2 document the user picked from the combobox.'
             required=false)
         public String selectedDocumentName;
 
+        @AuraEnabled
         @InvocableVariable(label='Selected Document File Path'
             description='File path (or Content/Document Id) of the L2 document the user picked.'
             required=false)
@@ -67,12 +71,15 @@ public with sharing class AF_GetL2DocumentsService {
 
     /** Output wrapper returned to the agent / mapped to conversation variables. */
     public class L2DocumentResult {
+        @AuraEnabled
         @InvocableVariable(label='Selected Document Name')
         public String selectedDocumentName;
 
+        @AuraEnabled
         @InvocableVariable(label='Selected Document File Path')
         public String selectedFilePath;
 
+        @AuraEnabled
         @InvocableVariable(label='Confirmation Message')
         public String confirmationMessage;
     }
