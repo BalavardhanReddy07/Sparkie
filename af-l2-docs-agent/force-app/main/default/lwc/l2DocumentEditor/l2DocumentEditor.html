@@ -1,6 +1,11 @@
 <template>
     <lightning-card title="Select an L2 Document" icon-name="doctype:pdf">
         <div class="slds-p-around_medium">
+            <!-- DEBUG INFO: Remove this once it works -->
+            <div class="slds-box slds-theme_shade slds-m-bottom_medium">
+                <p><strong>Debug - Injected Value:</strong> {debugData}</p>
+            </div>
+
             <template lwc:if={hasNoDocuments}>
                 <p class="slds-text-color_weak slds-p-top_small">
                     No L2 documents were found for this topic and scheme category.
