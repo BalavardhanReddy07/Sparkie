@@ -8,6 +8,7 @@
     <targetConfigs>
         <targetConfig targets="lightning__AgentforceOutput">
             <sourceType name="c__l2DocumentResult"/>
+            <property name="value" type="Object" />
         </targetConfig>
     </targetConfigs>
 </LightningComponentBundle>
