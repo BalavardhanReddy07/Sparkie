@@ -1,0 +1,31 @@
+<template>
+    <lightning-card title="Select an L2 Document" icon-name="doctype:pdf">
+        <div class="slds-p-around_medium">
+            <template lwc:if={hasNoDocuments}>
+                <p class="slds-text-color_weak slds-p-top_small">
+                    No L2 documents were found for this topic and scheme category.
+                </p>
+            </template>
+            <template lwc:else>
+                <lightning-combobox
+                    name="l2Document"
+                    label="L2 Document"
+                    placeholder="Search L2 documents..."
+                    value={selectedFilePath}
+                    options={documentOptions}
+                    onchange={handleSelect}
+                    dropdown-alignment="auto">
+                </lightning-combobox>
+
+                <div class="slds-p-top_medium slds-text-align_right">
+                    <lightning-button
+                        variant="brand"
+                        label="Submit"
+                        disabled={isSubmitDisabled}
+                        onclick={handleSubmit}>
+                    </lightning-button>
+                </div>
+            </template>
+        </div>
+    </lightning-card>
+</template>

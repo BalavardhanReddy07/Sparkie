@@ -1,0 +1,27 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "lightning:type": "@apexClassType/c__AF_GetL2DocumentsService$L2DocumentResult",
+  "properties": {
+    "hasDocuments": {
+      "type": "boolean",
+      "title": "Has Documents"
+    },
+    "documentOptions": {
+      "type": "array",
+      "title": "Document Options",
+      "items": {
+        "type": "object",
+        "lightning:type": "@apexClassType/c__AF_GetL2DocumentsService$DocumentOption",
+        "properties": {
+          "label": {
+            "type": "string"
+          },
+          "value": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  }
+}
