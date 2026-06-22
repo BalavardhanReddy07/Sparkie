@@ -22,6 +22,12 @@
                     dropdown-alignment="auto">
                 </lightning-combobox>
 
+                <template lwc:if={flowOutputMessage}>
+                    <p class="slds-text-color_success slds-p-top_small slds-text-title_bold">
+                        {flowOutputMessage}
+                    </p>
+                </template>
+
                 <div class="slds-p-top_medium slds-text-align_right">
                     <lightning-button
                         variant="brand"
