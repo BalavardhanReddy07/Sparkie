@@ -18,7 +18,11 @@ export default class L2DocumentEditor extends LightningElement {
         return this._value;
     }
     set value(val) {
-        this._value = val || {};
+        this._value = val ? JSON.parse(JSON.stringify(val)) : {};
+    }
+
+    get debugData() {
+        return JSON.stringify(this._value);
     }
 
     get documentOptions() {
