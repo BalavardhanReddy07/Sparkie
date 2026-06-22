@@ -95,24 +95,46 @@ public with sharing class AF_GetL2DocumentsService {
             L2DocumentResult res = new L2DocumentResult();
             res.documentOptions = new List<DocumentOption>();
             
-            if (String.isBlank(req.schemeCategory) || String.isBlank(req.selectedTopic)) {
+            // If the topic is Brighter Library, we don't need a scheme category
+            Boolean isBrighterLibrary = (req.selectedTopic == 'Brighter Library');
+
+            if (String.isBlank(req.selectedTopic) || (!isBrighterLibrary && String.isBlank(req.schemeCategory))) {
                 res.hasDocuments = false;
                 results.add(res);
                 continue;
             }
 
-            for (Topic_Document_Mapping__c mapping : [
-                SELECT Additional_Document__c,
-                       Additional_Document__r.Name,
-                       Additional_Document__r.Data_Cloud_File_Path__c
-                FROM Topic_Document_Mapping__c
-                WHERE Topic__c = :req.selectedTopic
-                  AND Key_Field_Value__c = :req.schemeCategory
-                  AND Additional_Document__c != null
-                  AND Active__c = true
-                ORDER BY Additional_Document__r.Name ASC
-                LIMIT 200
-            ]) {
+            List<Topic_Document_Mapping__c> mappings;
+            
+            if (isBrighterLibrary) {
+                // Ignore Key_Field_Value__c for Brighter Library
+                mappings = [
+                    SELECT Additional_Document__c,
+                           Additional_Document__r.Name,
+                           Additional_Document__r.Data_Cloud_File_Path__c
+                    FROM Topic_Document_Mapping__c
+                    WHERE Topic__c = :req.selectedTopic
+                      AND Additional_Document__c != null
+                      AND Active__c = true
+                    ORDER BY Additional_Document__r.Name ASC
+                    LIMIT 200
+                ];
+            } else {
+                mappings = [
+                    SELECT Additional_Document__c,
+                           Additional_Document__r.Name,
+                           Additional_Document__r.Data_Cloud_File_Path__c
+                    FROM Topic_Document_Mapping__c
+                    WHERE Topic__c = :req.selectedTopic
+                      AND Key_Field_Value__c = :req.schemeCategory
+                      AND Additional_Document__c != null
+                      AND Active__c = true
+                    ORDER BY Additional_Document__r.Name ASC
+                    LIMIT 200
+                ];
+            }
+
+            for (Topic_Document_Mapping__c mapping : mappings) {
                 DocumentOption opt = new DocumentOption();
                 opt.label = mapping.Additional_Document__r.Name;
                 opt.value = mapping.Additional_Document__r.Data_Cloud_File_Path__c;
@@ -124,5 +146,34 @@ public with sharing class AF_GetL2DocumentsService {
         }
 
         return results;
+    }
+
+    /**
+     * Imperative method called directly by the l2DocumentEditor LWC upon Submit.
+     * Invokes the Flow_L2_Documents_Search flow and returns the Output_Message.
+     */
+    @AuraEnabled
+    public static String runL2SearchFlow(String documentFilePath) {
+        if (String.isBlank(documentFilePath)) {
+            return null;
+        }
+
+        try {
+            // Set the input variables for the flow
+            Map<String, Object> flowParams = new Map<String, Object>();
+            flowParams.put('document_File_Paths', documentFilePath);
+
+            // Create and start the flow interview
+            Flow.Interview myFlow = Flow.Interview.createInterview('Flow_L2_Documents_Search', flowParams);
+            myFlow.start();
+
+            // Retrieve the output variable
+            String outputMessage = (String) myFlow.getVariableValue('Output_Message');
+            return outputMessage;
+            
+        } catch (Exception e) {
+            System.debug('Error invoking flow: ' + e.getMessage());
+            throw new AuraHandledException('Error executing the search flow: ' + e.getMessage());
+        }
     }
 }
