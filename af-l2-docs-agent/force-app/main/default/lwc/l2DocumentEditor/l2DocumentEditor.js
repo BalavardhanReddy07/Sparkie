@@ -1,4 +1,5 @@
 import { LightningElement, api } from 'lwc';
+import runL2SearchFlow from '@salesforce/apex/AF_GetL2DocumentsService.runL2SearchFlow';
 
 /**
  * Output CLT Renderer for the AF_GetL2Documents action.
@@ -10,6 +11,8 @@ import { LightningElement, api } from 'lwc';
 export default class L2DocumentEditor extends LightningElement {
     selectedFilePath;
     selectedDocumentName;
+    isSubmitting = false;
+    flowOutputMessage;
 
     _value = {};
 
@@ -51,27 +54,31 @@ export default class L2DocumentEditor extends LightningElement {
     }
 
     get isSubmitDisabled() {
-        return !this.selectedFilePath;
+        return !this.selectedFilePath || this.isSubmitting;
     }
 
     handleSelect(event) {
         this.selectedFilePath = event.detail.value;
         const match = this.documentOptions.find((o) => o.value === this.selectedFilePath);
         this.selectedDocumentName = match ? match.label : '';
+        // Clear previous message if user changes selection
+        this.flowOutputMessage = null;
     }
 
-    handleSubmit() {
-        // TODO: Execute your Flow or dispatch agent message here.
-        // Example logic to invoke a flow if you embed lightning-flow:
-        // const flowParams = [
-        //     { name: 'dataCloudL2FilePath', type: 'String', value: this.selectedFilePath }
-        // ];
-        // this.template.querySelector('lightning-flow').startFlow('Your_Flow_Api_Name', flowParams);
-        
-        console.log('User submitted document:', this.selectedDocumentName, this.selectedFilePath);
-        
-        // Note: For Output CLTs, standard agent platform flow does not inherently wait for 
-        // a valuechange event from an output component. You must use Flow, standard platform 
-        // events, or send a message back to the conversation.
+    async handleSubmit() {
+        this.isSubmitting = true;
+        this.flowOutputMessage = null;
+
+        try {
+            const outputMessage = await runL2SearchFlow({ 
+                documentFilePath: this.selectedFilePath 
+            });
+            this.flowOutputMessage = outputMessage || 'Success! Please ask your questions.';
+        } catch (error) {
+            console.error('Error invoking flow:', error);
+            this.flowOutputMessage = 'Error invoking flow: ' + (error.body ? error.body.message : error.message);
+        } finally {
+            this.isSubmitting = false;
+        }
     }
 }
