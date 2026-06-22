@@ -1,29 +1,4 @@
-                        {
-                          "componentName": "c/l2DocumentEditor"
-                        }
+Select an L2 Document
+Debug - Injected Value: [{"value":"1JD9j000001btWPGAY/Brighter Super Corporate Offer Insurance URL_Redacted","label":"Brighter Super Corporate Offer Insurance Guide"}]
 
-
-
-                        {
-                          "$schema": "http://json-schema.org/draft-07/schema#",
-                          "type": "object",
-                          "lightning:type":                                            "@apexClassType/c__AF_GetL2DocumentsService$L2DocumentRequest",
-                          "properties": {
-                            "schemeCategory": {
-                              "type": "string",
-                              "title": "Scheme Category"
-                            },
-                            "selectedTopic": {
-                              "type": "string",
-                              "title": "Selected Topic"
-                            },
-                            "selectedDocumentName": {
-                              "type": "string",
-                              "title": "Selected Document Name"
-                            },
-                            "selectedFilePath": {
-                              "type": "string",
-                              "title": "Selected Document File Path"
-                            }
-                          }
-                        }
+No L2 documents were found for this topic and scheme category.
