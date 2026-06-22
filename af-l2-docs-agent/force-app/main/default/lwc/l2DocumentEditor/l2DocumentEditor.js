@@ -26,15 +26,28 @@ export default class L2DocumentEditor extends LightningElement {
     }
 
     get documentOptions() {
-        if (!this._value.documentOptions) return [];
-        return this._value.documentOptions.map(opt => ({
-            label: opt.label,
-            value: opt.value
-        }));
+        // If Agentforce injects the array directly
+        if (Array.isArray(this._value)) {
+            return this._value.map(opt => ({
+                label: opt.label,
+                value: opt.value
+            }));
+        }
+        // If Agentforce injects the wrapper object
+        if (this._value && this._value.documentOptions) {
+            return this._value.documentOptions.map(opt => ({
+                label: opt.label,
+                value: opt.value
+            }));
+        }
+        return [];
     }
 
     get hasNoDocuments() {
-        return !this._value.hasDocuments;
+        if (Array.isArray(this._value)) {
+            return this._value.length === 0;
+        }
+        return !this._value || !this._value.hasDocuments;
     }
 
     get isSubmitDisabled() {
