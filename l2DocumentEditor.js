@@ -1,22 +1,17 @@
 import { LightningElement, api } from 'lwc';
-import searchDocuments from '@salesforce/apex/AF_GetL2DocumentsService.searchDocuments';
+import runL2SearchFlow from '@salesforce/apex/AF_GetL2DocumentsService.runL2SearchFlow';
 
 /**
- * Editor CLT for the AF_GetL2Documents action's L2DocumentRequest input.
- *
- * The agent pre-fills `value.schemeCategory` and `value.selectedTopic` from
- * conversation context before this component ever renders (those two
- * fields are NOT marked "Collect data from user" on the action). This
- * component uses them to fetch the matching documents directly via Apex,
- * then lets the user pick one and submit -- which sends the COMPLETE
- * object (including the user's selection) back to the agent via
- * `valuechange`, which is what the platform listens for to run the action.
+ * Output CLT Renderer for the AF_GetL2Documents action.
  */
 export default class L2DocumentEditor extends LightningElement {
-    documentOptions = [];
     selectedFilePath;
     selectedDocumentName;
-    isLoading = true;
+    isSubmitting = false;
+    flowOutputMessage;
+    
+    // Holds the active V6 Session ID intercepted from the Apex array
+    hiddenSessionId = null;
 
     _value = {};
 
@@ -25,57 +20,76 @@ export default class L2DocumentEditor extends LightningElement {
         return this._value;
     }
     set value(val) {
-        this._value = val || {};
-        this.loadDocuments();
+        this._value = val ? JSON.parse(JSON.stringify(val)) : {};
     }
 
-    async loadDocuments() {
-        this.isLoading = true;
-        try {
-            const options = await searchDocuments({
-                schemeCategory: this._value.schemeCategory,
-                selectedTopic: this._value.selectedTopic
-            });
-            this.documentOptions = (options || []).map((o) => ({
-                label: o.label,
-                value: o.value
-            }));
-        } catch (e) {
-            this.documentOptions = [];
-            // eslint-disable-next-line no-console
-            console.error('Error loading L2 documents', e);
-        } finally {
-            this.isLoading = false;
+    get debugData() {
+        return JSON.stringify(this._value);
+    }
+
+    get documentOptions() {
+        let rawOptions = [];
+        
+        // Handle Agentforce direct array vs wrapper object injection
+        if (Array.isArray(this._value)) {
+            rawOptions = this._value;
+        } else if (this._value && this._value.documentOptions) {
+            rawOptions = this._value.documentOptions;
         }
+
+        const displayOptions = [];
+        
+        // --- INTERCEPTOR LOGIC ---
+        // Strip out the hidden session ID so it never shows in the UI combobox
+        rawOptions.forEach(opt => {
+            if (opt.label === 'HIDDEN_SESSION_ID') {
+                this.hiddenSessionId = opt.value;
+            } else {
+                displayOptions.push({
+                    label: opt.label,
+                    value: opt.value
+                });
+            }
+        });
+        
+        return displayOptions;
     }
 
     get hasNoDocuments() {
-        return !this.isLoading && this.documentOptions.length === 0;
+        // Evaluate based on the filtered options, not the raw array
+        return this.documentOptions.length === 0;
     }
 
     get isSubmitDisabled() {
-        return !this.selectedFilePath;
+        return !this.selectedFilePath || this.isSubmitting;
     }
 
     handleSelect(event) {
         this.selectedFilePath = event.detail.value;
         const match = this.documentOptions.find((o) => o.value === this.selectedFilePath);
         this.selectedDocumentName = match ? match.label : '';
+        
+        // Clear previous message if user changes selection
+        this.flowOutputMessage = null;
     }
 
-    handleSubmit() {
-        const updatedValue = {
-            ...this._value,
-            selectedDocumentName: this.selectedDocumentName,
-            selectedFilePath: this.selectedFilePath
-        };
+    async handleSubmit() {
+        this.isSubmitting = true;
+        this.flowOutputMessage = null;
 
-        // The platform listens for this event to capture the form data
-        // and forward it as the input to the AF_GetL2Documents action.
-        this.dispatchEvent(
-            new CustomEvent('valuechange', {
-                detail: { value: updatedValue }
-            })
-        );
+        try {
+            // Pass both the selected path and the smuggled Session ID to the Flow
+            const outputMessage = await runL2SearchFlow({ 
+                documentFilePath: this.selectedFilePath,
+                sessionId: this.hiddenSessionId
+            });
+            this.flowOutputMessage = outputMessage || 'Success! Please ask your questions.';
+            
+        } catch (error) {
+            console.error('Error invoking flow:', error);
+            this.flowOutputMessage = 'Error invoking flow: ' + (error.body ? error.body.message : error.message);
+        } finally {
+            this.isSubmitting = false;
+        }
     }
 }
