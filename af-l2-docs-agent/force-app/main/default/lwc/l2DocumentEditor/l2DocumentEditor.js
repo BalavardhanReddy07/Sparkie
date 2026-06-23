@@ -8,6 +8,7 @@ import runL2SearchFlow from '@salesforce/apex/AF_GetL2DocumentsService.runL2Sear
  * the L2DocumentResult. This component receives that result via `@api value`
  * and renders the combobox for the user to select.
  */
+
 export default class L2DocumentEditor extends LightningElement {
     selectedFilePath;
     selectedDocumentName;
@@ -28,20 +29,17 @@ export default class L2DocumentEditor extends LightningElement {
         return JSON.stringify(this._value);
     }
 
+    // NEW GETTER: Safely extract the Agent Session ID
+    get agentSessionId() {
+        return this._value && this._value.agentSessionId ? this._value.agentSessionId : null;
+    }
+
     get documentOptions() {
-        // If Agentforce injects the array directly
         if (Array.isArray(this._value)) {
-            return this._value.map(opt => ({
-                label: opt.label,
-                value: opt.value
-            }));
+            return this._value.map(opt => ({ label: opt.label, value: opt.value }));
         }
-        // If Agentforce injects the wrapper object
         if (this._value && this._value.documentOptions) {
-            return this._value.documentOptions.map(opt => ({
-                label: opt.label,
-                value: opt.value
-            }));
+            return this._value.documentOptions.map(opt => ({ label: opt.label, value: opt.value }));
         }
         return [];
     }
@@ -61,7 +59,6 @@ export default class L2DocumentEditor extends LightningElement {
         this.selectedFilePath = event.detail.value;
         const match = this.documentOptions.find((o) => o.value === this.selectedFilePath);
         this.selectedDocumentName = match ? match.label : '';
-        // Clear previous message if user changes selection
         this.flowOutputMessage = null;
     }
 
@@ -70,8 +67,10 @@ export default class L2DocumentEditor extends LightningElement {
         this.flowOutputMessage = null;
 
         try {
+            // Update the parameters to include the sessionId
             const outputMessage = await runL2SearchFlow({ 
-                documentFilePath: this.selectedFilePath 
+                documentFilePath: this.selectedFilePath,
+                sessionId: this.agentSessionId 
             });
             this.flowOutputMessage = outputMessage || 'Success! Please ask your questions.';
         } catch (error) {
