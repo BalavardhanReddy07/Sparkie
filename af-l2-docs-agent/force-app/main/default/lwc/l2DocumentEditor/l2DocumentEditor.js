@@ -12,6 +12,7 @@ import runL2SearchFlow from '@salesforce/apex/AF_GetL2DocumentsService.runL2Sear
 export default class L2DocumentEditor extends LightningElement {
     selectedFilePath;
     selectedDocumentName;
+    selectedWarningMessage;
     isSubmitting = false;
     flowOutputMessage;
 
@@ -36,10 +37,10 @@ export default class L2DocumentEditor extends LightningElement {
 
     get documentOptions() {
         if (Array.isArray(this._value)) {
-            return this._value.map(opt => ({ label: opt.label, value: opt.value }));
+            return this._value.map(opt => ({ label: opt.label, value: opt.value, warningMessage: opt.warningMessage }));
         }
         if (this._value && this._value.documentOptions) {
-            return this._value.documentOptions.map(opt => ({ label: opt.label, value: opt.value }));
+            return this._value.documentOptions.map(opt => ({ label: opt.label, value: opt.value, warningMessage: opt.warningMessage }));
         }
         return [];
     }
@@ -59,6 +60,7 @@ export default class L2DocumentEditor extends LightningElement {
         this.selectedFilePath = event.detail.value;
         const match = this.documentOptions.find((o) => o.value === this.selectedFilePath);
         this.selectedDocumentName = match ? match.label : '';
+        this.selectedWarningMessage = match ? match.warningMessage : null;
         this.flowOutputMessage = null;
     }
 
