@@ -5,35 +5,35 @@
  *
  * Design notes (read this before wiring up Agent Builder):
  * - This single action does double duty:
- *   1. It is the action the agent calls when the user types "Show L2
- *      Documents". Its complex input (L2DocumentRequest) is rendered by
- *      a custom Editor CLT (the l2DocumentEditor LWC), so the agent
- *      shows a searchable combobox + Submit button right in the chat
- *      instead of asking the user to type a document name.
- *   2. Because schemeCategory / selectedTopic are NOT marked as
- *      "Collect data from user" in Agent Builder, the agent fills them
- *      in automatically from your existing conversation variables
- *      (IsTopicSelected / SelectedSchemeCategory). The editor LWC
- *      receives those pre-filled values and uses them to look up the
- *      matching documents (via the searchDocuments Apex method below)
- *      to populate the combobox.
- *   3. When the user picks a document and clicks Submit, the editor LWC
- *      dispatches a `valuechange` event with the full object (including
- *      selectedDocumentName / selectedFilePath). THAT is what runs this
- *      invocable method.
- *   4. In Agent Builder, map this action's `selectedFilePath` output to
- *      your `dataCloudL2FilePath` conversation variable (Action ->
- *      Output -> Map to Variable). That is what makes the value
- *      available to the "Find L2 Answers" subagent later.
- *   5. NEW [SMUGGLER APPROACH]: To support dynamic Flow interactions without
- *      breaking the CLT schema, the `agentSessionId` is captured from the input, 
- *      injected into the `documentOptions` array as a hidden option, and 
- *      extracted by the LWC before rendering.
+ * 1. It is the action the agent calls when the user types "Show L2
+ * Documents". Its complex input (L2DocumentRequest) is rendered by
+ * a custom Editor CLT (the l2DocumentEditor LWC), so the agent
+ * shows a searchable combobox + Submit button right in the chat
+ * instead of asking the user to type a document name.
+ * 2. Because schemeCategory / selectedTopic are NOT marked as
+ * "Collect data from user" in Agent Builder, the agent fills them
+ * in automatically from your existing conversation variables
+ * (IsTopicSelected / SelectedSchemeCategory). The editor LWC
+ * receives those pre-filled values and uses them to look up the
+ * matching documents (via the searchDocuments Apex method below)
+ * to populate the combobox.
+ * 3. When the user picks a document and clicks Submit, the editor LWC
+ * dispatches a `valuechange` event with the full object (including
+ * selectedDocumentName / selectedFilePath). THAT is what runs this
+ * invocable method.
+ * 4. In Agent Builder, map this action's `selectedFilePath` output to
+ * your `dataCloudL2FilePath` conversation variable (Action ->
+ * Output -> Map to Variable). That is what makes the value
+ * available to the "Find L2 Answers" subagent later.
+ * 5. NEW [SMUGGLER APPROACH]: To support dynamic Flow interactions without
+ * breaking the CLT schema, the `agentSessionId` is captured from the input, 
+ * injected into the `documentOptions` array as a hidden option, and 
+ * extracted by the LWC before rendering.
  *
  * - Data model:
- *   Topic_Document_Mapping__c  (topic + scheme category -> L2 doc lookup)
- *     └─ Additional_Document__c  (Lookup -> Document_Detail__c)
- *   Document_Detail__c  (Name, Data_Cloud_File_Path__c, Document_URL__c)
+ * Topic_Document_Mapping__c  (topic + scheme category -> L2 doc lookup)
+ * └─ Additional_Document__c  (Lookup -> Document_Detail__c)
+ * Document_Detail__c  (Name, Data_Cloud_File_Path__c, Document_URL__c)
  */
 public with sharing class AF_GetL2DocumentsService {
 
@@ -53,7 +53,7 @@ public with sharing class AF_GetL2DocumentsService {
         public String agentSessionId;
     }
 
-    /** Output wrapper (Note: agentSessionId is NOT here to protect CLT Schema) */
+    /** Output wrapper */
     public class L2DocumentResult {
         @AuraEnabled
         @InvocableVariable(label='Has Documents' description='True if any documents were found.')
@@ -62,6 +62,15 @@ public with sharing class AF_GetL2DocumentsService {
         @AuraEnabled
         @InvocableVariable(label='Document Options' description='The list of documents found for the category and topic.')
         public List<DocumentOption> documentOptions;
+
+        // --- NEW: Schema bridges for the LWC Return Payload ---
+        @AuraEnabled
+        @InvocableVariable(label='Selected File Path' description='Populated by the LWC on Submit')
+        public String selectedFilePath;
+
+        @AuraEnabled
+        @InvocableVariable(label='Selected Document Name' description='Populated by the LWC on Submit')
+        public String selectedDocumentName;
     }
 
     public class DocumentOption {
