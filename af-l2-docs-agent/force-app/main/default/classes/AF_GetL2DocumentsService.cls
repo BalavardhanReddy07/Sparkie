@@ -87,6 +87,7 @@ public with sharing class AF_GetL2DocumentsService {
     public class DocumentOption {
         @AuraEnabled @InvocableVariable public String label;
         @AuraEnabled @InvocableVariable public String value;
+        @AuraEnabled @InvocableVariable public String warningMessage;
     }
 
     /**
@@ -129,7 +130,8 @@ public with sharing class AF_GetL2DocumentsService {
                 mappings = [
                     SELECT Additional_Document__c,
                            Additional_Document__r.Name,
-                           Additional_Document__r.Data_Cloud_File_Path__c
+                           Additional_Document__r.Data_Cloud_File_Path__c,
+                           Additional_Document__r.Warning_for_L2_document__c
                     FROM Topic_Document_Mapping__c
                     WHERE Topic__c = :req.selectedTopic
                       AND Additional_Document__c != null
@@ -141,7 +143,8 @@ public with sharing class AF_GetL2DocumentsService {
                 mappings = [
                     SELECT Additional_Document__c,
                            Additional_Document__r.Name,
-                           Additional_Document__r.Data_Cloud_File_Path__c
+                           Additional_Document__r.Data_Cloud_File_Path__c,
+                           Additional_Document__r.Warning_for_L2_document__c
                     FROM Topic_Document_Mapping__c
                     WHERE Topic__c = :req.selectedTopic
                       AND Key_Field_Value__c = :req.schemeCategory
@@ -156,6 +159,7 @@ public with sharing class AF_GetL2DocumentsService {
                 DocumentOption opt = new DocumentOption();
                 opt.label = mapping.Additional_Document__r.Name;
                 opt.value = mapping.Additional_Document__r.Data_Cloud_File_Path__c;
+                opt.warningMessage = mapping.Additional_Document__r.Warning_for_L2_document__c;
                 res.documentOptions.add(opt);
             }
 
