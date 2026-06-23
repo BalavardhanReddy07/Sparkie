@@ -5,7 +5,7 @@ API Version for Running the Flow: 67
 Some of this flow's variables were set when the interview started.
 SessionId = c15ee348-4ee8-46c1-bd1d-75324ad9fbf7
 document_File_Paths = 1JD9j000001btWPGAY/Brighter Super Member Guide.pdf
-Flow start time: <b>23 June 2026 at 6:42 pm</b>.
+Flow start time: <b>23 June 2026 at 6:45 pm</b>.
 
 
 Assignment: Set Context Variable Data
@@ -20,17 +20,14 @@ Result
 
 
 Assignment: Construct Message Body
-7 variables were updated.
+5 variables were updated.
 {!var_AgentVariableCollection} Add {!var_AgentVariable}
 {!var_MessageBody.variables} Equals {!var_AgentVariableCollection}
 {!var_MessageBody.message.TextMessage.text} Equals L2 Document Selected Successfully
 {!var_MessageBody.message.TextMessage.z0type} Equals Text
-{!var_MessageBody.message.ReplyMessage.sequenceId} Equals 2
-{!var_MessageBody.message.ReplyMessage.reply} Equals {!var_MessageBody.message.ReplyMessage.reply}
 {!var_MessageBody.message.TextMessage.sequenceId} Equals 1
 Result
 {!var_MessageBody.message.TextMessage.z0type} = "Text"
-{!var_MessageBody.message.ReplyMessage.reply} = "[]"
 {!var_AgentVariableCollection} = "[AIAgentAPIV1_Variable_KT_PT : {
   "TextVariable_set" : true,
   "TextVariable" : {
@@ -53,7 +50,6 @@ Result
 }]"
 {!var_MessageBody.message.TextMessage.sequenceId} = "1"
 {!var_MessageBody.message.TextMessage.text} = "L2 Document Selected Successfully"
-{!var_MessageBody.message.ReplyMessage.sequenceId} = "2"
 
 
 AIAgentAPIV1.sendMessage (API): Send Session Message Action 1
@@ -85,19 +81,28 @@ body = {!var_MessageBody}
       "text": "L2 Document Selected Successfully",
       "sequenceId_set": true,
       "sequenceId": 1
-    },
-    "ReplyMessage_set": true,
-    "ReplyMessage": {
-      "z0type": "Reply",
-      "sequenceId_set": true,
-      "sequenceId": 2,
-      "reply_set": true,
-      "reply": []
     }
   }
 }
+Outputs:
+404Exc
+{
+  "timestamp_set": true,
+  "timestamp": 1782204344128,
+  "status_set": true,
+  "status": 404,
+  "requestId_set": true,
+  "requestId": "87764d50-fa3a-4029-b197-0ea7b19179da",
+  "path_set": true,
+  "path": "v6.0.0/sessions/c15ee348-4ee8-46c1-bd1d-75324ad9fbf7/messages",
+  "message_set": true,
+  "message": "V6Session not found for sessionId: c15ee348-4ee8-46c1-bd1d-75324ad9fbf7",
+  "error_set": true,
+  "error": "NotFoundException"
+}
+responseCode (404)
 $$:Fault:
-Error Occurred: Callout failed for invocable action AIAgentAPIV1.sendMessage. The polymorphic object AIAgentAPIV1_AbstractRequestMessage_KT_PT expects only one property, but an extra object TextMessage was passed in for service AIAgentAPIV1
+Error Occurred: Not Found
 
 
 
@@ -106,4 +111,4 @@ Because an error occurred, any records that the flow was ready to create, update
 
 
 An Error Occurred
-The flow interview failed on 23 June 2026 at 6:42 pm. It ran for 7.61 seconds.
+The flow interview failed on 23 June 2026 at 6:45 pm. It ran for 10.65 seconds.
