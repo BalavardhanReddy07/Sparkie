@@ -1,14 +1,9 @@
 <template>
     <lightning-card title="Select an L2 Document" icon-name="doctype:pdf">
         <div class="slds-p-around_medium">
-            <!-- DEBUG INFO: Remove this once it works -->
-            <div class="slds-box slds-theme_shade slds-m-bottom_medium">
-                <p><strong>Debug - Injected Value:</strong> {debugData}</p>
-            </div>
-
             <template lwc:if={hasNoDocuments}>
                 <p class="slds-text-color_weak slds-p-top_small">
-                    No L2 documents were found for this topic and scheme category.
+                    No L2 documents were found for this topic.
                 </p>
             </template>
             <template lwc:else>
@@ -19,14 +14,9 @@
                     value={selectedFilePath}
                     options={documentOptions}
                     onchange={handleSelect}
+                    disabled={isSuccessfullySubmitted}
                     dropdown-alignment="auto">
                 </lightning-combobox>
-
-                <template lwc:if={selectedWarningMessage}>
-                    <p class="slds-text-color_error slds-p-top_x-small slds-text-body_small">
-                        {selectedWarningMessage}
-                    </p>
-                </template>
 
                 <template lwc:if={flowOutputMessage}>
                     <p class="slds-text-color_success slds-p-top_small slds-text-title_bold">
@@ -37,7 +27,7 @@
                 <div class="slds-p-top_medium slds-text-align_right">
                     <lightning-button
                         variant="brand"
-                        label="Submit"
+                        label={submitButtonLabel}
                         disabled={isSubmitDisabled}
                         onclick={handleSubmit}>
                     </lightning-button>
