@@ -29,6 +29,10 @@ public with sharing class AF_GetL2DocumentsService {
         List<L2DocumentResult> results = new List<L2DocumentResult>();
 
         for (L2DocumentRequest req : requests) {
+            
+            // --- DEBUG LOG 1: Check what Agentforce passes in ---
+            System.debug('AF_GetL2DocumentsService - Inbound Agent Session ID: ' + req.agentSessionId);
+            
             L2DocumentResult res = new L2DocumentResult();
             res.documentOptions = new List<DocumentOption>();
             
@@ -73,6 +77,11 @@ public with sharing class AF_GetL2DocumentsService {
 
     @AuraEnabled
     public static String runL2SearchFlow(String documentFilePath, String sessionId) {
+        
+        // --- DEBUG LOG 2: Check what the LWC passes back before the Flow runs ---
+        System.debug('AF_GetL2DocumentsService - Session ID passed to Flow: ' + sessionId);
+        System.debug('AF_GetL2DocumentsService - Document File Path passed to Flow: ' + documentFilePath);
+        
         if (String.isBlank(documentFilePath)) {
             return null;
         }
@@ -88,6 +97,8 @@ public with sharing class AF_GetL2DocumentsService {
             // Returns the exact string from your Flow's Assignment variable
             return (String) myFlow.getVariableValue('Output_Message');
         } catch (Exception e) {
+            // --- DEBUG LOG 3: Catch any Flow execution errors ---
+            System.debug('AF_GetL2DocumentsService - Flow Execution Error: ' + e.getMessage());
             throw new AuraHandledException(e.getMessage());
         }
     }
