@@ -78,7 +78,8 @@ export default class L2DocumentEditor extends LightningElement {
         this.flowOutputMessage = null;
 
         try {
-            // 1. BACKEND UPDATE: Pass both the selected path and the smuggled Session ID to the Flow
+            // 1. BACKEND UPDATE: Pass the selected path and the smuggled Session ID to the Flow
+            // This firmly injects the selected document into the Agent's backend memory.
             const outputMessage = await runL2SearchFlow({ 
                 documentFilePath: this.selectedFilePath,
                 sessionId: this.hiddenSessionId
@@ -86,18 +87,15 @@ export default class L2DocumentEditor extends LightningElement {
             
             this.flowOutputMessage = outputMessage || "Success! I've loaded the document. Please ask your questions.";
 
-            // 2. FRONTEND UPDATE: Package the properties your Agent Builder expects
-            const payload = {
-                selectedFilePath: this.selectedFilePath,
-                selectedDocumentName: this.selectedDocumentName
-            };
-
-            // 3. Dispatch the native event back to the Agent container so the Variables panel updates!
-            this.dispatchEvent(new CustomEvent('valuechange', {
+            // 2. FRONTEND UPDATE: Dispatch a standard chat message event
+            // This seamlessly nudges the Agent forward, completes the turn, and forces
+            // the Agentforce Context Variables panel to fetch the newly updated backend memory.
+            const messageEvent = new CustomEvent('sendmessage', {
                 detail: { 
-                    value: payload 
+                    message: `I have selected the document: ${this.selectedDocumentName}. Please proceed.` 
                 }
-            }));
+            });
+            this.dispatchEvent(messageEvent);
             
         } catch (error) {
             console.error('Error invoking flow:', error);
