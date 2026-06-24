@@ -3,18 +3,15 @@ import runL2SearchFlow from '@salesforce/apex/AF_GetL2DocumentsService.runL2Sear
 
 /**
  * Output CLT Renderer for the AF_GetL2Documents action.
- *
- * The agent runs the Apex action, which queries the documents and returns
- * the L2DocumentResult. This component receives that result via `@api value`
- * and renders the combobox for the user to select.
  */
-
 export default class L2DocumentEditor extends LightningElement {
     selectedFilePath;
     selectedDocumentName;
-    selectedWarningMessage;
     isSubmitting = false;
     flowOutputMessage;
+    
+    // Holds the active V6 Session ID intercepted from the Apex array
+    hiddenSessionId = null;
 
     _value = {};
 
@@ -30,26 +27,37 @@ export default class L2DocumentEditor extends LightningElement {
         return JSON.stringify(this._value);
     }
 
-    // NEW GETTER: Safely extract the Agent Session ID
-    get agentSessionId() {
-        return this._value && this._value.agentSessionId ? this._value.agentSessionId : null;
-    }
-
     get documentOptions() {
+        let rawOptions = [];
+        
+        // Handle Agentforce direct array vs wrapper object injection
         if (Array.isArray(this._value)) {
-            return this._value.map(opt => ({ label: opt.label, value: opt.value, warningMessage: opt.warningMessage }));
+            rawOptions = this._value;
+        } else if (this._value && this._value.documentOptions) {
+            rawOptions = this._value.documentOptions;
         }
-        if (this._value && this._value.documentOptions) {
-            return this._value.documentOptions.map(opt => ({ label: opt.label, value: opt.value, warningMessage: opt.warningMessage }));
-        }
-        return [];
+
+        const displayOptions = [];
+        
+        // --- INTERCEPTOR LOGIC ---
+        // Strip out the hidden session ID so it never shows in the UI combobox
+        rawOptions.forEach(opt => {
+            if (opt.label === 'HIDDEN_SESSION_ID') {
+                this.hiddenSessionId = opt.value;
+            } else {
+                displayOptions.push({
+                    label: opt.label,
+                    value: opt.value
+                });
+            }
+        });
+        
+        return displayOptions;
     }
 
     get hasNoDocuments() {
-        if (Array.isArray(this._value)) {
-            return this._value.length === 0;
-        }
-        return !this._value || !this._value.hasDocuments;
+        // Evaluate based on the filtered options, not the raw array
+        return this.documentOptions.length === 0;
     }
 
     get isSubmitDisabled() {
@@ -60,7 +68,8 @@ export default class L2DocumentEditor extends LightningElement {
         this.selectedFilePath = event.detail.value;
         const match = this.documentOptions.find((o) => o.value === this.selectedFilePath);
         this.selectedDocumentName = match ? match.label : '';
-        this.selectedWarningMessage = match ? match.warningMessage : null;
+        
+        // Clear previous message if user changes selection
         this.flowOutputMessage = null;
     }
 
@@ -69,12 +78,13 @@ export default class L2DocumentEditor extends LightningElement {
         this.flowOutputMessage = null;
 
         try {
-            // Update the parameters to include the sessionId
+            // Pass both the selected path and the smuggled Session ID to the Flow
             const outputMessage = await runL2SearchFlow({ 
                 documentFilePath: this.selectedFilePath,
-                sessionId: this.agentSessionId 
+                sessionId: this.hiddenSessionId
             });
             this.flowOutputMessage = outputMessage || 'Success! Please ask your questions.';
+            
         } catch (error) {
             console.error('Error invoking flow:', error);
             this.flowOutputMessage = 'Error invoking flow: ' + (error.body ? error.body.message : error.message);
