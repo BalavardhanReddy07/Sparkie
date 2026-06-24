@@ -1,106 +1,93 @@
-                import { LightningElement, api } from 'lwc';
-                import runL2SearchFlow from '@salesforce/apex/AF_GetL2DocumentsService.runL2SearchFlow';
-                
-                /**
-                 * Output CLT Renderer for the AF_GetL2Documents action.
-                 */
-                export default class L2DocumentEditor extends LightningElement {
-                    selectedFilePath;
-                    selectedDocumentName;
-                    isSubmitting = false;
-                    flowOutputMessage;
-                    
-                    // Holds the active V6 Session ID intercepted from the Apex array
-                    hiddenSessionId = null;
-                
-                    _value = {};
-                    _documentOptions = [];
-                
-                    @api
-                    get value() {
-                        return this._value;
-                    }
-                    set value(val) {
-                        this._value = val ? JSON.parse(JSON.stringify(val)) : {};
+    import { LightningElement, api } from 'lwc';
+    
+    /**
+     * Output CLT Renderer for the AF_GetL2Documents action.
+     */
+    export default class L2DocumentEditor extends LightningElement {
+        selectedFilePath;
+        selectedDocumentName;
+        isSubmitting = false;
+        flowOutputMessage;
+    
+        _value = {};
+    
+        @api
+        get value() {
+            return this._value;
+        }
+        set value(val) {
+            this._value = val ? JSON.parse(JSON.stringify(val)) : {};
+        }
+    
+        get documentOptions() {
+            let rawOptions = [];
+        
+        if (Array.isArray(this._value)) {
+            rawOptions = this._value;
+        } else if (this._value && this._value.documentOptions) {
+            rawOptions = this._value.documentOptions;
+        }
 
-                    // --- Extract options and session ID eagerly in the setter (runs once on data arrival) ---
-                    let rawOptions = [];
-                    if (Array.isArray(this._value)) {
-                        rawOptions = this._value;
-                    } else if (this._value && this._value.documentOptions) {
-                        rawOptions = this._value.documentOptions;
-                    }
-            
-                    const displayOptions = [];
-                    this.hiddenSessionId = null; // reset each time value changes
-            
-                    rawOptions.forEach(opt => {
-                        if (opt.label === 'HIDDEN_SESSION_ID') {
-                            // Intercept and stash — never show in the combobox
-                            this.hiddenSessionId = opt.value;
-                        } else {
-                            displayOptions.push({ label: opt.label, value: opt.value });
-                        }
-                    });
-            
-                    this._documentOptions = displayOptions;
-                }
-            
-                get debugData() {
-                    return JSON.stringify(this._value);
-                }
-            
-                get documentOptions() {
-                    return this._documentOptions;
-                }
-            
-                get hasNoDocuments() {
-                    // Evaluate based on the filtered options, not the raw array
-                    return this.documentOptions.length === 0;
-                }
-            
-                get isSubmitDisabled() {
-                    return !this.selectedFilePath || this.isSubmitting;
-                }
-            
-                handleSelect(event) {
-                    this.selectedFilePath = event.detail.value;
-                    const match = this.documentOptions.find((o) => o.value === this.selectedFilePath);
-                    this.selectedDocumentName = match ? match.label : '';
-                    
-                    // Clear previous message if user changes selection
-                    this.flowOutputMessage = null;
-                }
-            
-                async handleSubmit() {
-                    this.isSubmitting = true;
-                    this.flowOutputMessage = null;
-            
-                    try {
-                        // 1. BACKEND UPDATE: Pass the selected path and the smuggled Session ID to the Flow
-                        // This firmly injects the selected document into the Agent's backend memory.
-                        const outputMessage = await runL2SearchFlow({ 
-                            documentFilePath: this.selectedFilePath,
-                            sessionId: this.hiddenSessionId
-                        });
-                        
-                        this.flowOutputMessage = outputMessage || "Success! I've loaded the document. Please ask your questions.";
-            
-                        // 2. FRONTEND UPDATE: Dispatch a standard chat message event
-                        // This seamlessly nudges the Agent forward, completes the turn, and forces
-                        // the Agentforce Context Variables panel to fetch the newly updated backend memory.
-                        const messageEvent = new CustomEvent('sendmessage', {
-                            detail: { 
-                                message: `I have selected the document: ${this.selectedDocumentName}. Please proceed.` 
-                            }
-                        });
-                        this.dispatchEvent(messageEvent);
-                        
-                    } catch (error) {
-                        console.error('Error invoking flow:', error);
-                        this.flowOutputMessage = 'Error invoking flow: ' + (error.body ? error.body.message : error.message);
-                    } finally {
-                        this.isSubmitting = false;
-                    }
-                }
+        const displayOptions = [];
+        rawOptions.forEach(opt => {
+            // Filter out any smuggled IDs if you left them in Apex, otherwise just map normally
+            if (opt.label !== 'HIDDEN_SESSION_ID') {
+                displayOptions.push({
+                    label: opt.label,
+                    value: opt.value
+                });
             }
+        });
+        
+        return displayOptions;
+    }
+
+    get hasNoDocuments() {
+        return this.documentOptions.length === 0;
+    }
+
+    get isSubmitDisabled() {
+        return !this.selectedFilePath || this.isSubmitting;
+    }
+
+    handleSelect(event) {
+        this.selectedFilePath = event.detail.value;
+        const match = this.documentOptions.find((o) => o.value === this.selectedFilePath);
+        this.selectedDocumentName = match ? match.label : '';
+        this.flowOutputMessage = null;
+    }
+
+    handleSubmit() {
+        this.isSubmitting = true;
+
+        try {
+            // 1. Package the exact properties mapped in your AgentScript YAML
+            const payload = {
+                selectedFilePath: this.selectedFilePath,
+                selectedDocumentName: this.selectedDocumentName
+            };
+
+            // 2. Dispatch the native event back to the Agent container
+            // This triggers Agentforce to automatically set @variables.SelectedL2Document = @outputs.selectedFilePath
+            this.dispatchEvent(new CustomEvent('valuechange', {
+                detail: { 
+                    value: payload 
+                }
+            }));
+
+            // 3. Optional: Trigger a message to nudge the LLM forward
+            this.dispatchEvent(new CustomEvent('sendmessage', {
+                detail: { 
+                    message: `I have selected the document: ${this.selectedDocumentName}. Please proceed.` 
+                }
+            }));
+            
+            this.flowOutputMessage = "Success! Document loaded. Please ask your questions.";
+        } catch (error) {
+            console.error('Error selecting document:', error);
+            this.flowOutputMessage = 'An error occurred while selecting the document.';
+        } finally {
+            this.isSubmitting = false;
+        }
+    }
+    }
