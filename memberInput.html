@@ -1,0 +1,89 @@
+<template>
+    <lightning-card>
+        <div class="slds-p-horizontal_medium slds-p-vertical_medium">
+
+            <!-- Step 1: Member Specific Button -->
+            <lightning-button-stateful
+                label-when-off="Member Specific"
+                label-when-on="Member Specific"
+                icon-name-when-on="utility:check"
+                selected={isSelected}
+                disabled={readOnly}
+                onclick={handleExistingMemberChange}>
+            </lightning-button-stateful>
+
+            <!-- Step 2: Member ID Input -->
+            <template if:true={isExistingMember}>
+                <div class="slds-m-top_medium">
+                    <lightning-input
+                        label="Enter Member Id"
+                        name="memberId"
+                        value={memberId}
+                        type="text"
+                        onchange={handleInputChange}
+                        read-only={readOnly}>
+                    </lightning-input>
+
+                    <!-- Fetch Summary Button -->
+                    <div class="slds-m-top_small">
+                        <lightning-button
+                            label="Get Member Summary"
+                            variant="brand"
+                            disabled={isFetchDisabled}
+                            onclick={handleGetSummary}>
+                        </lightning-button>
+                    </div>
+                </div>
+            </template>
+
+            <!-- Loading Spinner -->
+            <template if:true={isLoading}>
+                <div class="slds-m-top_medium slds-align_absolute-center">
+                    <lightning-spinner alternative-text="Loading member summary..." size="small"></lightning-spinner>
+                </div>
+            </template>
+
+            <!-- Error Message -->
+            <template if:true={errorMessage}>
+                <div class="slds-m-top_medium">
+                    <p class="slds-text-color_error">{errorMessage}</p>
+                </div>
+            </template>
+
+            <!-- Step 3: Flow (hidden, used to fetch member summary) -->
+            <template if:true={runFlow}>
+                <div class="slds-hide">
+                    <lightning-flow
+                        flow-api-name="Sparkie_Get_Member_Summary"
+                        flow-input-variables={flowInputVariables}
+                        onstatuschange={handleFlowStatusChange}>
+                    </lightning-flow>
+                </div>
+            </template>
+
+            <!-- Step 4: Member Summary Display + Product Selection -->
+            <template if:true={hasMemberSummary}>
+                <div class="slds-m-top_large">
+                    <div class="slds-box slds-theme_shade slds-m-bottom_medium">
+                        <h2 class="slds-text-heading_small slds-m-bottom_small">Member Summary</h2>
+                        <lightning-formatted-rich-text value={memberSummary}></lightning-formatted-rich-text>
+                    </div>
+
+                    <!-- Product Selection via Radio Buttons -->
+                    <template if:true={hasProducts}>
+                        <lightning-radio-group
+                            label="Select the account to ask questions."
+                            name="productSelection"
+                            options={productOptions}
+                            value={selectedSchemeCategory}
+                            type="radio"
+                            onchange={handleProductChange}
+                            disabled={readOnly}>
+                        </lightning-radio-group>
+                    </template>
+                </div>
+            </template>
+
+        </div>
+    </lightning-card>
+</template>
