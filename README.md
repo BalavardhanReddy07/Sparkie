@@ -12,3 +12,27 @@ Sub Topic	Sub_Topic__c	Text(255)		False
 Topic	Topic__c	Text(255)		False	
 Valid From	Valid_From__c	Date		False	
 Valid To	Valid_To__c	Date
+                    
+                    
+                    
+                    
+                                        {
+                                "description": "Used in Sparkie for showing asking the existing member question and getting the Member ID",
+                                "lightning:type": "@apexClassType/c__AF_MemberQuestionService$MemberInput",
+                                "title": "Existing Member Question and Member ID"
+                            }
+
+
+                                            <?xml version="1.0" encoding="UTF-8"?>
+                <LightningComponentBundle xmlns="http://soap.sforce.com/2006/04/metadata">
+                    <apiVersion>62.0</apiVersion>
+                    <isExposed>true</isExposed>
+                    <targets>
+                        <target>lightning__AgentforceInput</target>
+                    </targets>
+                    <targetConfigs>
+                        <targetConfig targets="lightning__AgentforceInput">
+                            <targetType name="c__memberInput"/>
+                        </targetConfig>
+                    </targetConfigs>
+                </LightningComponentBundle>
