@@ -107,6 +107,8 @@ export default class InsuranceMemberInput extends LightningElement {
             this.runFlow         = false;
             this.errorMessage    = "";
         }
+        
+        this.dispatchValueChangeEvent();
     }
 
     // ─── Step 2: Member ID input change ─────────────────────────────────────
@@ -122,6 +124,8 @@ export default class InsuranceMemberInput extends LightningElement {
         this.employerOptions = [];
         this.runFlow         = false;
         this.errorMessage    = "";
+
+        this.dispatchValueChangeEvent();
     }
 
     // ─── Step 3: Launch the flow to fetch member summary ────────────────────
@@ -173,6 +177,9 @@ export default class InsuranceMemberInput extends LightningElement {
             } else {
                 this.memberSummary = "No summary returned by the flow.";
             }
+            
+            // Sync up the summary and products back to the CLT framework
+            this.dispatchValueChangeEvent();
 
         } else if (status === "ERROR") {
             this.isLoading    = false;
@@ -187,6 +194,9 @@ export default class InsuranceMemberInput extends LightningElement {
         this.selectedEmployer = ""; // Reset employer if scheme changes
         this.employerOptions = [];
         
+        // Immediately dispatch so Agentforce has the Scheme Category even if they don't select an employer
+        this.dispatchValueChangeEvent();
+
         // Show spinner during Apex fetch
         this.isEmployerLoading = true;
 
@@ -219,10 +229,13 @@ export default class InsuranceMemberInput extends LightningElement {
             ...emp,
             selected: emp.value === selectedVal
         }));
+        
+        // Dispatch updated employer selection to Agentforce
+        this.dispatchValueChangeEvent();
     }
 
-    // ─── NEW: Submit functionality to Agentforce ────────────────────────────
-    handleSubmit() {
+    // ─── Core: Dispatch value back to Agentforce ────────────────────────────
+    dispatchValueChangeEvent() {
         const currentValue = {
             existingMember:  this.existingMember,
             memberId:        this.memberId,
@@ -233,7 +246,6 @@ export default class InsuranceMemberInput extends LightningElement {
         }
         this._value = currentValue;
         
-        // Fire valuechange allowing Agentforce engine to transition.
         this.dispatchEvent(
             new CustomEvent("valuechange", {
                 detail: {
