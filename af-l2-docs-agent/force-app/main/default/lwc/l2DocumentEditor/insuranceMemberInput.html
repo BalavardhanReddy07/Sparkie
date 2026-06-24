@@ -2,6 +2,7 @@
     <lightning-card>
         <div class="slds-p-horizontal_medium slds-p-vertical_medium">
 
+            <!-- Step 1: Member Specific Button -->
             <lightning-button-stateful
                 label-when-off="Member Specific"
                 label-when-on="Member Specific"
@@ -11,6 +12,7 @@
                 onclick={handleExistingMemberChange}>
             </lightning-button-stateful>
 
+            <!-- Step 2: Member ID Input -->
             <template if:true={isExistingMember}>
                 <div class="slds-m-top_medium">
                     <lightning-input
@@ -22,6 +24,7 @@
                         read-only={readOnly}>
                     </lightning-input>
 
+                    <!-- Fetch Summary Button -->
                     <div class="slds-m-top_small">
                         <lightning-button
                             label="Get Member Summary"
@@ -33,18 +36,21 @@
                 </div>
             </template>
 
+            <!-- Loading Spinner for Flow -->
             <template if:true={isLoading}>
                 <div class="slds-m-top_medium slds-align_absolute-center">
                     <lightning-spinner alternative-text="Loading member summary..." size="small"></lightning-spinner>
                 </div>
             </template>
 
+            <!-- Error Message -->
             <template if:true={errorMessage}>
                 <div class="slds-m-top_medium">
                     <p class="slds-text-color_error">{errorMessage}</p>
                 </div>
             </template>
 
+            <!-- Step 3: Flow (hidden, runs same flow as existing) -->
             <template if:true={runFlow}>
                 <div class="slds-hide">
                     <lightning-flow
@@ -55,6 +61,7 @@
                 </div>
             </template>
 
+            <!-- Step 4: Member Summary Display + Product Selection -->
             <template if:true={hasMemberSummary}>
                 <div class="slds-m-top_large">
                     <div class="slds-box slds-theme_shade slds-m-bottom_medium">
@@ -62,6 +69,7 @@
                         <lightning-formatted-rich-text value={memberSummary}></lightning-formatted-rich-text>
                     </div>
 
+                    <!-- Product Selection via Radio Buttons -->
                     <template if:true={hasProducts}>
                         <lightning-radio-group
                             label="Select the account to ask questions."
@@ -76,12 +84,14 @@
                 </div>
             </template>
 
+            <!-- NEW: Loading Spinner for Employer Query -->
             <template if:true={isEmployerLoading}>
                 <div class="slds-m-top_medium slds-align_absolute-center">
                     <lightning-spinner alternative-text="Fetching Employers..." size="small"></lightning-spinner>
                 </div>
             </template>
 
+            <!-- NEW: Employer Selection UI -->
             <template if:true={hasEmployers}>
                 <div class="slds-m-top_large">
                     <h2 class="slds-text-heading_small slds-m-bottom_small">Select Employer (Optional)</h2>
@@ -102,15 +112,6 @@
                     </div>
                 </div>
             </template>
-
-            <div class="slds-m-top_large">
-                <lightning-button
-                    label="Submit"
-                    variant="brand"
-                    onclick={handleSubmit}
-                    disabled={readOnly}>
-                </lightning-button>
-            </div>
 
         </div>
     </lightning-card>
