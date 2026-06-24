@@ -1,54 +1,32 @@
 import { LightningElement, api } from 'lwc';
 import runL2SearchFlow from '@salesforce/apex/AF_GetL2DocumentsService.runL2SearchFlow';
 
-/**
- * Output CLT Renderer for the AF_GetL2Documents action.
- */
 export default class L2DocumentEditor extends LightningElement {
     selectedFilePath;
     selectedDocumentName;
-    isSubmitting = false;
-    flowOutputMessage;
     
-    // Holds the active V6 Session ID intercepted from the Apex array
+    // State management flags
+    isSubmitting = false;
+    isSuccessfullySubmitted = false;
+    
+    flowOutputMessage;
     hiddenSessionId = null;
 
     _value = {};
 
     @api
-    get value() {
-        return this._value;
-    }
-    set value(val) {
-        this._value = val ? JSON.parse(JSON.stringify(val)) : {};
-    }
-
-    get debugData() {
-        return JSON.stringify(this._value);
-    }
+    get value() { return this._value; }
+    set value(val) { this._value = val ? JSON.parse(JSON.stringify(val)) : {}; }
 
     get documentOptions() {
-        let rawOptions = [];
-        
-        // Handle Agentforce direct array vs wrapper object injection
-        if (Array.isArray(this._value)) {
-            rawOptions = this._value;
-        } else if (this._value && this._value.documentOptions) {
-            rawOptions = this._value.documentOptions;
-        }
-
+        let rawOptions = Array.isArray(this._value) ? this._value : (this._value?.documentOptions || []);
         const displayOptions = [];
         
-        // --- INTERCEPTOR LOGIC ---
-        // Strip out the hidden session ID so it never shows in the UI combobox
         rawOptions.forEach(opt => {
             if (opt.label === 'HIDDEN_SESSION_ID') {
                 this.hiddenSessionId = opt.value;
             } else {
-                displayOptions.push({
-                    label: opt.label,
-                    value: opt.value
-                });
+                displayOptions.push({ label: opt.label, value: opt.value });
             }
         });
         
@@ -56,12 +34,18 @@ export default class L2DocumentEditor extends LightningElement {
     }
 
     get hasNoDocuments() {
-        // Evaluate based on the filtered options, not the raw array
         return this.documentOptions.length === 0;
     }
 
+    // Permanently disable if successful, or temporarily disable during load/empty state
     get isSubmitDisabled() {
-        return !this.selectedFilePath || this.isSubmitting;
+        return !this.selectedFilePath || this.isSubmitting || this.isSuccessfullySubmitted;
+    }
+
+    get submitButtonLabel() {
+        if (this.isSuccessfullySubmitted) return 'Submitted';
+        if (this.isSubmitting) return 'Submitting...';
+        return 'Submit';
     }
 
     handleSelect(event) {
@@ -69,8 +53,10 @@ export default class L2DocumentEditor extends LightningElement {
         const match = this.documentOptions.find((o) => o.value === this.selectedFilePath);
         this.selectedDocumentName = match ? match.label : '';
         
-        // Clear previous message if user changes selection
-        this.flowOutputMessage = null;
+        // Only clear the message if they haven't locked it in yet
+        if (!this.isSuccessfullySubmitted) {
+            this.flowOutputMessage = null;
+        }
     }
 
     async handleSubmit() {
@@ -78,12 +64,17 @@ export default class L2DocumentEditor extends LightningElement {
         this.flowOutputMessage = null;
 
         try {
-            // Pass both the selected path and the smuggled Session ID to the Flow
+            // Trigger the Flow 
             const outputMessage = await runL2SearchFlow({ 
                 documentFilePath: this.selectedFilePath,
                 sessionId: this.hiddenSessionId
             });
-            this.flowOutputMessage = outputMessage || 'Success! Please ask your questions.';
+            
+            // Set the exact message passed back from the Flow
+            this.flowOutputMessage = outputMessage;
+            
+            // Permanently lock the component since the Flow took over
+            this.isSuccessfullySubmitted = true;
             
         } catch (error) {
             console.error('Error invoking flow:', error);
