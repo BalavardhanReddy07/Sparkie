@@ -91,8 +91,8 @@ public with sharing class AF_InsuranceMemberInput {
                 for (Topic_Document_Mapping__c tdm : [
                     SELECT Sub_Topic__c 
                     FROM Topic_Document_Mapping__c 
-                    WHERE Key_field_value__c = :schemeCategory 
-                    AND Sub_Topic__c != null
+                    WHERE Key_field_value__c = :schemeCategory  AND Topic__c = 'Insurance'
+                    AND Sub_Topic__c != null AND Sub_Topic__c != 'General Insurance'
                 ]) {
                     uniqueEmployers.add(tdm.Sub_Topic__c);
                 }
