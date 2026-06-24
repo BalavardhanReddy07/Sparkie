@@ -3,103 +3,115 @@ import runL2SearchFlow from '@salesforce/apex/AF_GetL2DocumentsService.runL2Sear
 
 /**
  * Output CLT Renderer for the AF_GetL2Documents action.
+ * Registered under sourceType: c__documentResult
  */
 export default class L2DocumentEditor extends LightningElement {
-    selectedFilePath;
-    selectedDocumentName;
-    isSubmitting = false;
-    flowOutputMessage;
-    
-    // Holds the active V6 Session ID intercepted from the Apex array
-    hiddenSessionId = null;
 
-    _value = {};
+    // --- Internal state ---
+    selectedFilePath  = null;
+    selectedDocumentName = null;
+    isSubmitting      = false;
+    flowOutputMessage = null;
+    hiddenSessionId   = null;   // Smuggled session ID intercepted from Apex options array
 
+    _value           = {};
+    _documentOptions = [];      // Filtered display options (HIDDEN_SESSION_ID stripped out)
+
+    // ─── @api value ──────────────────────────────────────────────────────────
+    // Agentforce injects the action output here. We parse it once in the setter
+    // so hiddenSessionId and _documentOptions are always ready before handleSubmit.
     @api
     get value() {
         return this._value;
     }
     set value(val) {
         this._value = val ? JSON.parse(JSON.stringify(val)) : {};
-    }
 
-    get debugData() {
-        return JSON.stringify(this._value);
-    }
-
-    get documentOptions() {
+        // Accept either a direct array (Agentforce injects the list directly)
+        // or a wrapper object with a documentOptions field.
         let rawOptions = [];
-        
-        // Handle Agentforce direct array vs wrapper object injection
         if (Array.isArray(this._value)) {
             rawOptions = this._value;
-        } else if (this._value && this._value.documentOptions) {
+        } else if (this._value && Array.isArray(this._value.documentOptions)) {
             rawOptions = this._value.documentOptions;
         }
 
         const displayOptions = [];
-        
-        // --- INTERCEPTOR LOGIC ---
-        // Strip out the hidden session ID so it never shows in the UI combobox
+        this.hiddenSessionId = null; // reset on each new injection
+
         rawOptions.forEach(opt => {
-            if (opt.label === 'HIDDEN_SESSION_ID') {
+            if (opt && opt.label === 'HIDDEN_SESSION_ID') {
+                // Intercept the smuggled session ID — never surface it in the combobox
                 this.hiddenSessionId = opt.value;
-            } else {
-                displayOptions.push({
-                    label: opt.label,
-                    value: opt.value
-                });
+            } else if (opt && opt.label && opt.value) {
+                displayOptions.push({ label: opt.label, value: opt.value });
             }
         });
-        
-        return displayOptions;
+
+        this._documentOptions = displayOptions;
+
+        // Reset selection whenever new options arrive
+        this.selectedFilePath    = null;
+        this.selectedDocumentName = null;
+        this.flowOutputMessage   = null;
+    }
+
+    // ─── Computed getters ────────────────────────────────────────────────────
+    get documentOptions() {
+        return this._documentOptions;
     }
 
     get hasNoDocuments() {
-        // Evaluate based on the filtered options, not the raw array
-        return this.documentOptions.length === 0;
+        return this._documentOptions.length === 0;
     }
 
     get isSubmitDisabled() {
         return !this.selectedFilePath || this.isSubmitting;
     }
 
+    get selectedWarningMessage() {
+        // Show a warning if the user hasn't picked anything yet after opening
+        return null; // reserved for future validation messages
+    }
+
+    // ─── Handlers ────────────────────────────────────────────────────────────
     handleSelect(event) {
         this.selectedFilePath = event.detail.value;
-        const match = this.documentOptions.find((o) => o.value === this.selectedFilePath);
+        const match = this._documentOptions.find(o => o.value === this.selectedFilePath);
         this.selectedDocumentName = match ? match.label : '';
-        
-        // Clear previous message if user changes selection
         this.flowOutputMessage = null;
     }
 
     async handleSubmit() {
-        this.isSubmitting = true;
+        if (!this.selectedFilePath) return;
+
+        this.isSubmitting      = true;
         this.flowOutputMessage = null;
 
         try {
-            // 1. BACKEND UPDATE: Pass the selected path and the smuggled Session ID to the Flow
-            // This firmly injects the selected document into the Agent's backend memory.
-            const outputMessage = await runL2SearchFlow({ 
+            // 1. Call the Flow via Apex — updates SelectedL2Document agent variable
+            //    using the session ID that was smuggled in through the options array.
+            const outputMessage = await runL2SearchFlow({
                 documentFilePath: this.selectedFilePath,
                 sessionId: this.hiddenSessionId
             });
-            
-            this.flowOutputMessage = outputMessage || "Success! I've loaded the document. Please ask your questions.";
 
-            // 2. FRONTEND UPDATE: Dispatch a standard chat message event
-            // This seamlessly nudges the Agent forward, completes the turn, and forces
-            // the Agentforce Context Variables panel to fetch the newly updated backend memory.
-            const messageEvent = new CustomEvent('sendmessage', {
-                detail: { 
-                    message: `I have selected the document: ${this.selectedDocumentName}. Please proceed.` 
-                }
-            });
-            this.dispatchEvent(messageEvent);
-            
+            this.flowOutputMessage =
+                outputMessage || "Success! I've loaded the document. Please ask your questions.";
+
+            // 2. Nudge the agent forward so it picks up the updated variable.
+            this.dispatchEvent(
+                new CustomEvent('sendmessage', {
+                    detail: {
+                        message: `I have selected the document: ${this.selectedDocumentName}. Please proceed.`
+                    }
+                })
+            );
+
         } catch (error) {
-            console.error('Error invoking flow:', error);
-            this.flowOutputMessage = 'Error invoking flow: ' + (error.body ? error.body.message : error.message);
+            console.error('L2DocumentEditor — Flow error:', error);
+            this.flowOutputMessage =
+                'Error loading document: ' + (error.body ? error.body.message : error.message);
         } finally {
             this.isSubmitting = false;
         }
