@@ -25,6 +25,7 @@ export default class InsuranceMemberInput extends LightningElement {
         }
     }
     _value;
+    _dispatchDelay; // Tracks the debounce timeout to prevent Agentforce race conditions
 
     // ─── Internal State ──────────────────────────────────────────────────────
     existingMember  = false;
@@ -196,30 +197,39 @@ export default class InsuranceMemberInput extends LightningElement {
         this.dispatchValueChangeEvent();
     }
 
-    // ─── Core: Dispatch value back to Agentforce ────────────────────────────
+    // ─── Core: Dispatch value back to Agentforce (DEBOUNCED) ────────────────
     dispatchValueChangeEvent() {
-        const currentValue = {
-            existingMember:  this.existingMember,
-            memberId:        this.memberId,
-            memberSummary:   this.memberSummary,
-            selectedSchemeCategory: this.selectedSchemeCategory,
-            selectedEmployer: this.selectedEmployer,
-            products: this.products,
+        // Clear the previous timeout if the user rapidly clicks
+        if (this._dispatchDelay) {
+            clearTimeout(this._dispatchDelay);
         }
-        this._value = currentValue;
-        
-        this.dispatchEvent(
-            new CustomEvent("valuechange", {
-                detail: {
-                    value: {
-                        existingMember:  this.existingMember,
-                        memberId:        this.memberId,
-                        memberSummary:   this.memberSummary,
-                        selectedSchemeCategory: this.selectedSchemeCategory,
-                        selectedEmployer: this.selectedEmployer
+
+        // Wait 150ms before firing to prevent Agentforce state from flickering
+        // eslint-disable-next-line @lwc/lwc/no-async-operation
+        this._dispatchDelay = setTimeout(() => {
+            const currentValue = {
+                existingMember:  this.existingMember,
+                memberId:        this.memberId,
+                memberSummary:   this.memberSummary,
+                selectedSchemeCategory: this.selectedSchemeCategory,
+                selectedEmployer: this.selectedEmployer,
+                products: this.products,
+            };
+            this._value = currentValue;
+            
+            this.dispatchEvent(
+                new CustomEvent("valuechange", {
+                    detail: {
+                        value: {
+                            existingMember:  this.existingMember,
+                            memberId:        this.memberId,
+                            memberSummary:   this.memberSummary,
+                            selectedSchemeCategory: this.selectedSchemeCategory,
+                            selectedEmployer: this.selectedEmployer
+                        },
                     },
-                },
-            })
-        );
+                })
+            );
+        }, 150);
     }
 }
