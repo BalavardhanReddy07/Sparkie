@@ -78,30 +78,43 @@ public with sharing class AF_InsuranceMemberInput {
     }
 
     /**
-     * @description Fetches Employer names based on Scheme Category. Uses a Set to ensure distinct Sub_Topic__c values.
-     * @param schemeCategory The selected Scheme Category key value.
+     * @description Fetches all mapped Employer names for a list of Scheme Categories in one bulk query.
+     * Incorporates specific Insurance and Sub_Topic filters.
      */
     @AuraEnabled(cacheable=true)
-    public static List<String> getEmployers(String schemeCategory) {
-        Set<String> uniqueEmployers = new Set<String>();
+    public static Map<String, List<String>> getAllEmployers(List<String> schemeCategories) {
+        Map<String, Set<String>> empSetMap = new Map<String, Set<String>>();
+        Map<String, List<String>> resultMap = new Map<String, List<String>>();
         
         try {
-            if (String.isNotBlank(schemeCategory)) {
-                // Querying mapped documents and filtering out nulls to extract Employer Names
+            if (schemeCategories != null && !schemeCategories.isEmpty()) {
+                
+                // Bulk querying the mapped documents using the exact filter logic requested
                 for (Topic_Document_Mapping__c tdm : [
-                    SELECT Sub_Topic__c 
+                    SELECT Key_field_value__c, Sub_Topic__c 
                     FROM Topic_Document_Mapping__c 
-                    WHERE Key_field_value__c = :schemeCategory  AND Topic__c = 'Insurance'
-                    AND Sub_Topic__c != null AND Sub_Topic__c != 'General Insurance'
+                    WHERE Key_field_value__c IN :schemeCategories 
+                    AND Topic__c = 'Insurance'
+                    AND Sub_Topic__c != null 
+                    AND Sub_Topic__c != 'General Insurance'
                 ]) {
-                    uniqueEmployers.add(tdm.Sub_Topic__c);
+                    // Initialize the set for this Scheme Category if it doesn't exist
+                    if (!empSetMap.containsKey(tdm.Key_field_value__c)) {
+                        empSetMap.put(tdm.Key_field_value__c, new Set<String>());
+                    }
+                    // Add employer (Using a Set automatically handles duplicate Sub_Topic__c values)
+                    empSetMap.get(tdm.Key_field_value__c).add(tdm.Sub_Topic__c);
+                }
+                
+                // Convert Map<String, Set<String>> to Map<String, List<String>> for LWC digestion
+                for (String key : empSetMap.keySet()) {
+                    resultMap.put(key, new List<String>(empSetMap.get(key)));
                 }
             }
         } catch(Exception e) {
-            System.debug(LoggingLevel.ERROR, 'Error fetching employers: ' + e.getMessage() + '\n' + e.getStackTraceString());
+            System.debug(LoggingLevel.ERROR, 'Error fetching employers: ' + e.getMessage());
         }
         
-        // Return as List for LWC iteration
-        return new List<String>(uniqueEmployers);
+        return resultMap;
     }
 }
