@@ -4,9 +4,6 @@
  */
 public with sharing class AF_InsuranceMemberInput {
 
-    /**
-     * @description Data shape for CLT input
-     */
     public class InsuranceMemberInput {
         @InvocableVariable(label='Existing Member' required=true)
         public Boolean existingMember;
@@ -24,9 +21,6 @@ public with sharing class AF_InsuranceMemberInput {
         public String selectedEmployer;
     }
 
-    /**
-     * @description Data shape for CLT output
-     */
     public class InsuranceMemberResult {
         @InvocableVariable(label='Existing Member' required=true)
         public Boolean existingMember;
@@ -44,17 +38,11 @@ public with sharing class AF_InsuranceMemberInput {
         public String selectedEmployer;
     }
 
-    /**
-     * @description Invocable request wrapper matching AgentScript action inputs
-     */
     public class InsuranceMemberRequestInput {
         @InvocableVariable(required=true)
         public InsuranceMemberInput memberData;
     }
 
-    /**
-     * @description Returns the captured values from the user back to Agentforce
-     */
     @InvocableMethod(label='Get Insurance Member ID' description='Ask if Existing Member and Get Member ID with optional Employer')
     public static List<InsuranceMemberResult> getInsuranceMemberId(List<InsuranceMemberRequestInput> requests) {
         List<InsuranceMemberResult> responses = new List<InsuranceMemberResult>();
@@ -77,36 +65,36 @@ public with sharing class AF_InsuranceMemberInput {
         return responses;
     }
 
-    /**
-     * @description Fetches all mapped Employer names for a list of Scheme Categories in one bulk query.
-     * Incorporates specific Insurance and Sub_Topic filters.
-     */
     @AuraEnabled(cacheable=true)
     public static Map<String, List<String>> getAllEmployers(List<String> schemeCategories) {
+        System.debug('--- getAllEmployers APEX STARTED ---');
+        System.debug('Input schemeCategories received from LWC: ' + schemeCategories);
+        
         Map<String, Set<String>> empSetMap = new Map<String, Set<String>>();
         Map<String, List<String>> resultMap = new Map<String, List<String>>();
         
         try {
             if (schemeCategories != null && !schemeCategories.isEmpty()) {
                 
-                // Bulk querying the mapped documents using the exact filter logic requested
-                for (Topic_Document_Mapping__c tdm : [
+                // Store the query results so we can debug the size
+                List<Topic_Document_Mapping__c> mappings = [
                     SELECT Key_field_value__c, Sub_Topic__c 
                     FROM Topic_Document_Mapping__c 
                     WHERE Key_field_value__c IN :schemeCategories 
                     AND Topic__c = 'Insurance'
                     AND Sub_Topic__c != null 
                     AND Sub_Topic__c != 'General Insurance'
-                ]) {
-                    // Initialize the set for this Scheme Category if it doesn't exist
+                ];
+                
+                System.debug('SOQL Query returned ' + mappings.size() + ' records.');
+
+                for (Topic_Document_Mapping__c tdm : mappings) {
                     if (!empSetMap.containsKey(tdm.Key_field_value__c)) {
                         empSetMap.put(tdm.Key_field_value__c, new Set<String>());
                     }
-                    // Add employer (Using a Set automatically handles duplicate Sub_Topic__c values)
                     empSetMap.get(tdm.Key_field_value__c).add(tdm.Sub_Topic__c);
                 }
                 
-                // Convert Map<String, Set<String>> to Map<String, List<String>> for LWC digestion
                 for (String key : empSetMap.keySet()) {
                     resultMap.put(key, new List<String>(empSetMap.get(key)));
                 }
@@ -114,6 +102,9 @@ public with sharing class AF_InsuranceMemberInput {
         } catch(Exception e) {
             System.debug(LoggingLevel.ERROR, 'Error fetching employers: ' + e.getMessage());
         }
+        
+        System.debug('Final resultMap returning to LWC: ' + resultMap);
+        System.debug('--- getAllEmployers APEX ENDED ---');
         
         return resultMap;
     }
