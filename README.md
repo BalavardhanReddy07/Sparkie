@@ -13,3 +13,8 @@ processTopicSelection
 
 
 CLT_Process_Topic_Selection
+
+
+
+
+Cases filtered by active case Record Type AND Record Type != 'Enquiry'  AND Record Type != 'Partner'  AND Record Type != 'Return Main' and Status != 'Closed',
