@@ -5,7 +5,7 @@
 public with sharing class AF_InsuranceMemberInput {
 
     public class InsuranceMemberInput {
-        @InvocableVariable(label='Existing Member' required=true)
+        @InvocableVariable(label='Existing Member')
         public Boolean existingMember;
 
         @InvocableVariable(label='Member ID')
