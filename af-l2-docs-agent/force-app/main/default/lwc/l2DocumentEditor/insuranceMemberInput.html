@@ -94,7 +94,10 @@
             <!-- NEW: Employer Selection UI -->
             <template if:true={hasEmployers}>
                 <div class="slds-m-top_large">
-                    <h2 class="slds-text-heading_small slds-m-bottom_small">Select Employer (Optional)</h2>
+                    <h2 class="slds-text-heading_small slds-m-bottom_small">Select Employer</h2>
+                        <p class="slds-text-body_x-small slds-text-color_weak slds-m-bottom_small">
+                            You must select an employer to get the relevant response
+                        </p>
                     <div class="slds-grid slds-wrap slds-gutters_x-small">
                         <template for:each={employerOptions} for:item="emp">
                             <div key={emp.value} class="slds-col slds-m-bottom_small">
