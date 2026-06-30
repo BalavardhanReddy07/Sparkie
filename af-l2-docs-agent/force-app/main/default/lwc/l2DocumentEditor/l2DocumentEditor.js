@@ -19,16 +19,26 @@ export default class MenuFilter extends LightningElement {
     }
     set value(value) {
         this._value = value;
-        if (value) {
-            this.existingMember = value.existingMember || false;
-            this.isSelected     = value.existingMember || false;
-            this.memberId       = value.memberId       || "";
-            this.selectedSchemeCategory = value.selectedSchemeCategory || "";
-            this.memberSummary = value.memberSummary || "";
-            this.products = value.products || [];
+        if (!value) return;
+
+        // If this push is just Agentforce echoing back the exact value we
+        // ourselves just dispatched, our local state is already correct -
+        // skip re-hydrating so a stale echo can't overwrite a selection the
+        // user just made (this was causing the "selects the last option
+        // first" bug).
+        if (this.isEchoOfLastDispatch(value)) {
+            return;
         }
+
+        this.existingMember = value.existingMember || false;
+        this.isSelected     = value.existingMember || false;
+        this.memberId       = value.memberId       || "";
+        this.selectedSchemeCategory = value.selectedSchemeCategory || "";
+        this.memberSummary = value.memberSummary || "";
+        this.products = value.products || [];
     }
     _value;
+    _lastDispatchedValue; // snapshot of the last payload WE dispatched, used to detect echoes
 
     // ─── Internal State ──────────────────────────────────────────────────────
     existingMember  = false;
@@ -192,6 +202,14 @@ export default class MenuFilter extends LightningElement {
         this.dispatchValueChangeEvent();
     }
 
+    // ─── Helper: is this incoming `value` push just Agentforce echoing back
+    // what we ourselves last dispatched? ──────────────────────────────────────
+    isEchoOfLastDispatch(incoming) {
+        if (!this._lastDispatchedValue) return false;
+        const fields = ['existingMember', 'memberId', 'memberSummary', 'selectedSchemeCategory'];
+        return fields.every(f => (incoming[f] ?? '') === (this._lastDispatchedValue[f] ?? ''));
+    }
+
     // ─── Dispatch value back to Agentforce (same pattern as original) ────────
     dispatchValueChangeEvent() {
         const currentValue = {
@@ -202,15 +220,19 @@ export default class MenuFilter extends LightningElement {
             products: this.products,
         }
         this._value = currentValue;
+
+        const dispatchedPayload = {
+            existingMember:  this.existingMember,
+            memberId:        this.memberId,
+            memberSummary:   this.memberSummary,
+            selectedSchemeCategory: this.selectedSchemeCategory,
+        };
+        this._lastDispatchedValue = dispatchedPayload;
+
         this.dispatchEvent(
             new CustomEvent("valuechange", {
                 detail: {
-                    value: {
-                        existingMember:  this.existingMember,
-                        memberId:        this.memberId,
-                        memberSummary:   this.memberSummary,
-                        selectedSchemeCategory: this.selectedSchemeCategory,
-                    },
+                    value: dispatchedPayload,
                 },
             })
         );
