@@ -1,105 +1,90 @@
-public with sharing class AF_GetL2DocumentsService {
+/**
+ * @description Service for getting the MemberId via Custom Lightning Types.
+ * Inner classes MemberInput and MemberResult are the CLT data shapes referenced
+ * by memberInput/schema.json and memberResult/schema.json respectively.
+ */
+public with sharing class AF_MemberQuestionService {
 
-    public class L2DocumentRequest {
-        @AuraEnabled @InvocableVariable(label='Scheme Category' required=true)
-        public String schemeCategory;
+    /**
+     * @description Data shape for CLT input — referenced by memberInput/schema.json
+     */
+    public class MemberInput {
+        @InvocableVariable(label='Existing Member' description='This indicates if the user is an existing member.')
+        public Boolean existingMember;
 
-        @AuraEnabled @InvocableVariable(label='Selected Topic' required=true)
-        public String selectedTopic;
+        @InvocableVariable(label='Member ID' description='If the user is an existing member then this variable stores the member id (also known as client id).')
+        public String memberId;
 
-        @AuraEnabled @InvocableVariable(label='Agent Session ID' required=false)
-        public String agentSessionId;
+        @InvocableVariable(label='Member Summary' description='This variable stores the summary of the membership details.')
+        public String memberSummary;
+
+        @InvocableVariable(label='Selected Scheme Category' description='This variable stores scheme category value about which user is going to ask their question.')
+        public String selectedSchemeCategory;
+
     }
 
-    public class L2DocumentResult {
-        @AuraEnabled @InvocableVariable(label='Has Documents')
-        public Boolean hasDocuments;
+    /**
+     * @description Data shape for CLT output — referenced by memberResult/schema.json
+     */
+    public class MemberResult {
 
-        @AuraEnabled @InvocableVariable(label='Document Options')
-        public List<DocumentOption> documentOptions;
+        @InvocableVariable(label='Existing Member' description='This indicates if the user is an existing member.' required=true)
+        public Boolean existingMember;
+
+        @InvocableVariable(label='Member ID' description='If the user is an existing member then this variable stores the member id (also known as client id).')
+        public String memberId;
+
+        @InvocableVariable(label='Member Summary' description='This variable stores the summary of the membership details.')
+        public String memberSummary;
+
+        @InvocableVariable(label='Selected Scheme Category' description='This variable stores scheme category value about which user is going to ask their question.')
+        public String selectedSchemeCategory;
     }
 
-    public class DocumentOption {
-        @AuraEnabled @InvocableVariable public String label;
-        @AuraEnabled @InvocableVariable public String value;
+    /**
+     * @description Invocable request wrapper — field names must match AgentScript action input names
+     */
+    public class MemberRequestInput {
+        @InvocableVariable(required=false)
+        public MemberInput memberData;
     }
 
-    @InvocableMethod(label='AF Get L2 Documents' category='L2 Documents')
-    public static List<L2DocumentResult> getSelectedDocument(List<L2DocumentRequest> requests) {
-        List<L2DocumentResult> results = new List<L2DocumentResult>();
-
-        for (L2DocumentRequest req : requests) {
-            
-            // --- DEBUG LOG 1: Check what Agentforce passes in ---
-            System.debug('AF_GetL2DocumentsService - Inbound Agent Session ID: ' + req.agentSessionId);
-            
-            L2DocumentResult res = new L2DocumentResult();
-            res.documentOptions = new List<DocumentOption>();
-            
-            Boolean isBrighterLibrary = (req.selectedTopic == 'Brighter Library');
-
-            if (String.isBlank(req.selectedTopic) || (!isBrighterLibrary && String.isBlank(req.schemeCategory))) {
-                res.hasDocuments = false;
-                results.add(res);
-                continue;
-            }
-
-            List<Topic_Document_Mapping__c> mappings;
-            
-            if (isBrighterLibrary) {
-                mappings = [SELECT Additional_Document__c, Additional_Document__r.Name, Additional_Document__r.Data_Cloud_File_Path__c FROM Topic_Document_Mapping__c WHERE Topic__c = :req.selectedTopic AND Additional_Document__c != null AND Active__c = true ORDER BY Additional_Document__r.Name ASC LIMIT 200];
-            } else {
-                mappings = [SELECT Additional_Document__c, Additional_Document__r.Name, Additional_Document__r.Data_Cloud_File_Path__c FROM Topic_Document_Mapping__c WHERE Topic__c = :req.selectedTopic AND Key_Field_Value__c = :req.schemeCategory AND Additional_Document__c != null AND Active__c = true ORDER BY Additional_Document__r.Name ASC LIMIT 200];
-            }
-
-            for (Topic_Document_Mapping__c mapping : mappings) {
-                DocumentOption opt = new DocumentOption();
-                opt.label = mapping.Additional_Document__r.Name;
-                opt.value = mapping.Additional_Document__r.Data_Cloud_File_Path__c;
-                res.documentOptions.add(opt);
-            }
-
-            res.hasDocuments = !res.documentOptions.isEmpty();
-
-            // The Smuggler: Hide the active session ID for the LWC to grab
-            if (String.isNotBlank(req.agentSessionId)) {
-                DocumentOption sessionOpt = new DocumentOption();
-                sessionOpt.label = 'HIDDEN_SESSION_ID';
-                sessionOpt.value = req.agentSessionId;
-                res.documentOptions.add(sessionOpt);
-            }
-
-            results.add(res);
-        }
-
-        return results;
-    }
-
-    @AuraEnabled
-    public static String runL2SearchFlow(String documentFilePath, String sessionId) {
+    /**
+     * @description returns the captured values from the user
+     */
+    @InvocableMethod(label='Get Member ID' description='Ask if Existing Member and Get Member ID')
+    public static List<MemberResult> getMemberId(List<MemberRequestInput> requests) {
         
-        // --- DEBUG LOG 2: Check what the LWC passes back before the Flow runs ---
-        System.debug('AF_GetL2DocumentsService - Session ID passed to Flow: ' + sessionId);
-        System.debug('AF_GetL2DocumentsService - Document File Path passed to Flow: ' + documentFilePath);
+
+        List<MemberResult> responses = new List<MemberResult>();
+        MemberResult response = new MemberResult();
+        try{
+            response.memberId= requests[0].memberData.memberId;
+            response.existingMember = requests[0].memberData.existingMember;
+            response.memberSummary = requests[0].memberData.memberSummary;
+            response.selectedSchemeCategory = requests[0].memberData.selectedSchemeCategory;
+            
+        //     if(requests[0].memberData.memberId != null){
+        //         response.memberId = requests[0].memberData.memberId;
+
+        //         Map<String, Object> flowInputs = new Map<String, Object>{
+        //             'memberId'=> requests[0].memberData.memberId
+        //         };
+
+        //         Flow.Interview flowInterview = Flow.Interview.createInterview(MEMBER_SUMMARY_FLOW_API_NAME, flowInputs);
+        //         flowInterview.start();
+        //         system.debug('flowInterview.getVariableValue(memberSummaryResponse)'+ flowInterview.getVariableValue('memberSummaryResponse'));
+        //         MemberResult result = new MemberResult();
+        //         result.memberSummary = (String)  flowInterview.getVariableValue('memberSummaryResponse');
+        //         response.member_summary = result;
+        //     }
+            responses.add(response);
+        }
+        catch(Exception e){
+            system.debug(e.getCause()+ ' '+ e.getLineNumber()+ ' '+ e.getStackTraceString() + ' '+ e.getMessage());
+        }
         
-        if (String.isBlank(documentFilePath)) {
-            return null;
-        }
-
-        try {
-            Map<String, Object> flowParams = new Map<String, Object>();
-            flowParams.put('document_File_Paths', documentFilePath);
-            flowParams.put('SessionId', sessionId);
-
-            Flow.Interview myFlow = Flow.Interview.createInterview('Flow_L2_Documents_Search', flowParams);
-            myFlow.start();
-
-            // Returns the exact string from your Flow's Assignment variable
-            return (String) myFlow.getVariableValue('Output_Message');
-        } catch (Exception e) {
-            // --- DEBUG LOG 3: Catch any Flow execution errors ---
-            System.debug('AF_GetL2DocumentsService - Flow Execution Error: ' + e.getMessage());
-            throw new AuraHandledException(e.getMessage());
-        }
+        return responses;
     }
+
 }
