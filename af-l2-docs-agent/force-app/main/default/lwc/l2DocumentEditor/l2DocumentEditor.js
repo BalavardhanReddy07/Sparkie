@@ -34,10 +34,10 @@ export default class InsuranceMemberInput extends LightningElement {
         }
 
         this.selectedSchemeCategory = incoming.selectedSchemeCategory || "";
-        // Scheme category alone can't tell us WHICH duplicate-category row
-        // was originally picked, so best-effort match it back to a product
-        // so the right radio still shows checked after a genuine rehydrate.
-        this.selectedProductKey = this.findProductKeyForCategory(this.selectedSchemeCategory);
+        
+        // FIX: Prioritize the exact, unique product key from Agentforce if it exists, 
+        // otherwise fall back to guessing via the category code.
+        this.selectedProductKey = incoming.selectedProductKey || this.findProductKeyForCategory(this.selectedSchemeCategory);
     }
     _value;
     _dispatchDelay;        // debounce timer, used only for free-text typing
@@ -75,18 +75,16 @@ export default class InsuranceMemberInput extends LightningElement {
     get hasProducts() { return this.products && this.products.length > 0; }
     get hasEmployers() { return this.employerOptions && this.employerOptions.length > 0; }
 
-    // Use the FULL raw product string as the radio value rather than just
-    // the scheme category code. Two accounts can legitimately share the same
-    // category (e.g. two "Accumulation" accounts) but each raw string also
-    // embeds the distinct account number, so it's always unique - this is
-    // what was causing the radio group to "lock" on duplicate categories.
     get productOptions() {
         return this.products.map((item) => {
             const mainParts = item.split(" -- ");
             const displayPart = mainParts[0] ? mainParts[0].trim() : item;
             return {
                 label: displayPart,
-                value: item
+                value: item,
+                // FIX: Explicitly evaluate and attach the boolean selected state 
+                // so standard HTML inputs know when they are active
+                selected: item === this.selectedProductKey 
             };
         });
     }
@@ -162,8 +160,6 @@ export default class InsuranceMemberInput extends LightningElement {
             }
 
             // Pre-fetch employers for all DISTINCT categories in one query.
-            // Several accounts can share the same category, so de-dupe first
-            // rather than asking for the same category more than once.
             if (this.hasProducts) {
                 this.isEmployerLoading = true;
                 try {
@@ -200,9 +196,7 @@ export default class InsuranceMemberInput extends LightningElement {
         this.selectedProductKey = selectedKey;
 
         // Pull the real scheme category code back out for everything that
-        // actually depends on the category itself (Apex lookups, the value
-        // sent to Agentforce). The radio group only ever needed a unique
-        // key to know which specific row is checked.
+        // actually depends on the category itself.
         const mainParts = selectedKey ? selectedKey.split(" -- ") : [];
         const newCategory = mainParts[1] ? mainParts[1].trim() : "";
         this.selectedSchemeCategory = newCategory;
@@ -216,11 +210,10 @@ export default class InsuranceMemberInput extends LightningElement {
         }
 
         if (Object.prototype.hasOwnProperty.call(this.employerMap, newCategory)) {
-            // Already cached - apply instantly, no server round trip.
+            // Already cached - apply instantly
             this.applyEmployerOptions(this.employerMap[newCategory]);
         } else {
-            // Not cached yet - fetch just this category on demand and cache
-            // the result so re-selecting it later is instant too.
+            // Not cached yet - fetch just this category on demand
             this.isEmployerLoading = true;
             try {
                 const result = await getAllEmployers({ schemeCategories: [newCategory] });
@@ -244,22 +237,8 @@ export default class InsuranceMemberInput extends LightningElement {
         }));
     }
 
-    // ─── Step 5: Employer Selection handler ─────────────────────────────────
-    handleEmployerSelection(event) {
-        const selectedVal = event.target.dataset.value;
-        this.selectedEmployer = selectedVal;
-
-        this.employerOptions = this.employerOptions.map(emp => ({
-            ...emp,
-            selected: emp.value === selectedVal
-        }));
-
-        this.dispatchValueChangeEvent(true); // discrete click -> dispatch immediately
-    }
-
     // ─── Helper: best-effort match a scheme category back to one of its
-    // product rows (used only when rehydrating from a genuine external push,
-    // since the category alone can't disambiguate duplicate rows) ───────────
+    // product rows
     findProductKeyForCategory(category) {
         if (!category) return "";
         const match = this.products.find(item => {
@@ -271,16 +250,24 @@ export default class InsuranceMemberInput extends LightningElement {
     }
 
     // ─── Helper: is this incoming `value` push just Agentforce echoing back
-    // what we ourselves last dispatched? ──────────────────────────────────────
+    // what we ourselves last dispatched?
     isEchoOfLastDispatch(incoming) {
         if (!this._lastDispatchedValue) return false;
-        const fields = ['existingMember', 'memberId', 'memberSummary', 'selectedSchemeCategory', 'selectedEmployer'];
+        
+        // FIX: Added 'selectedProductKey' to the fields array so we evaluate 
+        // echoes accurately against the unique account string.
+        const fields = [
+            'existingMember', 
+            'memberId', 
+            'memberSummary', 
+            'selectedSchemeCategory', 
+            'selectedEmployer',
+            'selectedProductKey' 
+        ];
         return fields.every(f => (incoming[f] ?? '') === (this._lastDispatchedValue[f] ?? ''));
     }
 
     // ─── Core: Dispatch value back to Agentforce ─────────────────────────────
-    // immediate = true  -> discrete clicks (radio/button toggles).
-    // immediate = false -> free-text typing, keeps a short debounce.
     dispatchValueChangeEvent(immediate = false) {
         if (this._dispatchDelay) {
             clearTimeout(this._dispatchDelay);
@@ -293,6 +280,8 @@ export default class InsuranceMemberInput extends LightningElement {
                 memberSummary:   this.memberSummary,
                 selectedSchemeCategory: this.selectedSchemeCategory,
                 selectedEmployer: this.selectedEmployer,
+                // FIX: Passed the unique exact key to Agentforce so it won't drop it
+                selectedProductKey: this.selectedProductKey 
             };
 
             this._lastDispatchedValue = payload;
