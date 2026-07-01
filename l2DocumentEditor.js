@@ -146,8 +146,8 @@ export default class InsuranceMemberInput extends LightningElement {
             if (this.hasProducts) {
                 this.isEmployerLoading = true;
                 try {
-                    // Extract just the Scheme Category values to pass into the IN clause
-                    const categoriesToFetch = this.productOptions.map(opt => opt.value).filter(Boolean);
+                    // Extract unique Scheme Category values (NOT the radio value which is now the account number)
+                    const categoriesToFetch = [...new Set(this.productOptions.map(opt => opt.schemeCategory).filter(Boolean))];
                     
                     if(categoriesToFetch.length > 0) {
                         this.employerMap = await getAllEmployers({ schemeCategories: categoriesToFetch });
