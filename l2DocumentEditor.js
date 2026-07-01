@@ -218,17 +218,20 @@ export default class InsuranceMemberInput extends LightningElement {
         // Wait 150ms before firing to prevent Agentforce state from flickering
         // eslint-disable-next-line @lwc/lwc/no-async-operation
         this._dispatchDelay = setTimeout(() => {
+            // Keep selectedAccountNumber in _value for internal UI state (radio binding)
+            // but do NOT dispatch it — the Apex InsuranceMemberInput class has no such field.
             const currentValue = {
                 existingMember:  this.existingMember,
                 memberId:        this.memberId,
                 memberSummary:   this.memberSummary,
                 selectedSchemeCategory: this.selectedSchemeCategory,
-                selectedAccountNumber:  this.selectedAccountNumber,
+                selectedAccountNumber:  this.selectedAccountNumber, // internal only
                 selectedEmployer: this.selectedEmployer,
                 products: this.products,
             };
             this._value = currentValue;
             
+            // Only dispatch fields that exist in the Agentforce Flow/Apex Invocable variables
             this.dispatchEvent(
                 new CustomEvent("valuechange", {
                     detail: {
@@ -237,7 +240,6 @@ export default class InsuranceMemberInput extends LightningElement {
                             memberId:        this.memberId,
                             memberSummary:   this.memberSummary,
                             selectedSchemeCategory: this.selectedSchemeCategory,
-                            selectedAccountNumber:  this.selectedAccountNumber,
                             selectedEmployer: this.selectedEmployer
                         },
                     },
