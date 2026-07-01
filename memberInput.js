@@ -34,6 +34,7 @@ export default class MenuFilter extends LightningElement {
         this.isSelected     = value.existingMember || false;
         this.memberId       = value.memberId       || "";
         this.selectedSchemeCategory = value.selectedSchemeCategory || "";
+        this.selectedAccountNumber  = value.selectedAccountNumber  || "";
         this.memberSummary = value.memberSummary || "";
         this.products = value.products || [];
     }
@@ -48,6 +49,7 @@ export default class MenuFilter extends LightningElement {
     @track memberSummary  = "";      // plain-text summary returned by flow
     @track products       = [];      // array of product name strings
     @track selectedSchemeCategory = "";
+    @track selectedAccountNumber = ""; // Unique radio value — the account identifier
 
     isLoading    = false;
     runFlow      = false;
@@ -80,19 +82,19 @@ export default class MenuFilter extends LightningElement {
     /** Map products array → radio-group options */
     get productOptions() {
         return this.products.map((item) => {
-        // Step 1: Split off the Scheme Category (after " -- ")
-        const mainParts = item.split(" -- ");
-        const displayPart = mainParts[0] ? mainParts[0].trim() : item;
-        const schemeCategory = mainParts[1] ? mainParts[1].trim() : "";
+            // Step 1: Split off the Scheme Category (after " -- ")
+            const mainParts = item.split(" -- ");
+            const displayPart = mainParts[0] ? mainParts[0].trim() : item;
+            const schemeCategory = mainParts[1] ? mainParts[1].trim() : "";
 
-        // Step 2: displayPart is "AccountNumber - Designation" — use as-is for label
-        const label = displayPart;
-
-        return {
-            label: label,
-            value: schemeCategory
-        };
-    });
+            // Step 2: Use the account identifier (displayPart) as the unique radio value
+            // so that two accounts sharing the same scheme category stay independently selectable.
+            return {
+                label: displayPart,
+                value: displayPart,
+                schemeCategory: schemeCategory
+            };
+        });
     }   
 
 
@@ -107,6 +109,7 @@ export default class MenuFilter extends LightningElement {
             this.memberSummary   = "";
             this.products        = [];
             this.selectedSchemeCategory = "";
+            this.selectedAccountNumber  = "";
             this.runFlow         = false;
             this.errorMessage    = "";
         }
@@ -124,6 +127,7 @@ export default class MenuFilter extends LightningElement {
         this.memberSummary   = "";
         this.products        = [];
         this.selectedSchemeCategory = "";
+        this.selectedAccountNumber  = "";
         this.runFlow         = false;
         this.errorMessage    = "";
 
@@ -198,7 +202,13 @@ export default class MenuFilter extends LightningElement {
 
     // ─── Step 4: Product selection ───────────────────────────────────────────
     handleProductChange(event) {
-        this.selectedSchemeCategory = event.detail.value;
+        // event.detail.value is now the unique account identifier (displayPart)
+        this.selectedAccountNumber = event.detail.value;
+
+        // Resolve the Scheme Category from the selected account number
+        const matchedOption = this.productOptions.find(opt => opt.value === this.selectedAccountNumber);
+        this.selectedSchemeCategory = matchedOption ? matchedOption.schemeCategory : "";
+
         this.dispatchValueChangeEvent();
     }
 
@@ -206,7 +216,7 @@ export default class MenuFilter extends LightningElement {
     // what we ourselves last dispatched? ──────────────────────────────────────
     isEchoOfLastDispatch(incoming) {
         if (!this._lastDispatchedValue) return false;
-        const fields = ['existingMember', 'memberId', 'memberSummary', 'selectedSchemeCategory'];
+        const fields = ['existingMember', 'memberId', 'memberSummary', 'selectedSchemeCategory', 'selectedAccountNumber'];
         return fields.every(f => (incoming[f] ?? '') === (this._lastDispatchedValue[f] ?? ''));
     }
 
@@ -217,8 +227,9 @@ export default class MenuFilter extends LightningElement {
             memberId:        this.memberId,
             memberSummary:   this.memberSummary,
             selectedSchemeCategory: this.selectedSchemeCategory,
+            selectedAccountNumber:  this.selectedAccountNumber,
             products: this.products,
-        }
+        };
         this._value = currentValue;
 
         const dispatchedPayload = {
@@ -226,6 +237,7 @@ export default class MenuFilter extends LightningElement {
             memberId:        this.memberId,
             memberSummary:   this.memberSummary,
             selectedSchemeCategory: this.selectedSchemeCategory,
+            selectedAccountNumber:  this.selectedAccountNumber,
         };
         this._lastDispatchedValue = dispatchedPayload;
 
