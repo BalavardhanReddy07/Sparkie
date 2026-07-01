@@ -216,28 +216,32 @@ export default class MenuFilter extends LightningElement {
     // what we ourselves last dispatched? ──────────────────────────────────────
     isEchoOfLastDispatch(incoming) {
         if (!this._lastDispatchedValue) return false;
-        const fields = ['existingMember', 'memberId', 'memberSummary', 'selectedSchemeCategory', 'selectedAccountNumber'];
+        // Only compare fields that are actually dispatched to Agentforce
+        // (selectedAccountNumber is internal UI state only — never dispatched)
+        const fields = ['existingMember', 'memberId', 'memberSummary', 'selectedSchemeCategory'];
         return fields.every(f => (incoming[f] ?? '') === (this._lastDispatchedValue[f] ?? ''));
     }
 
     // ─── Dispatch value back to Agentforce (same pattern as original) ────────
     dispatchValueChangeEvent() {
+        // Keep selectedAccountNumber in _value for internal UI state (radio binding)
+        // but do NOT include it in the dispatched payload — the Flow/Apex has no such variable.
         const currentValue = {
             existingMember:  this.existingMember,
             memberId:        this.memberId,
             memberSummary:   this.memberSummary,
             selectedSchemeCategory: this.selectedSchemeCategory,
-            selectedAccountNumber:  this.selectedAccountNumber,
+            selectedAccountNumber:  this.selectedAccountNumber, // internal only
             products: this.products,
         };
         this._value = currentValue;
 
+        // Only dispatch fields that exist in the Agentforce Flow/Apex Invocable variables
         const dispatchedPayload = {
             existingMember:  this.existingMember,
             memberId:        this.memberId,
             memberSummary:   this.memberSummary,
             selectedSchemeCategory: this.selectedSchemeCategory,
-            selectedAccountNumber:  this.selectedAccountNumber,
         };
         this._lastDispatchedValue = dispatchedPayload;
 
