@@ -1,89 +1,1538 @@
-<template>
-    <lightning-card>
-        <div class="slds-p-horizontal_medium slds-p-vertical_medium">
+How the Interview Started
+How the Interview Started
+Bala Reddy (0059j00000QLTDM) started the flow interview.
+API Version for Running the Flow: 66
+Some of this flow's variables were set when the interview started.
+SchemeCategory = public
+IsExistingMember = true
+IsInsuranceSelected = true
+Flow start time: <b>21 July 2026 at 7:45 pm</b>.
 
-            <!-- Step 1: Member Specific Button -->
-            <lightning-button-stateful
-                label-when-off="Member Specific"
-                label-when-on="Member Specific"
-                icon-name-when-on="utility:check"
-                selected={isSelected}
-                disabled={readOnly}
-                onclick={handleExistingMemberChange}>
-            </lightning-button-stateful>
 
-            <!-- Step 2: Member ID Input -->
-            <template if:true={isExistingMember}>
-                <div class="slds-m-top_medium">
-                    <lightning-input
-                        label="Enter Member Id"
-                        name="memberId"
-                        value={memberId}
-                        type="text"
-                        onchange={handleInputChange}
-                        read-only={readOnly}>
-                    </lightning-input>
+Decision: Check Which Topic is Selected
+" Insurance " outcome was executed.
+$$:OutcomeNotExecuted:Product
+Skipped this outcome because its conditions weren't met: Product
+Outcome conditions: 
+{!IsProductSelected} (null) Equals true
+All conditions must be true (AND)
+$$:OutcomeExecuted:Insurance
+Outcome executed: Insurance
+Outcome conditions: 
+{!IsInsuranceSelected} (true) Equals true
+All conditions must be true (AND)
 
-                    <!-- Fetch Summary Button -->
-                    <div class="slds-m-top_small">
-                        <lightning-button
-                            label="Get Member Summary"
-                            variant="brand"
-                            disabled={isFetchDisabled}
-                            onclick={handleGetSummary}>
-                        </lightning-button>
-                    </div>
-                </div>
-            </template>
 
-            <!-- Loading Spinner -->
-            <template if:true={isLoading}>
-                <div class="slds-m-top_medium slds-align_absolute-center">
-                    <lightning-spinner alternative-text="Loading member summary..." size="small"></lightning-spinner>
-                </div>
-            </template>
+Decision: Is Member Specific ?
+" Yes_MemberSpecific " outcome was executed.
+$$:OutcomeExecuted:Yes_MemberSpecific
+Outcome executed: Yes_MemberSpecific
+Outcome conditions: 
+{!IsExistingMember} (true) Equals true
+All conditions must be true (AND)
 
-            <!-- Error Message -->
-            <template if:true={errorMessage}>
-                <div class="slds-m-top_medium">
-                    <p class="slds-text-color_error">{errorMessage}</p>
-                </div>
-            </template>
 
-            <!-- Step 3: Flow (hidden, used to fetch member summary) -->
-            <template if:true={runFlow}>
-                <div class="slds-hide">
-                    <lightning-flow
-                        flow-api-name="Sparkie_Get_Member_Summary"
-                        flow-input-variables={flowInputVariables}
-                        onstatuschange={handleFlowStatusChange}>
-                    </lightning-flow>
-                </div>
-            </template>
+Decision: Is Scheme Category and Employer Name Selected
+" Scheme_Category_Selected_Insurance " outcome was executed.
+$$:OutcomeExecuted:Scheme_Category_Selected_Insurance
+Outcome executed: Scheme_Category_Selected_Insurance
+Outcome conditions: 
+1. {!SchemeCategory} (public) Is null false
+2. {!SchemeCategory} (public) Is Blank false
+3. {!EmployerName} (null) Is null true
+4. {!EmployerName} (null) Is Blank true
+Logic: Advanced Logic (1 AND 2 AND (3 OR 4))
 
-            <!-- Step 4: Member Summary + Display + Product Selection -->
-            <template if:true={hasMemberSummary}>
-                <div class="slds-m-top_large">
-                    <div class="slds-box slds-theme_shade slds-m-bottom_medium">
-                        <h2 class="slds-text-heading_small slds-m-bottom_small">Member Summary</h2>
-                        <lightning-formatted-rich-text value={memberSummary}></lightning-formatted-rich-text>
-                    </div>
 
-                    <!-- Product Selection via Radio Buttons -->
-                    <template if:true={hasProducts}>
-                        <lightning-radio-group
-                            label="Select the account to ask questions."
-                            name="productSelection"
-                            options={productOptions}
-                            value={selectedAccountNumber}
-                            type="radio"
-                            onchange={handleProductChange}
-                            disabled={readOnly}>
-                        </lightning-radio-group>
-                    </template>
-                </div>
-            </template>
+Get Records: Get Insurance Records - SchemeCategory
+One or more  Topic_Document_Mapping__c  records were retrieved.
+Find all Topic_Document_Mapping__c records where:
+1.  Topic__c Equals Insurance
+2.  Active__c Equals true
+3.  Valid_From__c Less than or equal {!$Flow.CurrentDate} (21 July 2026)
+4.  Valid_From__c Is null true
+5.  Valid_To__c Is null true
+6.  Valid_To__c Greater than or equal {!$Flow.CurrentDate} (21 July 2026)
+with advanced logic (1 AND 2 AND (3 OR 4) AND (5 OR 6))
+Store the values of these fields in Get_Insurance_Records_SchemeCategory: Primary_Document__c, Key_Field_Value__c, Key_Field_API_Name__c, Object_API_Name__c, Id, Sub_Topic__c
+Result
+Successfully found records.
+SOQL queries: 1 out of 100
+,SOQL query rows: 180 out of 50000
 
-        </div>
-    </lightning-card>
-</template>
+
+Collection Filter: Filter ADL Records
+2  records exist in the filtered target collection.
+Source collection: Get_Insurance_Records_SchemeCategory
+Create a collection, applying these filter conditions: 
+All conditions must be true (AND)
+1. {!currentItem_Filter_ADL_Records_General_Products.Key_Field_API_Name__c} Equals Scheme_Category__c
+2. {!currentItem_Filter_ADL_Records_General_Products.Key_Field_Value__c} Equals {!SchemeCategory} (public)
+3. {!currentItem_Filter_ADL_Records_General_Products.Object_API_Name__c} Equals Product__c
+Items in source collection: 180
+Items in filtered target collection: 2
+Result
+[
+  {
+    "Primary_Document__c": "a1z9j000007kNwrAAE",
+    "Key_Field_Value__c": "Public",
+    "Key_Field_API_Name__c": "Scheme_Category__c",
+    "Object_API_Name__c": "Product__c",
+    "Id": "a209j000000mz1BAAQ",
+    "Sub_Topic__c": "Member Specific Products"
+  },
+  {
+    "Primary_Document__c": "a1z9j000007kbBpAAI",
+    "Key_Field_Value__c": "Public",
+    "Key_Field_API_Name__c": "Scheme_Category__c",
+    "Object_API_Name__c": "Product__c",
+    "Id": "a209j000000o9mUAAQ",
+    "Sub_Topic__c": "Member Specific Products"
+  }
+]
+
+
+Assignment: Assign ADL Records
+1 variable was updated.
+{!TopicDocumentMappingRecordsADL} Equals {!Filter_ADL_Records_Insurance_SC}
+Result
+{!TopicDocumentMappingRecordsADL} = "[Topic_Document_Mapping__c (a209j000000mz1BAAQ),Topic_Document_Mapping__c (a209j000000o9mUAAQ)]"
+
+
+Collection Filter: Filter KA Records
+14  records exist in the filtered target collection.
+Source collection: Get_Insurance_Records_SchemeCategory
+Create a collection, applying these filter conditions: 
+All conditions must be true (AND)
+1. {!currentItem_Filter_KA_Records_General_Products.Object_API_Name__c} Equals Knowledge_kav
+2. {!currentItem_Filter_KA_Records_General_Products.Key_Field_API_Name__c} Equals Data_Category__c
+Items in source collection: 180
+Items in filtered target collection: 14
+Result
+[
+  {
+    "Primary_Document__c": null,
+    "Key_Field_Value__c": "Accumulation Accounts",
+    "Key_Field_API_Name__c": "Data_Category__c",
+    "Object_API_Name__c": "Knowledge_kav",
+    "Id": "a209j000000oKy1AAE",
+    "Sub_Topic__c": null
+  },
+  {
+    "Primary_Document__c": null,
+    "Key_Field_Value__c": "Pension Accounts",
+    "Key_Field_API_Name__c": "Data_Category__c",
+    "Object_API_Name__c": "Knowledge_kav",
+    "Id": "a209j000000oKzdAAE",
+    "Sub_Topic__c": null
+  },
+  {
+    "Primary_Document__c": null,
+    "Key_Field_Value__c": "Defined Benefit Products",
+    "Key_Field_API_Name__c": "Data_Category__c",
+    "Object_API_Name__c": "Knowledge_kav",
+    "Id": "a209j000000oL1FAAU",
+    "Sub_Topic__c": null
+  },
+  {
+    "Primary_Document__c": null,
+    "Key_Field_Value__c": "Claims",
+    "Key_Field_API_Name__c": "Data_Category__c",
+    "Object_API_Name__c": "Knowledge_kav",
+    "Id": "a209j000000oL2rAAE",
+    "Sub_Topic__c": null
+  },
+  {
+    "Primary_Document__c": null,
+    "Key_Field_Value__c": "Claims Documents",
+    "Key_Field_API_Name__c": "Data_Category__c",
+    "Object_API_Name__c": "Knowledge_kav",
+    "Id": "a209j000000oL4TAAU",
+    "Sub_Topic__c": null
+  },
+  {
+    "Primary_Document__c": null,
+    "Key_Field_Value__c": "Death Claims",
+    "Key_Field_API_Name__c": "Data_Category__c",
+    "Object_API_Name__c": "Knowledge_kav",
+    "Id": "a209j000000oL65AAE",
+    "Sub_Topic__c": null
+  },
+  {
+    "Primary_Document__c": null,
+    "Key_Field_Value__c": "Terminal Illness",
+    "Key_Field_API_Name__c": "Data_Category__c",
+    "Object_API_Name__c": "Knowledge_kav",
+    "Id": "a209j000000oL7hAAE",
+    "Sub_Topic__c": null
+  },
+  {
+    "Primary_Document__c": null,
+    "Key_Field_Value__c": "Escalations",
+    "Key_Field_API_Name__c": "Data_Category__c",
+    "Object_API_Name__c": "Knowledge_kav",
+    "Id": "a209j000000oL9JAAU",
+    "Sub_Topic__c": null
+  },
+  {
+    "Primary_Document__c": null,
+    "Key_Field_Value__c": "Operations",
+    "Key_Field_API_Name__c": "Data_Category__c",
+    "Object_API_Name__c": "Knowledge_kav",
+    "Id": "a209j000000oLAvAAM",
+    "Sub_Topic__c": null
+  },
+  {
+    "Primary_Document__c": null,
+    "Key_Field_Value__c": "Policy Definitions",
+    "Key_Field_API_Name__c": "Data_Category__c",
+    "Object_API_Name__c": "Knowledge_kav",
+    "Id": "a209j000000oLCXAA2",
+    "Sub_Topic__c": null
+  },
+  {
+    "Primary_Document__c": null,
+    "Key_Field_Value__c": "Cover Details",
+    "Key_Field_API_Name__c": "Data_Category__c",
+    "Object_API_Name__c": "Knowledge_kav",
+    "Id": "a209j000000oLE9AAM",
+    "Sub_Topic__c": null
+  },
+  {
+    "Primary_Document__c": null,
+    "Key_Field_Value__c": "Premiums",
+    "Key_Field_API_Name__c": "Data_Category__c",
+    "Object_API_Name__c": "Knowledge_kav",
+    "Id": "a209j000000oLFlAAM",
+    "Sub_Topic__c": null
+  },
+  {
+    "Primary_Document__c": null,
+    "Key_Field_Value__c": "Underwriting",
+    "Key_Field_API_Name__c": "Data_Category__c",
+    "Object_API_Name__c": "Knowledge_kav",
+    "Id": "a209j000000oLHNAA2",
+    "Sub_Topic__c": null
+  },
+  {
+    "Primary_Document__c": null,
+    "Key_Field_Value__c": "Account Information",
+    "Key_Field_API_Name__c": "Data_Category__c",
+    "Object_API_Name__c": "Knowledge_kav",
+    "Id": "a209j000000oLIzAAM",
+    "Sub_Topic__c": null
+  }
+]
+
+
+Assignment: Assign KA Records
+1 variable was updated.
+{!TopicDocumentMappingRecordsKA} Equals {!Filter_KA_Records_Insurance_SC}
+Result
+{!TopicDocumentMappingRecordsKA} = "[Topic_Document_Mapping__c (a209j000000oKy1AAE),Topic_Document_Mapping__c (a209j000000oKzdAAE),Topic_Document_Mapping__c (a209j000000oL1FAAU),Topic_Document_Mapping__c (a209j000000oL2rAAE),Topic_Document_Mapping__c (a209j000000oL4TAAU),Topic_Document_Mapping__c (a209j000000oL65AAE),Topic_Document_Mapping__c (a209j000000oL7hAAE),Topic_Document_Mapping__c (a209j000000oL9JAAU),Topic_Document_Mapping__c (a209j000000oLAvAAM),Topic_Document_Mapping__c (a209j000000oLCXAA2),Topic_Document_Mapping__c (a209j000000oLE9AAM),Topic_Document_Mapping__c (a209j000000oLFlAAM),Topic_Document_Mapping__c (a209j000000oLHNAA2),Topic_Document_Mapping__c (a209j000000oLIzAAM)]"
+
+
+Decision: Check if ADL Record Exists
+" Yes_ADL_Records " outcome was executed.
+$$:OutcomeExecuted:Yes_ADL_Records
+Outcome executed: Yes_ADL_Records
+Outcome conditions: 
+1. {!TopicDocumentMappingRecordsADL} ([Topic_Document_Mapping__c (a209j000000mz1BAAQ),Topic_Document_Mapping__c (a209j000000o9mUAAQ)]) Is null false
+2. {!TopicDocumentMappingRecordsADL} ([Topic_Document_Mapping__c (a209j000000mz1BAAQ),Topic_Document_Mapping__c (a209j000000o9mUAAQ)]) Is Empty false
+Logic: All conditions must be true (AND)
+
+
+Loop: Loop through Brs Records
+Iteration  0  of the loop through the  TopicDocumentMappingRecordsADL  collection occurred.
+$$:LoopNext:
+Loop Through: [a209j000000mz1BAAQ,a209j000000o9mUAAQ]
+Iteration: 0
+Current iteration item: a209j000000mz1BAAQ
+
+
+Assignment: Assign Document Ids
+1 variable was updated.
+{!DocumentIds} Add {!Loop_through_Brs_Records.Primary_Document__c}
+Result
+{!DocumentIds} = "[a1z9j000007kNwrAAE]"
+
+
+Loop: Loop through Brs Records
+Iteration  1  of the loop through the  TopicDocumentMappingRecordsADL  collection occurred.
+$$:LoopNext:
+Loop Through: [a209j000000mz1BAAQ,a209j000000o9mUAAQ]
+Iteration: 1
+Current iteration item: a209j000000o9mUAAQ
+
+
+Assignment: Assign Document Ids
+1 variable was updated.
+{!DocumentIds} Add {!Loop_through_Brs_Records.Primary_Document__c}
+Result
+{!DocumentIds} = "[a1z9j000007kNwrAAE,a1z9j000007kbBpAAI]"
+
+
+Loop: Loop through Brs Records
+Loop was completed.
+$$:LoopEnd:
+End Loop.
+
+
+Get Records: Get related document details records
+One or more  Document_Detail__c  records were retrieved.
+Find all Document_Detail__c records where:
+Id In {!DocumentIds} ([a1z9j000007kNwrAAE,a1z9j000007kbBpAAI])
+Store the values of these fields in Get_related_document_details_records: Data_Cloud_File_Path__c, Id
+Result
+Successfully found records.
+SOQL queries: 1 out of 100
+,SOQL query rows: 2 out of 50000
+
+
+Loop: Loop through Document detail records
+Iteration  0  of the loop through the  Get_related_document_details_records  collection occurred.
+$$:LoopNext:
+Loop Through: [a1z9j000007kNwrAAE,a1z9j000007kbBpAAI]
+Iteration: 0
+Current iteration item: a1z9j000007kNwrAAE
+
+
+Assignment: Assign Data cloud file path
+1 variable was updated.
+{!DCFilePaths} Add {!Loop_through_Document_detail_records.Data_Cloud_File_Path__c}
+Result
+{!DCFilePaths} = "[1JD9j000001btWPGAY/Brighter Super Insurance Guide - Local Government.pdf]"
+
+
+Loop: Loop through Document detail records
+Iteration  1  of the loop through the  Get_related_document_details_records  collection occurred.
+$$:LoopNext:
+Loop Through: [a1z9j000007kNwrAAE,a1z9j000007kbBpAAI]
+Iteration: 1
+Current iteration item: a1z9j000007kbBpAAI
+
+
+Assignment: Assign Data cloud file path
+1 variable was updated.
+{!DCFilePaths} Add {!Loop_through_Document_detail_records.Data_Cloud_File_Path__c}
+Result
+{!DCFilePaths} = "[1JD9j000001btWPGAY/Brighter Super Insurance Guide - Local Government.pdf,1JD9j000001btWPGAY/Guide to Claiming a Death Benefit.pdf]"
+
+
+Loop: Loop through Document detail records
+Loop was completed.
+$$:LoopEnd:
+End Loop.
+
+
+Decision: Check if KA Record Exists
+" Yes_KA_Records " outcome was executed.
+$$:OutcomeExecuted:Yes_KA_Records
+Outcome executed: Yes_KA_Records
+Outcome conditions: 
+1. {!TopicDocumentMappingRecordsKA} ([Topic_Document_Mapping__c (a209j000000oKy1AAE),Topic_Document_Mapping__c (a209j000000oKzdAAE),Topic_Document_Mapping__c (a209j000000oL1FAAU),Topic_Document_Mapping__c (a209j000000oL2rAAE),Topic_Document_Mapping__c (a209j000000oL4TAAU),Topic_Document_Mapping__c (a209j000000oL65AAE),Topic_Document_Mapping__c (a209j000000oL7hAAE),Topic_Document_Mapping__c (a209j000000oL9JAAU),Topic_Document_Mapping__c (a209j000000oLAvAAM),Topic_Document_Mapping__c (a209j000000oLCXAA2),Topic_Document_Mapping__c (a209j000000oLE9AAM),Topic_Document_Mapping__c (a209j000000oLFlAAM),Topic_Document_Mapping__c (a209j000000oLHNAA2),Topic_Document_Mapping__c (a209j000000oLIzAAM)]) Is null false
+2. {!TopicDocumentMappingRecordsKA} ([Topic_Document_Mapping__c (a209j000000oKy1AAE),Topic_Document_Mapping__c (a209j000000oKzdAAE),Topic_Document_Mapping__c (a209j000000oL1FAAU),Topic_Document_Mapping__c (a209j000000oL2rAAE),Topic_Document_Mapping__c (a209j000000oL4TAAU),Topic_Document_Mapping__c (a209j000000oL65AAE),Topic_Document_Mapping__c (a209j000000oL7hAAE),Topic_Document_Mapping__c (a209j000000oL9JAAU),Topic_Document_Mapping__c (a209j000000oLAvAAM),Topic_Document_Mapping__c (a209j000000oLCXAA2),Topic_Document_Mapping__c (a209j000000oLE9AAM),Topic_Document_Mapping__c (a209j000000oLFlAAM),Topic_Document_Mapping__c (a209j000000oLHNAA2),Topic_Document_Mapping__c (a209j000000oLIzAAM)]) Is Empty false
+Logic: All conditions must be true (AND)
+
+
+Transform: Retrieve Data Category Names
+Transform  1 source  to  1 target  with  1 transformation .
+Source Data: TopicDocumentMappingRecordsKA (Record Collection)
+[
+  {
+    "Primary_Document__c": null,
+    "Key_Field_Value__c": "Accumulation Accounts",
+    "Key_Field_API_Name__c": "Data_Category__c",
+    "Object_API_Name__c": "Knowledge_kav",
+    "Id": "a209j000000oKy1AAE",
+    "Sub_Topic__c": null
+  },
+  {
+    "Primary_Document__c": null,
+    "Key_Field_Value__c": "Pension Accounts",
+    "Key_Field_API_Name__c": "Data_Category__c",
+    "Object_API_Name__c": "Knowledge_kav",
+    "Id": "a209j000000oKzdAAE",
+    "Sub_Topic__c": null
+  },
+  {
+    "Primary_Document__c": null,
+    "Key_Field_Value__c": "Defined Benefit Products",
+    "Key_Field_API_Name__c": "Data_Category__c",
+    "Object_API_Name__c": "Knowledge_kav",
+    "Id": "a209j000000oL1FAAU",
+    "Sub_Topic__c": null
+  },
+  {
+    "Primary_Document__c": null,
+    "Key_Field_Value__c": "Claims",
+    "Key_Field_API_Name__c": "Data_Category__c",
+    "Object_API_Name__c": "Knowledge_kav",
+    "Id": "a209j000000oL2rAAE",
+    "Sub_Topic__c": null
+  },
+  {
+    "Primary_Document__c": null,
+    "Key_Field_Value__c": "Claims Documents",
+    "Key_Field_API_Name__c": "Data_Category__c",
+    "Object_API_Name__c": "Knowledge_kav",
+    "Id": "a209j000000oL4TAAU",
+    "Sub_Topic__c": null
+  },
+  {
+    "Primary_Document__c": null,
+    "Key_Field_Value__c": "Death Claims",
+    "Key_Field_API_Name__c": "Data_Category__c",
+    "Object_API_Name__c": "Knowledge_kav",
+    "Id": "a209j000000oL65AAE",
+    "Sub_Topic__c": null
+  },
+  {
+    "Primary_Document__c": null,
+    "Key_Field_Value__c": "Terminal Illness",
+    "Key_Field_API_Name__c": "Data_Category__c",
+    "Object_API_Name__c": "Knowledge_kav",
+    "Id": "a209j000000oL7hAAE",
+    "Sub_Topic__c": null
+  },
+  {
+    "Primary_Document__c": null,
+    "Key_Field_Value__c": "Escalations",
+    "Key_Field_API_Name__c": "Data_Category__c",
+    "Object_API_Name__c": "Knowledge_kav",
+    "Id": "a209j000000oL9JAAU",
+    "Sub_Topic__c": null
+  },
+  {
+    "Primary_Document__c": null,
+    "Key_Field_Value__c": "Operations",
+    "Key_Field_API_Name__c": "Data_Category__c",
+    "Object_API_Name__c": "Knowledge_kav",
+    "Id": "a209j000000oLAvAAM",
+    "Sub_Topic__c": null
+  },
+  {
+    "Primary_Document__c": null,
+    "Key_Field_Value__c": "Policy Definitions",
+    "Key_Field_API_Name__c": "Data_Category__c",
+    "Object_API_Name__c": "Knowledge_kav",
+    "Id": "a209j000000oLCXAA2",
+    "Sub_Topic__c": null
+  },
+  {
+    "Primary_Document__c": null,
+    "Key_Field_Value__c": "Cover Details",
+    "Key_Field_API_Name__c": "Data_Category__c",
+    "Object_API_Name__c": "Knowledge_kav",
+    "Id": "a209j000000oLE9AAM",
+    "Sub_Topic__c": null
+  },
+  {
+    "Primary_Document__c": null,
+    "Key_Field_Value__c": "Premiums",
+    "Key_Field_API_Name__c": "Data_Category__c",
+    "Object_API_Name__c": "Knowledge_kav",
+    "Id": "a209j000000oLFlAAM",
+    "Sub_Topic__c": null
+  },
+  {
+    "Primary_Document__c": null,
+    "Key_Field_Value__c": "Underwriting",
+    "Key_Field_API_Name__c": "Data_Category__c",
+    "Object_API_Name__c": "Knowledge_kav",
+    "Id": "a209j000000oLHNAA2",
+    "Sub_Topic__c": null
+  },
+  {
+    "Primary_Document__c": null,
+    "Key_Field_Value__c": "Account Information",
+    "Key_Field_API_Name__c": "Data_Category__c",
+    "Object_API_Name__c": "Knowledge_kav",
+    "Id": "a209j000000oLIzAAM",
+    "Sub_Topic__c": null
+  }
+]
+Target Data: Retrieve_Data_Category_Names (Text Collection)
+[
+  "Accumulation Accounts",
+  "Pension Accounts",
+  "Defined Benefit Products",
+  "Claims",
+  "Claims Documents",
+  "Death Claims",
+  "Terminal Illness",
+  "Escalations",
+  "Operations",
+  "Policy Definitions",
+  "Cover Details",
+  "Premiums",
+  "Underwriting",
+  "Account Information"
+]
+
+
+Get Records: Get Data Category Ids
+One or more  DataCategoryCustom__dlm  records were retrieved.
+Find all DataCategoryCustom__dlm records where:
+MasterLabel__c In {!Retrieve_Data_Category_Names} ([Accumulation Accounts,Pension Accounts,Defined Benefit Products,Claims,Claims Documents,Death Claims,Terminal Illness,Escalations,Operations,Policy Definitions,Cover Details,Premiums,Underwriting,Account Information])
+Store the values of these fields in Get_Data_Category_Ids: Id, Id__c
+Result
+Successfully found records.
+SOQL queries: 1 out of 100
+,SOQL query rows: 15 out of 50000
+
+
+Decision: Data Category Record Exists?
+" Yes_DataCategoryRecords " outcome was executed.
+$$:OutcomeExecuted:Yes_DataCategoryRecords
+Outcome executed: Yes_DataCategoryRecords
+Outcome conditions: 
+1. {!Get_Data_Category_Ids} ([DataCategoryCustom__dlm (q8A000a1GAFuCcWEYV),DataCategoryCustom__dlm (q8A000gzkA4IWi6EQG),DataCategoryCustom__dlm (q8A000IWXBsJujdE4C),DataCategoryCustom__dlm (q8A000DULVAZZy1E4H),DataCategoryCustom__dlm (q8A000NWA9Ova21EOB),DataCategoryCustom__dlm (q8A0000zVJeh3zAEYQ),DataCategoryCustom__dlm (q8A000mrKwL8VgoEIF),DataCategoryCustom__dlm (q8A000ZcAl6vTUaEKM),DataCategoryCustom__dlm (q8A000i9Yo3nJbNEIU),DataCategoryCustom__dlm (q8A000dF489vCylEEE),DataCategoryCustom__dlm (q8A000O8EMtX2hcE0C),DataCategoryCustom__dlm (q8A0008eYj3xGxhEIE),DataCategoryCustom__dlm (q8A000WWd74ezjJEGQ),DataCategoryCustom__dlm (q8A0007VfCLBNbqEUH),DataCategoryCustom__dlm (q8A000Yj1wCHmXfECL)]) Is Empty false
+2. {!Get_Data_Category_Ids} ([DataCategoryCustom__dlm (q8A000a1GAFuCcWEYV),DataCategoryCustom__dlm (q8A000gzkA4IWi6EQG),DataCategoryCustom__dlm (q8A000IWXBsJujdE4C),DataCategoryCustom__dlm (q8A000DULVAZZy1E4H),DataCategoryCustom__dlm (q8A000NWA9Ova21EOB),DataCategoryCustom__dlm (q8A0000zVJeh3zAEYQ),DataCategoryCustom__dlm (q8A000mrKwL8VgoEIF),DataCategoryCustom__dlm (q8A000ZcAl6vTUaEKM),DataCategoryCustom__dlm (q8A000i9Yo3nJbNEIU),DataCategoryCustom__dlm (q8A000dF489vCylEEE),DataCategoryCustom__dlm (q8A000O8EMtX2hcE0C),DataCategoryCustom__dlm (q8A0008eYj3xGxhEIE),DataCategoryCustom__dlm (q8A000WWd74ezjJEGQ),DataCategoryCustom__dlm (q8A0007VfCLBNbqEUH),DataCategoryCustom__dlm (q8A000Yj1wCHmXfECL)]) Is null false
+Logic: All conditions must be true (AND)
+
+
+Transform: Transform DataCategoryCustom__c Records
+Transform  1 source  to  1 target  with  1 transformation .
+Source Data: Get_Data_Category_Ids (Record Collection)
+[
+  {
+    "Id": "q8A000a1GAFuCcWEYV",
+    "Id__c": "02n9j000001eXBFAA2"
+  },
+  {
+    "Id": "q8A000gzkA4IWi6EQG",
+    "Id__c": "02n9j000001eTXHAA2"
+  },
+  {
+    "Id": "q8A000IWXBsJujdE4C",
+    "Id__c": "02n9j000001eWwvAAE"
+  },
+  {
+    "Id": "q8A000DULVAZZy1E4H",
+    "Id__c": "02n9j000001eWwoAAE"
+  },
+  {
+    "Id": "q8A000NWA9Ova21EOB",
+    "Id__c": "02n9j000001eWwtAAE"
+  },
+  {
+    "Id": "q8A0000zVJeh3zAEYQ",
+    "Id__c": "02n9j000001eWwnAAE"
+  },
+  {
+    "Id": "q8A000mrKwL8VgoEIF",
+    "Id__c": "02n9j000001eWwqAAE"
+  },
+  {
+    "Id": "q8A000ZcAl6vTUaEKM",
+    "Id__c": "02n9j000001eX6LAAU"
+  },
+  {
+    "Id": "q8A000i9Yo3nJbNEIU",
+    "Id__c": "02n9j000001eTXIAA2"
+  },
+  {
+    "Id": "q8A000dF489vCylEEE",
+    "Id__c": "02n9j000001eXBBAA2"
+  },
+  {
+    "Id": "q8A000O8EMtX2hcE0C",
+    "Id__c": "02n9j000001eWwsAAE"
+  },
+  {
+    "Id": "q8A0008eYj3xGxhEIE",
+    "Id__c": "02n9j000001eWyJAAU"
+  },
+  {
+    "Id": "q8A000WWd74ezjJEGQ",
+    "Id__c": "02n9j000001eWwuAAE"
+  },
+  {
+    "Id": "q8A0007VfCLBNbqEUH",
+    "Id__c": "02n9j000001eTXGAA2"
+  },
+  {
+    "Id": "q8A000Yj1wCHmXfECL",
+    "Id__c": "02n9j000001eWwrAAE"
+  }
+]
+Target Data: Transform_DataCategoryCustom_c_Records (Text Collection)
+[
+  "02n9j000001eXBFAA2",
+  "02n9j000001eTXHAA2",
+  "02n9j000001eWwvAAE",
+  "02n9j000001eWwoAAE",
+  "02n9j000001eWwtAAE",
+  "02n9j000001eWwnAAE",
+  "02n9j000001eWwqAAE",
+  "02n9j000001eX6LAAU",
+  "02n9j000001eTXIAA2",
+  "02n9j000001eXBBAA2",
+  "02n9j000001eWwsAAE",
+  "02n9j000001eWyJAAU",
+  "02n9j000001eWwuAAE",
+  "02n9j000001eTXGAA2",
+  "02n9j000001eWwrAAE"
+]
+
+
+Assignment: Assign Each Data Category Id
+1 variable was updated.
+{!KADataCategories} Equals {!Transform_DataCategoryCustom_c_Records}
+Result
+{!KADataCategories} = "[02n9j000001eXBFAA2,02n9j000001eTXHAA2,02n9j000001eWwvAAE,02n9j000001eWwoAAE,02n9j000001eWwtAAE,02n9j000001eWwnAAE,02n9j000001eWwqAAE,02n9j000001eX6LAAU,02n9j000001eTXIAA2,02n9j000001eXBBAA2,02n9j000001eWwsAAE,02n9j000001eWyJAAU,02n9j000001eWwuAAE,02n9j000001eTXGAA2,02n9j000001eWwrAAE]"
+
+
+Transaction Committed
+Any records that the flow was ready to create, update, or delete were committed to the database.
+
+
+How the Interview Finished
+The flow interview ran for 1.49 seconds and finished on 21 July 2026 at 7:45 pm.
+
+
+
+Flow 2 debug with Product path : 
+How the Interview Started
+How the Interview Started
+Bala Reddy (0059j00000QLTDM) started the flow interview.
+API Version for Running the Flow: 66
+Some of this flow's variables were set when the interview started.
+SchemeCategory = public
+IsExistingMember = true
+IsInsuranceSelected = false
+IsProductSelected = true
+Flow start time: <b>21 July 2026 at 7:47 pm</b>.
+
+
+Decision: Check Which Topic is Selected
+" Product " outcome was executed.
+$$:OutcomeExecuted:Product
+Outcome executed: Product
+Outcome conditions: 
+{!IsProductSelected} (true) Equals true
+All conditions must be true (AND)
+
+
+Decision: Member Specific?
+" Member_Product " outcome was executed.
+$$:OutcomeExecuted:Member_Product
+Outcome executed: Member_Product
+Outcome conditions: 
+{!IsExistingMember} (true) Equals true
+All conditions must be true (AND)
+
+
+Decision: Scheme Category Selected?
+" Yes " outcome was executed.
+$$:OutcomeExecuted:Yes
+Outcome executed: Yes
+Outcome conditions: 
+1. {!SchemeCategory} (public) Is null false
+2. {!SchemeCategory} (public) Is Blank false
+Logic: All conditions must be true (AND)
+
+
+Get Records: Get Product Records
+One or more  Topic_Document_Mapping__c  records were retrieved.
+Find all Topic_Document_Mapping__c records where:
+1.  Topic__c Equals Product
+2.  Active__c Equals true
+3.  Valid_From__c Is null true
+4.  Valid_From__c Less than or equal {!$Flow.CurrentDate} (21 July 2026)
+5.  Valid_To__c Greater than or equal {!$Flow.CurrentDate} (21 July 2026)
+6.  Valid_To__c Is null true
+with advanced logic (1 AND 2 AND (3 OR 4) AND (5 OR 6))
+Store the values of these fields in Get_Product_Records: Primary_Document__c, Key_Field_Value__c, Key_Field_API_Name__c, Object_API_Name__c, Id, Sub_Topic__c
+Result
+Successfully found records.
+SOQL queries: 1 out of 100
+,SOQL query rows: 230 out of 50000
+
+
+Collection Filter: Filter ADL Records
+8  records exist in the filtered target collection.
+Source collection: Get_Product_Records
+Create a collection, applying these filter conditions: 
+All conditions must be true (AND)
+1. {!currentItem_Filter_ADL_Records_General_Products.Key_Field_API_Name__c} Equals Scheme_Category__c
+2. {!currentItem_Filter_ADL_Records_General_Products.Key_Field_Value__c} Equals {!SchemeCategory} (public)
+3. {!currentItem_Filter_ADL_Records_General_Products.Object_API_Name__c} Equals Product__c
+4. {!currentItem_Filter_ADL_Records_General_Products.Sub_Topic__c} Equals Member Specific Products
+Items in source collection: 230
+Items in filtered target collection: 8
+Result
+[
+  {
+    "Primary_Document__c": "a1z9j000007kOo5AAE",
+    "Key_Field_Value__c": "Public",
+    "Key_Field_API_Name__c": "Scheme_Category__c",
+    "Object_API_Name__c": "Product__c",
+    "Id": "a209j000000n1weAAA",
+    "Sub_Topic__c": "Member Specific Products"
+  },
+  {
+    "Primary_Document__c": "a1z9j000007kOphAAE",
+    "Key_Field_Value__c": "Public",
+    "Key_Field_API_Name__c": "Scheme_Category__c",
+    "Object_API_Name__c": "Product__c",
+    "Id": "a209j000000n1wfAAA",
+    "Sub_Topic__c": "Member Specific Products"
+  },
+  {
+    "Primary_Document__c": "a1z9j000007vi3VAAQ",
+    "Key_Field_Value__c": "Public",
+    "Key_Field_API_Name__c": "Scheme_Category__c",
+    "Object_API_Name__c": "Product__c",
+    "Id": "a209j000000o1qXAAQ",
+    "Sub_Topic__c": "Member Specific Products"
+  },
+  {
+    "Primary_Document__c": "a1z9j000007kavhAAA",
+    "Key_Field_Value__c": "Public",
+    "Key_Field_API_Name__c": "Scheme_Category__c",
+    "Object_API_Name__c": "Product__c",
+    "Id": "a209j000000o1tlAAA",
+    "Sub_Topic__c": "Member Specific Products"
+  },
+  {
+    "Primary_Document__c": "a1z9j000007kb6zAAA",
+    "Key_Field_Value__c": "Public",
+    "Key_Field_API_Name__c": "Scheme_Category__c",
+    "Object_API_Name__c": "Product__c",
+    "Id": "a209j000000o1ybAAA",
+    "Sub_Topic__c": "Member Specific Products"
+  },
+  {
+    "Primary_Document__c": "a1z9j000007kb0XAAQ",
+    "Key_Field_Value__c": "Public",
+    "Key_Field_API_Name__c": "Scheme_Category__c",
+    "Object_API_Name__c": "Product__c",
+    "Id": "a209j000000o20DAAQ",
+    "Sub_Topic__c": "Member Specific Products"
+  },
+  {
+    "Primary_Document__c": "a1z9j000007kaxJAAQ",
+    "Key_Field_Value__c": "Public",
+    "Key_Field_API_Name__c": "Scheme_Category__c",
+    "Object_API_Name__c": "Product__c",
+    "Id": "a209j000000o23RAAQ",
+    "Sub_Topic__c": "Member Specific Products"
+  },
+  {
+    "Primary_Document__c": "a1z9j000007kZJjAAM",
+    "Key_Field_Value__c": "Public",
+    "Key_Field_API_Name__c": "Scheme_Category__c",
+    "Object_API_Name__c": "Product__c",
+    "Id": "a209j000000o28HAAQ",
+    "Sub_Topic__c": "Member Specific Products"
+  }
+]
+
+
+Assignment: Assign ADL Records
+1 variable was updated.
+{!TopicDocumentMappingRecordsADL} Equals {!Filter_ADL_Records_Products_MS}
+Result
+{!TopicDocumentMappingRecordsADL} = "[Topic_Document_Mapping__c (a209j000000n1weAAA),Topic_Document_Mapping__c (a209j000000n1wfAAA),Topic_Document_Mapping__c (a209j000000o1qXAAQ),Topic_Document_Mapping__c (a209j000000o1tlAAA),Topic_Document_Mapping__c (a209j000000o1ybAAA),Topic_Document_Mapping__c (a209j000000o20DAAQ),Topic_Document_Mapping__c (a209j000000o23RAAQ),Topic_Document_Mapping__c (a209j000000o28HAAQ)]"
+
+
+Collection Filter: Filter KA Records
+29  records exist in the filtered target collection.
+Source collection: Get_Product_Records
+Create a collection, applying these filter conditions: 
+All conditions must be true (AND)
+1. {!currentItem_Filter_KA_Records_General_Products.Object_API_Name__c} Equals Knowledge_kav
+2. {!currentItem_Filter_KA_Records_General_Products.Key_Field_API_Name__c} Equals Data_Category__c
+Items in source collection: 230
+Items in filtered target collection: 29
+Result (20 of 29)
+[
+  {
+    "Primary_Document__c": null,
+    "Key_Field_Value__c": "Account Information",
+    "Key_Field_API_Name__c": "Data_Category__c",
+    "Object_API_Name__c": "Knowledge_kav",
+    "Id": "a209j000000oLKbAAM",
+    "Sub_Topic__c": null
+  },
+  {
+    "Primary_Document__c": null,
+    "Key_Field_Value__c": "Accumulation Accounts",
+    "Key_Field_API_Name__c": "Data_Category__c",
+    "Object_API_Name__c": "Knowledge_kav",
+    "Id": "a209j000000oLKcAAM",
+    "Sub_Topic__c": null
+  },
+  {
+    "Primary_Document__c": null,
+    "Key_Field_Value__c": "Case Management",
+    "Key_Field_API_Name__c": "Data_Category__c",
+    "Object_API_Name__c": "Knowledge_kav",
+    "Id": "a209j000000oLKdAAM",
+    "Sub_Topic__c": null
+  },
+  {
+    "Primary_Document__c": null,
+    "Key_Field_Value__c": "Contact Centre",
+    "Key_Field_API_Name__c": "Data_Category__c",
+    "Object_API_Name__c": "Knowledge_kav",
+    "Id": "a209j000000oLKeAAM",
+    "Sub_Topic__c": null
+  },
+  {
+    "Primary_Document__c": null,
+    "Key_Field_Value__c": "Contribution Caps",
+    "Key_Field_API_Name__c": "Data_Category__c",
+    "Object_API_Name__c": "Knowledge_kav",
+    "Id": "a209j000000oLKfAAM",
+    "Sub_Topic__c": null
+  },
+  {
+    "Primary_Document__c": null,
+    "Key_Field_Value__c": "Contributions",
+    "Key_Field_API_Name__c": "Data_Category__c",
+    "Object_API_Name__c": "Knowledge_kav",
+    "Id": "a209j000000oLKgAAM",
+    "Sub_Topic__c": null
+  },
+  {
+    "Primary_Document__c": null,
+    "Key_Field_Value__c": "Defined Benefit Products",
+    "Key_Field_API_Name__c": "Data_Category__c",
+    "Object_API_Name__c": "Knowledge_kav",
+    "Id": "a209j000000oLKhAAM",
+    "Sub_Topic__c": null
+  },
+  {
+    "Primary_Document__c": null,
+    "Key_Field_Value__c": "Early Release Process",
+    "Key_Field_API_Name__c": "Data_Category__c",
+    "Object_API_Name__c": "Knowledge_kav",
+    "Id": "a209j000000oLKiAAM",
+    "Sub_Topic__c": null
+  },
+  {
+    "Primary_Document__c": null,
+    "Key_Field_Value__c": "Employee Setup",
+    "Key_Field_API_Name__c": "Data_Category__c",
+    "Object_API_Name__c": "Knowledge_kav",
+    "Id": "a209j000000oLKjAAM",
+    "Sub_Topic__c": null
+  },
+  {
+    "Primary_Document__c": null,
+    "Key_Field_Value__c": "Employer Contribution Returns",
+    "Key_Field_API_Name__c": "Data_Category__c",
+    "Object_API_Name__c": "Knowledge_kav",
+    "Id": "a209j000000oLKkAAM",
+    "Sub_Topic__c": null
+  },
+  {
+    "Primary_Document__c": null,
+    "Key_Field_Value__c": "Employer Maintenance",
+    "Key_Field_API_Name__c": "Data_Category__c",
+    "Object_API_Name__c": "Knowledge_kav",
+    "Id": "a209j000000oLKlAAM",
+    "Sub_Topic__c": null
+  },
+  {
+    "Primary_Document__c": null,
+    "Key_Field_Value__c": "Escalations",
+    "Key_Field_API_Name__c": "Data_Category__c",
+    "Object_API_Name__c": "Knowledge_kav",
+    "Id": "a209j000000oLKmAAM",
+    "Sub_Topic__c": null
+  },
+  {
+    "Primary_Document__c": null,
+    "Key_Field_Value__c": "Fees",
+    "Key_Field_API_Name__c": "Data_Category__c",
+    "Object_API_Name__c": "Knowledge_kav",
+    "Id": "a209j000000oLKnAAM",
+    "Sub_Topic__c": null
+  },
+  {
+    "Primary_Document__c": null,
+    "Key_Field_Value__c": "Member",
+    "Key_Field_API_Name__c": "Data_Category__c",
+    "Object_API_Name__c": "Knowledge_kav",
+    "Id": "a209j000000oLKoAAM",
+    "Sub_Topic__c": null
+  },
+  {
+    "Primary_Document__c": null,
+    "Key_Field_Value__c": "Operations",
+    "Key_Field_API_Name__c": "Data_Category__c",
+    "Object_API_Name__c": "Knowledge_kav",
+    "Id": "a209j000000oLKpAAM",
+    "Sub_Topic__c": null
+  },
+  {
+    "Primary_Document__c": null,
+    "Key_Field_Value__c": "Pension Accounts",
+    "Key_Field_API_Name__c": "Data_Category__c",
+    "Object_API_Name__c": "Knowledge_kav",
+    "Id": "a209j000000oLKqAAM",
+    "Sub_Topic__c": null
+  },
+  {
+    "Primary_Document__c": null,
+    "Key_Field_Value__c": "Performance",
+    "Key_Field_API_Name__c": "Data_Category__c",
+    "Object_API_Name__c": "Knowledge_kav",
+    "Id": "a209j000000oLKrAAM",
+    "Sub_Topic__c": null
+  },
+  {
+    "Primary_Document__c": null,
+    "Key_Field_Value__c": "Personal Contributions",
+    "Key_Field_API_Name__c": "Data_Category__c",
+    "Object_API_Name__c": "Knowledge_kav",
+    "Id": "a209j000000oLKsAAM",
+    "Sub_Topic__c": null
+  },
+  {
+    "Primary_Document__c": null,
+    "Key_Field_Value__c": "Risk",
+    "Key_Field_API_Name__c": "Data_Category__c",
+    "Object_API_Name__c": "Knowledge_kav",
+    "Id": "a209j000000oLKtAAM",
+    "Sub_Topic__c": null
+  },
+  {
+    "Primary_Document__c": null,
+    "Key_Field_Value__c": "Rollover In",
+    "Key_Field_API_Name__c": "Data_Category__c",
+    "Object_API_Name__c": "Knowledge_kav",
+    "Id": "a209j000000oLKuAAM",
+    "Sub_Topic__c": null
+  }
+]
+
+
+Assignment: Assign KA Records
+1 variable was updated.
+{!TopicDocumentMappingRecordsKA} Equals {!Filter_KA_Records_Products_MS}
+Result
+{!TopicDocumentMappingRecordsKA} = "[Topic_Document_Mapping__c (a209j000000oLKbAAM),Topic_Document_Mapping__c (a209j000000oLKcAAM),Topic_Document_Mapping__c (a209j000000oLKdAAM),Topic_Document_Mapping__c (a209j000000oLKeAAM),Topic_Document_Mapping__c (a209j000000oLKfAAM),Topic_Document_Mapping__c (a209j000000oLKgAAM),Topic_Document_Mapping__c (a209j000000oLKhAAM),Topic_Document_Mapping__c (a209j000000oLKiAAM),Topic_Document_Mapping__c (a209j000000oLKjAAM),Topic_Document_Mapping__c (a209j000000oLKkAAM),Topic_Document_Mapping__c (a209j000000oLKlAAM),Topic_Document_Mapping__c (a209j000000oLKmAAM),Topic_Document_Mapping__c (a209j000000oLKnAAM),Topic_Document_Mapping__c (a209j000000oLKoAAM),Topic_Document_Mapping__c (a209j000000oLKpAAM),Topic_Document_Mapping__c (a209j000000oLKqAAM),Topic_Document_Mapping__c (a209j000000oLKrAAM),Topic_Document_Mapping__c (a209j000000oLKsAAM),Topic_Document_Mapping__c (a209j000000oLKtAAM),Topic_Document_Mapping__c (a209j000000oLKuAAM),Topic_Document_Mapping__c (a209j000000oLKvAAM),Topic_Document_Mapping__c (a209j000000oLKwAAM),Topic_Document_Mapping__c (a209j000000oLKxAAM),Topic_Document_Mapping__c (a209j000000oLKyAAM),Topic_Document_Mapping__c (a209j000000oLKzAAM),Topic_Document_Mapping__c (a209j000000oLL0AAM),Topic_Document_Mapping__c (a209j000000oLL1AAM),Topic_Document_Mapping__c (a209j000000oLL2AAM),Topic_Document_Mapping__c (a209j000000oLL3AAM)]"
+
+
+Decision: Check if ADL Record Exists
+" Yes_ADL_Records " outcome was executed.
+$$:OutcomeExecuted:Yes_ADL_Records
+Outcome executed: Yes_ADL_Records
+Outcome conditions: 
+1. {!TopicDocumentMappingRecordsADL} ([Topic_Document_Mapping__c (a209j000000n1weAAA),Topic_Document_Mapping__c (a209j000000n1wfAAA),Topic_Document_Mapping__c (a209j000000o1qXAAQ),Topic_Document_Mapping__c (a209j000000o1tlAAA),Topic_Document_Mapping__c (a209j000000o1ybAAA),Topic_Document_Mapping__c (a209j000000o20DAAQ),Topic_Document_Mapping__c (a209j000000o23RAAQ),Topic_Document_Mapping__c (a209j000000o28HAAQ)]) Is null false
+2. {!TopicDocumentMappingRecordsADL} ([Topic_Document_Mapping__c (a209j000000n1weAAA),Topic_Document_Mapping__c (a209j000000n1wfAAA),Topic_Document_Mapping__c (a209j000000o1qXAAQ),Topic_Document_Mapping__c (a209j000000o1tlAAA),Topic_Document_Mapping__c (a209j000000o1ybAAA),Topic_Document_Mapping__c (a209j000000o20DAAQ),Topic_Document_Mapping__c (a209j000000o23RAAQ),Topic_Document_Mapping__c (a209j000000o28HAAQ)]) Is Empty false
+Logic: All conditions must be true (AND)
+
+
+Loop: Loop through Brs Records
+Iteration  0  of the loop through the  TopicDocumentMappingRecordsADL  collection occurred.
+$$:LoopNext:
+Loop Through: [a209j000000n1weAAA,a209j000000n1wfAAA,a209j000000o1qXAAQ,a209j000000o1tlAAA,a209j000000o1ybAAA,a209j000000o20DAAQ,a209j000000o23RAAQ,a209j000000o28HAAQ]
+Iteration: 0
+Current iteration item: a209j000000n1weAAA
+
+
+Assignment: Assign Document Ids
+1 variable was updated.
+{!DocumentIds} Add {!Loop_through_Brs_Records.Primary_Document__c}
+Result
+{!DocumentIds} = "[a1z9j000007kOo5AAE]"
+
+
+Loop: Loop through Brs Records
+Iteration  1  of the loop through the  TopicDocumentMappingRecordsADL  collection occurred.
+$$:LoopNext:
+Loop Through: [a209j000000n1weAAA,a209j000000n1wfAAA,a209j000000o1qXAAQ,a209j000000o1tlAAA,a209j000000o1ybAAA,a209j000000o20DAAQ,a209j000000o23RAAQ,a209j000000o28HAAQ]
+Iteration: 1
+Current iteration item: a209j000000n1wfAAA
+
+
+Assignment: Assign Document Ids
+1 variable was updated.
+{!DocumentIds} Add {!Loop_through_Brs_Records.Primary_Document__c}
+Result
+{!DocumentIds} = "[a1z9j000007kOo5AAE,a1z9j000007kOphAAE]"
+
+
+Loop: Loop through Brs Records
+Iteration  2  of the loop through the  TopicDocumentMappingRecordsADL  collection occurred.
+$$:LoopNext:
+Loop Through: [a209j000000n1weAAA,a209j000000n1wfAAA,a209j000000o1qXAAQ,a209j000000o1tlAAA,a209j000000o1ybAAA,a209j000000o20DAAQ,a209j000000o23RAAQ,a209j000000o28HAAQ]
+Iteration: 2
+Current iteration item: a209j000000o1qXAAQ
+
+
+Assignment: Assign Document Ids
+1 variable was updated.
+{!DocumentIds} Add {!Loop_through_Brs_Records.Primary_Document__c}
+Result
+{!DocumentIds} = "[a1z9j000007kOo5AAE,a1z9j000007kOphAAE,a1z9j000007vi3VAAQ]"
+
+
+Loop: Loop through Brs Records
+Iteration  3  of the loop through the  TopicDocumentMappingRecordsADL  collection occurred.
+$$:LoopNext:
+Loop Through: [a209j000000n1weAAA,a209j000000n1wfAAA,a209j000000o1qXAAQ,a209j000000o1tlAAA,a209j000000o1ybAAA,a209j000000o20DAAQ,a209j000000o23RAAQ,a209j000000o28HAAQ]
+Iteration: 3
+Current iteration item: a209j000000o1tlAAA
+
+
+Assignment: Assign Document Ids
+1 variable was updated.
+{!DocumentIds} Add {!Loop_through_Brs_Records.Primary_Document__c}
+Result
+{!DocumentIds} = "[a1z9j000007kOo5AAE,a1z9j000007kOphAAE,a1z9j000007vi3VAAQ,a1z9j000007kavhAAA]"
+
+
+Loop: Loop through Brs Records
+Iteration  4  of the loop through the  TopicDocumentMappingRecordsADL  collection occurred.
+$$:LoopNext:
+Loop Through: [a209j000000n1weAAA,a209j000000n1wfAAA,a209j000000o1qXAAQ,a209j000000o1tlAAA,a209j000000o1ybAAA,a209j000000o20DAAQ,a209j000000o23RAAQ,a209j000000o28HAAQ]
+Iteration: 4
+Current iteration item: a209j000000o1ybAAA
+
+
+Assignment: Assign Document Ids
+1 variable was updated.
+{!DocumentIds} Add {!Loop_through_Brs_Records.Primary_Document__c}
+Result
+{!DocumentIds} = "[a1z9j000007kOo5AAE,a1z9j000007kOphAAE,a1z9j000007vi3VAAQ,a1z9j000007kavhAAA,a1z9j000007kb6zAAA]"
+
+
+Loop: Loop through Brs Records
+Iteration  5  of the loop through the  TopicDocumentMappingRecordsADL  collection occurred.
+$$:LoopNext:
+Loop Through: [a209j000000n1weAAA,a209j000000n1wfAAA,a209j000000o1qXAAQ,a209j000000o1tlAAA,a209j000000o1ybAAA,a209j000000o20DAAQ,a209j000000o23RAAQ,a209j000000o28HAAQ]
+Iteration: 5
+Current iteration item: a209j000000o20DAAQ
+
+
+Assignment: Assign Document Ids
+1 variable was updated.
+{!DocumentIds} Add {!Loop_through_Brs_Records.Primary_Document__c}
+Result
+{!DocumentIds} = "[a1z9j000007kOo5AAE,a1z9j000007kOphAAE,a1z9j000007vi3VAAQ,a1z9j000007kavhAAA,a1z9j000007kb6zAAA,a1z9j000007kb0XAAQ]"
+
+
+Loop: Loop through Brs Records
+Iteration  6  of the loop through the  TopicDocumentMappingRecordsADL  collection occurred.
+$$:LoopNext:
+Loop Through: [a209j000000n1weAAA,a209j000000n1wfAAA,a209j000000o1qXAAQ,a209j000000o1tlAAA,a209j000000o1ybAAA,a209j000000o20DAAQ,a209j000000o23RAAQ,a209j000000o28HAAQ]
+Iteration: 6
+Current iteration item: a209j000000o23RAAQ
+
+
+Assignment: Assign Document Ids
+1 variable was updated.
+{!DocumentIds} Add {!Loop_through_Brs_Records.Primary_Document__c}
+Result
+{!DocumentIds} = "[a1z9j000007kOo5AAE,a1z9j000007kOphAAE,a1z9j000007vi3VAAQ,a1z9j000007kavhAAA,a1z9j000007kb6zAAA,a1z9j000007kb0XAAQ,a1z9j000007kaxJAAQ]"
+
+
+Loop: Loop through Brs Records
+Iteration  7  of the loop through the  TopicDocumentMappingRecordsADL  collection occurred.
+$$:LoopNext:
+Loop Through: [a209j000000n1weAAA,a209j000000n1wfAAA,a209j000000o1qXAAQ,a209j000000o1tlAAA,a209j000000o1ybAAA,a209j000000o20DAAQ,a209j000000o23RAAQ,a209j000000o28HAAQ]
+Iteration: 7
+Current iteration item: a209j000000o28HAAQ
+
+
+Assignment: Assign Document Ids
+1 variable was updated.
+{!DocumentIds} Add {!Loop_through_Brs_Records.Primary_Document__c}
+Result
+{!DocumentIds} = "[a1z9j000007kOo5AAE,a1z9j000007kOphAAE,a1z9j000007vi3VAAQ,a1z9j000007kavhAAA,a1z9j000007kb6zAAA,a1z9j000007kb0XAAQ,a1z9j000007kaxJAAQ,a1z9j000007kZJjAAM]"
+
+
+Loop: Loop through Brs Records
+Loop was completed.
+$$:LoopEnd:
+End Loop.
+
+
+Get Records: Get related document details records
+One or more  Document_Detail__c  records were retrieved.
+Find all Document_Detail__c records where:
+Id In {!DocumentIds} ([a1z9j000007kOo5AAE,a1z9j000007kOphAAE,a1z9j000007vi3VAAQ,a1z9j000007kavhAAA,a1z9j000007kb6zAAA,a1z9j000007kb0XAAQ,a1z9j000007kaxJAAQ,a1z9j000007kZJjAAM])
+Store the values of these fields in Get_related_document_details_records: Data_Cloud_File_Path__c, Id
+Result
+Successfully found records.
+SOQL queries: 1 out of 100
+,SOQL query rows: 8 out of 50000
+
+
+Loop: Loop through Document detail records
+Iteration  0  of the loop through the  Get_related_document_details_records  collection occurred.
+$$:LoopNext:
+Loop Through: [a1z9j000007kOo5AAE,a1z9j000007kOphAAE,a1z9j000007kZJjAAM,a1z9j000007kavhAAA,a1z9j000007kaxJAAQ,a1z9j000007kb0XAAQ,a1z9j000007kb6zAAA,a1z9j000007vi3VAAQ]
+Iteration: 0
+Current iteration item: a1z9j000007kOo5AAE
+
+
+Assignment: Assign Data cloud file path
+1 variable was updated.
+{!DCFilePaths} Add {!Loop_through_Document_detail_records.Data_Cloud_File_Path__c}
+Result
+{!DCFilePaths} = "[1JD9j000001btWPGAY/Accumulation Product Disclosure Statement.pdf]"
+
+
+Loop: Loop through Document detail records
+Iteration  1  of the loop through the  Get_related_document_details_records  collection occurred.
+$$:LoopNext:
+Loop Through: [a1z9j000007kOo5AAE,a1z9j000007kOphAAE,a1z9j000007kZJjAAM,a1z9j000007kavhAAA,a1z9j000007kaxJAAQ,a1z9j000007kb0XAAQ,a1z9j000007kb6zAAA,a1z9j000007vi3VAAQ]
+Iteration: 1
+Current iteration item: a1z9j000007kOphAAE
+
+
+Assignment: Assign Data cloud file path
+1 variable was updated.
+{!DCFilePaths} Add {!Loop_through_Document_detail_records.Data_Cloud_File_Path__c}
+Result
+{!DCFilePaths} = "[1JD9j000001btWPGAY/Accumulation Product Disclosure Statement.pdf,1JD9j000001btWPGAY/Brighter Super Investment and Fees Guide.pdf]"
+
+
+Loop: Loop through Document detail records
+Iteration  2  of the loop through the  Get_related_document_details_records  collection occurred.
+$$:LoopNext:
+Loop Through: [a1z9j000007kOo5AAE,a1z9j000007kOphAAE,a1z9j000007kZJjAAM,a1z9j000007kavhAAA,a1z9j000007kaxJAAQ,a1z9j000007kb0XAAQ,a1z9j000007kb6zAAA,a1z9j000007vi3VAAQ]
+Iteration: 2
+Current iteration item: a1z9j000007kZJjAAM
+
+
+Assignment: Assign Data cloud file path
+1 variable was updated.
+{!DCFilePaths} Add {!Loop_through_Document_detail_records.Data_Cloud_File_Path__c}
+Result
+{!DCFilePaths} = "[1JD9j000001btWPGAY/Accumulation Product Disclosure Statement.pdf,1JD9j000001btWPGAY/Brighter Super Investment and Fees Guide.pdf,1JD9j000001btWPGAY/Temporary residents leaving Australia _ Brighter Super.pdf]"
+
+
+Loop: Loop through Document detail records
+Iteration  3  of the loop through the  Get_related_document_details_records  collection occurred.
+$$:LoopNext:
+Loop Through: [a1z9j000007kOo5AAE,a1z9j000007kOphAAE,a1z9j000007kZJjAAM,a1z9j000007kavhAAA,a1z9j000007kaxJAAQ,a1z9j000007kb0XAAQ,a1z9j000007kb6zAAA,a1z9j000007vi3VAAQ]
+Iteration: 3
+Current iteration item: a1z9j000007kavhAAA
+
+
+Assignment: Assign Data cloud file path
+1 variable was updated.
+{!DCFilePaths} Add {!Loop_through_Document_detail_records.Data_Cloud_File_Path__c}
+Result
+{!DCFilePaths} = "[1JD9j000001btWPGAY/Accumulation Product Disclosure Statement.pdf,1JD9j000001btWPGAY/Brighter Super Investment and Fees Guide.pdf,1JD9j000001btWPGAY/Temporary residents leaving Australia _ Brighter Super.pdf,1JD9j000001btWPGAY/Family law and superannuation info sheet _ Brighter Super.pdf]"
+
+
+Loop: Loop through Document detail records
+Iteration  4  of the loop through the  Get_related_document_details_records  collection occurred.
+$$:LoopNext:
+Loop Through: [a1z9j000007kOo5AAE,a1z9j000007kOphAAE,a1z9j000007kZJjAAM,a1z9j000007kavhAAA,a1z9j000007kaxJAAQ,a1z9j000007kb0XAAQ,a1z9j000007kb6zAAA,a1z9j000007vi3VAAQ]
+Iteration: 4
+Current iteration item: a1z9j000007kaxJAAQ
+
+
+Assignment: Assign Data cloud file path
+1 variable was updated.
+{!DCFilePaths} Add {!Loop_through_Document_detail_records.Data_Cloud_File_Path__c}
+Result
+{!DCFilePaths} = "[1JD9j000001btWPGAY/Accumulation Product Disclosure Statement.pdf,1JD9j000001btWPGAY/Brighter Super Investment and Fees Guide.pdf,1JD9j000001btWPGAY/Temporary residents leaving Australia _ Brighter Super.pdf,1JD9j000001btWPGAY/Family law and superannuation info sheet _ Brighter Super.pdf,1JD9j000001btWPGAY/Redundancy and your super info sheet _ Brighter Super.pdf]"
+
+
+Loop: Loop through Document detail records
+Iteration  5  of the loop through the  Get_related_document_details_records  collection occurred.
+$$:LoopNext:
+Loop Through: [a1z9j000007kOo5AAE,a1z9j000007kOphAAE,a1z9j000007kZJjAAM,a1z9j000007kavhAAA,a1z9j000007kaxJAAQ,a1z9j000007kb0XAAQ,a1z9j000007kb6zAAA,a1z9j000007vi3VAAQ]
+Iteration: 5
+Current iteration item: a1z9j000007kb0XAAQ
+
+
+Assignment: Assign Data cloud file path
+1 variable was updated.
+{!DCFilePaths} Add {!Loop_through_Document_detail_records.Data_Cloud_File_Path__c}
+Result
+{!DCFilePaths} = "[1JD9j000001btWPGAY/Accumulation Product Disclosure Statement.pdf,1JD9j000001btWPGAY/Brighter Super Investment and Fees Guide.pdf,1JD9j000001btWPGAY/Temporary residents leaving Australia _ Brighter Super.pdf,1JD9j000001btWPGAY/Family law and superannuation info sheet _ Brighter Super.pdf,1JD9j000001btWPGAY/Redundancy and your super info sheet _ Brighter Super.pdf,1JD9j000001btWPGAY/Higher paid local government employee contributions _ Brighter Super.pdf]"
+
+
+Loop: Loop through Document detail records
+Iteration  6  of the loop through the  Get_related_document_details_records  collection occurred.
+$$:LoopNext:
+Loop Through: [a1z9j000007kOo5AAE,a1z9j000007kOphAAE,a1z9j000007kZJjAAM,a1z9j000007kavhAAA,a1z9j000007kaxJAAQ,a1z9j000007kb0XAAQ,a1z9j000007kb6zAAA,a1z9j000007vi3VAAQ]
+Iteration: 6
+Current iteration item: a1z9j000007kb6zAAA
+
+
+Assignment: Assign Data cloud file path
+1 variable was updated.
+{!DCFilePaths} Add {!Loop_through_Document_detail_records.Data_Cloud_File_Path__c}
+Result
+{!DCFilePaths} = "[1JD9j000001btWPGAY/Accumulation Product Disclosure Statement.pdf,1JD9j000001btWPGAY/Brighter Super Investment and Fees Guide.pdf,1JD9j000001btWPGAY/Temporary residents leaving Australia _ Brighter Super.pdf,1JD9j000001btWPGAY/Family law and superannuation info sheet _ Brighter Super.pdf,1JD9j000001btWPGAY/Redundancy and your super info sheet _ Brighter Super.pdf,1JD9j000001btWPGAY/Higher paid local government employee contributions _ Brighter Super.pdf,1JD9j000001btWPGAY/Higher paid employee contributions information for payroll _ Brighter Super.pdf]"
+
+
+Loop: Loop through Document detail records
+Iteration  7  of the loop through the  Get_related_document_details_records  collection occurred.
+$$:LoopNext:
+Loop Through: [a1z9j000007kOo5AAE,a1z9j000007kOphAAE,a1z9j000007kZJjAAM,a1z9j000007kavhAAA,a1z9j000007kaxJAAQ,a1z9j000007kb0XAAQ,a1z9j000007kb6zAAA,a1z9j000007vi3VAAQ]
+Iteration: 7
+Current iteration item: a1z9j000007vi3VAAQ
+
+
+Assignment: Assign Data cloud file path
+1 variable was updated.
+{!DCFilePaths} Add {!Loop_through_Document_detail_records.Data_Cloud_File_Path__c}
+Result
+{!DCFilePaths} = "[1JD9j000001btWPGAY/Accumulation Product Disclosure Statement.pdf,1JD9j000001btWPGAY/Brighter Super Investment and Fees Guide.pdf,1JD9j000001btWPGAY/Temporary residents leaving Australia _ Brighter Super.pdf,1JD9j000001btWPGAY/Family law and superannuation info sheet _ Brighter Super.pdf,1JD9j000001btWPGAY/Redundancy and your super info sheet _ Brighter Super.pdf,1JD9j000001btWPGAY/Higher paid local government employee contributions _ Brighter Super.pdf,1JD9j000001btWPGAY/Higher paid employee contributions information for payroll _ Brighter Super.pdf,1JD9j000001btWPGAY/Brighter Super Accumulation Target Market Determination (TMD).pdf]"
+
+
+Loop: Loop through Document detail records
+Loop was completed.
+$$:LoopEnd:
+End Loop.
+
+
+Decision: Check if KA Record Exists
+" Yes_KA_Records " outcome was executed.
+$$:OutcomeExecuted:Yes_KA_Records
+Outcome executed: Yes_KA_Records
+Outcome conditions: 
+1. {!TopicDocumentMappingRecordsKA} ([Topic_Document_Mapping__c (a209j000000oLKbAAM),Topic_Document_Mapping__c (a209j000000oLKcAAM),Topic_Document_Mapping__c (a209j000000oLKdAAM),Topic_Document_Mapping__c (a209j000000oLKeAAM),Topic_Document_Mapping__c (a209j000000oLKfAAM),Topic_Document_Mapping__c (a209j000000oLKgAAM),Topic_Document_Mapping__c (a209j000000oLKhAAM),Topic_Document_Mapping__c (a209j000000oLKiAAM),Topic_Document_Mapping__c (a209j000000oLKjAAM),Topic_Document_Mapping__c (a209j000000oLKkAAM),Topic_Document_Mapping__c (a209j000000oLKlAAM),Topic_Document_Mapping__c (a209j000000oLKmAAM),Topic_Document_Mapping__c (a209j000000oLKnAAM),Topic_Document_Mapping__c (a209j000000oLKoAAM),Topic_Document_Mapping__c (a209j000000oLKpAAM),Topic_Document_Mapping__c (a209j000000oLKqAAM),Topic_Document_Mapping__c (a209j000000oLKrAAM),Topic_Document_Mapping__c (a209j000000oLKsAAM),Topic_Document_Mapping__c (a209j000000oLKtAAM),Topic_Document_Mapping__c (a209j000000oLKuAAM),Topic_Document_Mapping__c (a209j000000oLKvAAM),Topic_Document_Mapping__c (a209j000000oLKwAAM),Topic_Document_Mapping__c (a209j000000oLKxAAM),Topic_Document_Mapping__c (a209j000000oLKyAAM),Topic_Document_Mapping__c (a209j000000oLKzAAM),Topic_Document_Mapping__c (a209j000000oLL0AAM),Topic_Document_Mapping__c (a209j000000oLL1AAM),Topic_Document_Mapping__c (a209j000000oLL2AAM),Topic_Document_Mapping__c (a209j000000oLL3AAM)]) Is null false
+2. {!TopicDocumentMappingRecordsKA} ([Topic_Document_Mapping__c (a209j000000oLKbAAM),Topic_Document_Mapping__c (a209j000000oLKcAAM),Topic_Document_Mapping__c (a209j000000oLKdAAM),Topic_Document_Mapping__c (a209j000000oLKeAAM),Topic_Document_Mapping__c (a209j000000oLKfAAM),Topic_Document_Mapping__c (a209j000000oLKgAAM),Topic_Document_Mapping__c (a209j000000oLKhAAM),Topic_Document_Mapping__c (a209j000000oLKiAAM),Topic_Document_Mapping__c (a209j000000oLKjAAM),Topic_Document_Mapping__c (a209j000000oLKkAAM),Topic_Document_Mapping__c (a209j000000oLKlAAM),Topic_Document_Mapping__c (a209j000000oLKmAAM),Topic_Document_Mapping__c (a209j000000oLKnAAM),Topic_Document_Mapping__c (a209j000000oLKoAAM),Topic_Document_Mapping__c (a209j000000oLKpAAM),Topic_Document_Mapping__c (a209j000000oLKqAAM),Topic_Document_Mapping__c (a209j000000oLKrAAM),Topic_Document_Mapping__c (a209j000000oLKsAAM),Topic_Document_Mapping__c (a209j000000oLKtAAM),Topic_Document_Mapping__c (a209j000000oLKuAAM),Topic_Document_Mapping__c (a209j000000oLKvAAM),Topic_Document_Mapping__c (a209j000000oLKwAAM),Topic_Document_Mapping__c (a209j000000oLKxAAM),Topic_Document_Mapping__c (a209j000000oLKyAAM),Topic_Document_Mapping__c (a209j000000oLKzAAM),Topic_Document_Mapping__c (a209j000000oLL0AAM),Topic_Document_Mapping__c (a209j000000oLL1AAM),Topic_Document_Mapping__c (a209j000000oLL2AAM),Topic_Document_Mapping__c (a209j000000oLL3AAM)]) Is Empty false
+Logic: All conditions must be true (AND)
+
+
+Transform: Retrieve Data Category Names
+Transform  1 source  to  1 target  with  1 transformation .
+Source Data: TopicDocumentMappingRecordsKA (Record Collection)
+[
+  {
+    "Primary_Document__c": null,
+    "Key_Field_Value__c": "Account Information",
+    "Key_Field_API_Name__c": "Data_Category__c",
+    "Object_API_Name__c": "Knowledge_kav",
+    "Id": "a209j000000oLKbAAM",
+    "Sub_Topic__c": null
+  },
+  {
+    "Primary_Document__c": null,
+    "Key_Field_Value__c": "Accumulation Accounts",
+    "Key_Field_API_Name__c": "Data_Category__c",
+    "Object_API_Name__c": "Knowledge_kav",
+    "Id": "a209j000000oLKcAAM",
+    "Sub_Topic__c": null
+  },
+  {
+    "Primary_Document__c": null,
+    "Key_Field_Value__c": "Case Management",
+    "Key_Field_API_Name__c": "Data_Category__c",
+    "Object_API_Name__c": "Knowledge_kav",
+    "Id": "a209j000000oLKdAAM",
+    "Sub_Topic__c": null
+  },
+  {
+    "Primary_Document__c": null,
+    "Key_Field_Value__c": "Contact Centre",
+    "Key_Field_API_Name__c": "Data_Category__c",
+    "Object_API_Name__c": "Knowledge_kav",
+    "Id": "a209j000000oLKeAAM",
+    "Sub_Topic__c": null
+  },
+  {
+    "Primary_Document__c": null,
+    "Key_Field_Value__c": "Contribution Caps",
+    "Key_Field_API_Name__c": "Data_Category__c",
+    "Object_API_Name__c": "Knowledge_kav",
+    "Id": "a209j000000oLKfAAM",
+    "Sub_Topic__c": null
+  },
+  {
+    "Primary_Document__c": null,
+    "Key_Field_Value__c": "Contributions",
+    "Key_Field_API_Name__c": "Data_Category__c",
+    "Object_API_Name__c": "Knowledge_kav",
+    "Id": "a209j000000oLKgAAM",
+    "Sub_Topic__c": null
+  },
+  {
+    "Primary_Document__c": null,
+    "Key_Field_Value__c": "Defined Benefit Products",
+    "Key_Field_API_Name__c": "Data_Category__c",
+    "Object_API_Name__c": "Knowledge_kav",
+    "Id": "a209j000000oLKhAAM",
+    "Sub_Topic__c": null
+  },
+  {
+    "Primary_Document__c": null,
+    "Key_Field_Value__c": "Early Release Process",
+    "Key_Field_API_Name__c": "Data_Category__c",
+    "Object_API_Name__c": "Knowledge_kav",
+    "Id": "a209j000000oLKiAAM",
+    "Sub_Topic__c": null
+  },
+  {
+    "Primary_Document__c": null,
+    "Key_Field_Value__c": "Employee Setup",
+    "Key_Field_API_Name__c": "Data_Category__c",
+    "Object_API_Name__c": "Knowledge_kav",
+    "Id": "a209j000000oLKjAAM",
+    "Sub_Topic__c": null
+  },
+  {
+    "Primary_Document__c": null,
+    "Key_Field_Value__c": "Employer Contribution Returns",
+    "Key_Field_API_Name__c": "Data_Category__c",
+    "Object_API_Name__c": "Knowledge_kav",
+    "Id": "a209j000000oLKkAAM",
+    "Sub_Topic__c": null
+  },
+  {
+    "Primary_Document__c": null,
+    "Key_Field_Value__c": "Employer Maintenance",
+    "Key_Field_API_Name__c": "Data_Category__c",
+    "Object_API_Name__c": "Knowledge_kav",
+    "Id": "a209j000000oLKlAAM",
+    "Sub_Topic__c": null
+  },
+  {
+    "Primary_Document__c": null,
+    "Key_Field_Value__c": "Escalations",
+    "Key_Field_API_Name__c": "Data_Category__c",
+    "Object_API_Name__c": "Knowledge_kav",
+    "Id": "a209j000000oLKmAAM",
+    "Sub_Topic__c": null
+  },
+  {
+    "Primary_Document__c": null,
+    "Key_Field_Value__c": "Fees",
+    "Key_Field_API_Name__c": "Data_Category__c",
+    "Object_API_Name__c": "Knowledge_kav",
+    "Id": "a209j000000oLKnAAM",
+    "Sub_Topic__c": null
+  },
+  {
+    "Primary_Document__c": null,
+    "Key_Field_Value__c": "Member",
+    "Key_Field_API_Name__c": "Data_Category__c",
+    "Object_API_Name__c": "Knowledge_kav",
+    "Id": "a209j000000oLKoAAM",
+    "Sub_Topic__c": null
+  },
+  {
+    "Primary_Document__c": null,
+    "Key_Field_Value__c": "Operations",
+    "Key_Field_API_Name__c": "Data_Category__c",
+    "Object_API_Name__c": "Knowledge_kav",
+    "Id": "a209j000000oLKpAAM",
+    "Sub_Topic__c": null
+  },
+  {
+    "Primary_Document__c": null,
+    "Key_Field_Value__c": "Pension Accounts",
+    "Key_Field_API_Name__c": "Data_Category__c",
+    "Object_API_Name__c": "Knowledge_kav",
+    "Id": "a209j000000oLKqAAM",
+    "Sub_Topic__c": null
+  },
+  {
+    "Primary_Document__c": null,
+    "Key_Field_Value__c": "Performance",
+    "Key_Field_API_Name__c": "Data_Category__c",
+    "Object_API_Name__c": "Knowledge_kav",
+    "Id": "a209j000000oLKrAAM",
+    "Sub_Topic__c": null
+  },
+  {
+    "Primary_Document__c": null,
+    "Key_Field_Value__c": "Personal Contributions",
+    "Key_Field_API_Name__c": "Data_Category__c",
+    "Object_API_Name__c": "Knowledge_kav",
+    "Id": "a209j000000oLKsAAM",
+    "Sub_Topic__c": null
+  },
+  {
+    "Primary_Document__c": null,
+    "Key_Field_Value__c": "Risk",
+    "Key_Field_API_Name__c": "Data_Category__c",
+    "Object_API_Name__c": "Knowledge_kav",
+    "Id": "a209j000000oLKtAAM",
+    "Sub_Topic__c": null
+  },
+  {
+    "Primary_Document__c": null,
+    "Key_Field_Value__c": "Rollover In",
+    "Key_Field_API_Name__c": "Data_Category__c",
+    "Object_API_Name__c": "Knowledge_kav",
+    "Id": "a209j000000oLKuAAM",
+    "Sub_Topic__c": null
+  }
+]
+Target Data: Retrieve_Data_Category_Names (Text Collection)
+[
+  "Account Information",
+  "Accumulation Accounts",
+  "Case Management",
+  "Contact Centre",
+  "Contribution Caps",
+  "Contributions",
+  "Defined Benefit Products",
+  "Early Release Process",
+  "Employee Setup",
+  "Employer Contribution Returns",
+  "Employer Maintenance",
+  "Escalations",
+  "Fees",
+  "Member",
+  "Operations",
+  "Pension Accounts",
+  "Performance",
+  "Personal Contributions",
+  "Risk",
+  "Rollover In"
+]
+
+
+Get Records: Get Data Category Ids
+One or more  DataCategoryCustom__dlm  records were retrieved.
+Find all DataCategoryCustom__dlm records where:
+MasterLabel__c In {!Retrieve_Data_Category_Names} ([Account Information,Accumulation Accounts,Case Management,Contact Centre,Contribution Caps,Contributions,Defined Benefit Products,Early Release Process,Employee Setup,Employer Contribution Returns,Employer Maintenance,Escalations,Fees,Member,Operations,Pension Accounts,Performance,Personal Contributions,Risk,Rollover In,Rollover Out,Rollover Requirements,Service Levels,Super Clearing House,Super Clearing House Access,Super Clearing House Errors,Switching,Tax Deduction Notices,Unit Pricing])
+Store the values of these fields in Get_Data_Category_Ids: Id, Id__c
+Result
+Successfully found records.
+SOQL queries: 1 out of 100
+,SOQL query rows: 29 out of 50000
+
+
+Decision: Data Category Record Exists?
+" Yes_DataCategoryRecords " outcome was executed.
+$$:OutcomeExecuted:Yes_DataCategoryRecords
+Outcome executed: Yes_DataCategoryRecords
+Outcome conditions: 
+1. {!Get_Data_Category_Ids} ([DataCategoryCustom__dlm (q8A000xgzXSX1dCEQT),DataCategoryCustom__dlm (q8A000peW9eUQD7EIO),DataCategoryCustom__dlm (q8A000FGSFuGa1uE4C),DataCategoryCustom__dlm (q8A0000xHLivkfYEYQ),DataCategoryCustom__dlm (q8A000Qp2oHYqEVEC1),DataCategoryCustom__dlm (q8A0007VfCLBNbqEUH),DataCategoryCustom__dlm (q8A000OV4pxihAwEGI),DataCategoryCustom__dlm (q8A000fxfG7kriHEQQ),DataCategoryCustom__dlm (q8A000gzkA4IWi6EQG),DataCategoryCustom__dlm (q8A0000CJEnMk4yE2C),DataCategoryCustom__dlm (q8A000i9Yo3nJbNEIU),DataCategoryCustom__dlm (q8A000P9ih4ziaPECQ),DataCategoryCustom__dlm (q8A000dF489vCylEEE),DataCategoryCustom__dlm (q8A0002AE5zwEghEME),DataCategoryCustom__dlm (q8A000tRClhLsIgEMK),DataCategoryCustom__dlm (q8A000Bh0GIn5VLESZ),DataCategoryCustom__dlm (q8A0008eYj3xGxhEIE),DataCategoryCustom__dlm (q8A000ZWvc5FdmeEGC),DataCategoryCustom__dlm (q8A000Uke2hXRxJECW),DataCategoryCustom__dlm (q8A000v9jbdPUfAEAW),DataCategoryCustom__dlm (q8A000ZcAl6vTUaEKM),DataCategoryCustom__dlm (q8A000aAGlODvm4EMD),DataCategoryCustom__dlm (q8A000A6wbd4QgGECU),DataCategoryCustom__dlm (q8A000R1pyVZvFaECL),DataCategoryCustom__dlm (q8A000YZsNQzZXeEWN),DataCategoryCustom__dlm (q8A000AGrUfI78IEWS),DataCategoryCustom__dlm (q8A000Mo7ynKRVxECO),DataCategoryCustom__dlm (q8A0005Zmttn7WGEEY),DataCategoryCustom__dlm (q8A000CpRX75FKPE02)]) Is Empty false
+2. {!Get_Data_Category_Ids} ([DataCategoryCustom__dlm (q8A000xgzXSX1dCEQT),DataCategoryCustom__dlm (q8A000peW9eUQD7EIO),DataCategoryCustom__dlm (q8A000FGSFuGa1uE4C),DataCategoryCustom__dlm (q8A0000xHLivkfYEYQ),DataCategoryCustom__dlm (q8A000Qp2oHYqEVEC1),DataCategoryCustom__dlm (q8A0007VfCLBNbqEUH),DataCategoryCustom__dlm (q8A000OV4pxihAwEGI),DataCategoryCustom__dlm (q8A000fxfG7kriHEQQ),DataCategoryCustom__dlm (q8A000gzkA4IWi6EQG),DataCategoryCustom__dlm (q8A0000CJEnMk4yE2C),DataCategoryCustom__dlm (q8A000i9Yo3nJbNEIU),DataCategoryCustom__dlm (q8A000P9ih4ziaPECQ),DataCategoryCustom__dlm (q8A000dF489vCylEEE),DataCategoryCustom__dlm (q8A0002AE5zwEghEME),DataCategoryCustom__dlm (q8A000tRClhLsIgEMK),DataCategoryCustom__dlm (q8A000Bh0GIn5VLESZ),DataCategoryCustom__dlm (q8A0008eYj3xGxhEIE),DataCategoryCustom__dlm (q8A000ZWvc5FdmeEGC),DataCategoryCustom__dlm (q8A000Uke2hXRxJECW),DataCategoryCustom__dlm (q8A000v9jbdPUfAEAW),DataCategoryCustom__dlm (q8A000ZcAl6vTUaEKM),DataCategoryCustom__dlm (q8A000aAGlODvm4EMD),DataCategoryCustom__dlm (q8A000A6wbd4QgGECU),DataCategoryCustom__dlm (q8A000R1pyVZvFaECL),DataCategoryCustom__dlm (q8A000YZsNQzZXeEWN),DataCategoryCustom__dlm (q8A000AGrUfI78IEWS),DataCategoryCustom__dlm (q8A000Mo7ynKRVxECO),DataCategoryCustom__dlm (q8A0005Zmttn7WGEEY),DataCategoryCustom__dlm (q8A000CpRX75FKPE02)]) Is null false
+Logic: All conditions must be true (AND)
+
+
+Transform: Transform DataCategoryCustom__c Records
+Transform  1 source  to  1 target  with  1 transformation .
+Source Data: Get_Data_Category_Ids (Record Collection)
+[
+  {
+    "Id": "q8A000xgzXSX1dCEQT",
+    "Id__c": "02n9j000001eWqRAAU"
+  },
+  {
+    "Id": "q8A000peW9eUQD7EIO",
+    "Id__c": "02n9j000001eWqKAAU"
+  },
+  {
+    "Id": "q8A000FGSFuGa1uE4C",
+    "Id__c": "02n9j000001eWwjAAE"
+  },
+  {
+    "Id": "q8A0000xHLivkfYEYQ",
+    "Id__c": "02n9j000001eWwlAAE"
+  },
+  {
+    "Id": "q8A000Qp2oHYqEVEC1",
+    "Id__c": "02n9j000001eWyMAAU"
+  },
+  {
+    "Id": "q8A0007VfCLBNbqEUH",
+    "Id__c": "02n9j000001eTXGAA2"
+  },
+  {
+    "Id": "q8A000OV4pxihAwEGI",
+    "Id__c": "02n9j000001eX9dAAE"
+  },
+  {
+    "Id": "q8A000fxfG7kriHEQQ",
+    "Id__c": "02n9j000001eX4jAAE"
+  },
+  {
+    "Id": "q8A000gzkA4IWi6EQG",
+    "Id__c": "02n9j000001eTXHAA2"
+  },
+  {
+    "Id": "q8A0000CJEnMk4yE2C",
+    "Id__c": "02n9j000001eX4nAAE"
+  },
+  {
+    "Id": "q8A000i9Yo3nJbNEIU",
+    "Id__c": "02n9j000001eTXIAA2"
+  },
+  {
+    "Id": "q8A000P9ih4ziaPECQ",
+    "Id__c": "02n9j000001eWqPAAU"
+  },
+  {
+    "Id": "q8A000dF489vCylEEE",
+    "Id__c": "02n9j000001eXBBAA2"
+  },
+  {
+    "Id": "q8A0002AE5zwEghEME",
+    "Id__c": "02n9j000001eWwgAAE"
+  },
+  {
+    "Id": "q8A000tRClhLsIgEMK",
+    "Id__c": "02n9j000001eWwiAAE"
+  },
+  {
+    "Id": "q8A000Bh0GIn5VLESZ",
+    "Id__c": "02n9j000001eWwkAAE"
+  },
+  {
+    "Id": "q8A0008eYj3xGxhEIE",
+    "Id__c": "02n9j000001eWyJAAU"
+  },
+  {
+    "Id": "q8A000ZWvc5FdmeEGC",
+    "Id__c": "02n9j000001eX9qAAE"
+  },
+  {
+    "Id": "q8A000Uke2hXRxJECW",
+    "Id__c": "02n9j000001eX4lAAE"
+  },
+  {
+    "Id": "q8A000v9jbdPUfAEAW",
+    "Id__c": "02n9j000001eX4mAAE"
+  }
+]
+Target Data: Transform_DataCategoryCustom_c_Records (Text Collection)
+[
+  "02n9j000001eWqRAAU",
+  "02n9j000001eWqKAAU",
+  "02n9j000001eWwjAAE",
+  "02n9j000001eWwlAAE",
+  "02n9j000001eWyMAAU",
+  "02n9j000001eTXGAA2",
+  "02n9j000001eX9dAAE",
+  "02n9j000001eX4jAAE",
+  "02n9j000001eTXHAA2",
+  "02n9j000001eX4nAAE",
+  "02n9j000001eTXIAA2",
+  "02n9j000001eWqPAAU",
+  "02n9j000001eXBBAA2",
+  "02n9j000001eWwgAAE",
+  "02n9j000001eWwiAAE",
+  "02n9j000001eWwkAAE",
+  "02n9j000001eWyJAAU",
+  "02n9j000001eX9qAAE",
+  "02n9j000001eX4lAAE",
+  "02n9j000001eX4mAAE"
+]
+
+
+Assignment: Assign Each Data Category Id
+1 variable was updated.
+{!KADataCategories} Equals {!Transform_DataCategoryCustom_c_Records}
+Result
+{!KADataCategories} = "[02n9j000001eWqRAAU,02n9j000001eWqKAAU,02n9j000001eWwjAAE,02n9j000001eWwlAAE,02n9j000001eWyMAAU,02n9j000001eTXGAA2,02n9j000001eX9dAAE,02n9j000001eX4jAAE,02n9j000001eTXHAA2,02n9j000001eX4nAAE,02n9j000001eTXIAA2,02n9j000001eWqPAAU,02n9j000001eXBBAA2,02n9j000001eWwgAAE,02n9j000001eWwiAAE,02n9j000001eWwkAAE,02n9j000001eWyJAAU,02n9j000001eX9qAAE,02n9j000001eX4lAAE,02n9j000001eX4mAAE,02n9j000001eX6LAAU,02n9j000001eWyHAAU,02n9j000001eX9pAAE,02n9j000001eVuAAAU,02n9j000001eVvlAAE,02n9j000001eVvoAAE,02n9j000001eWwfAAE,02n9j000001eWqNAAU,02n9j000001eX4kAAE]"
+
+
+Transaction Committed
+Any records that the flow was ready to create, update, or delete were committed to the database.
+
+
+How the Interview Finished
+The flow interview ran for 1.69 seconds and finished on 21 July 2026 at 7:47 pm.
