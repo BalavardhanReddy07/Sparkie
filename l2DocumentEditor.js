@@ -1,250 +1,269 @@
-import { api, LightningElement, track } from "lwc";
-import getAllEmployers from '@salesforce/apex/AF_InsuranceMemberInput.getAllEmployers';
+public with sharing class AF_ADLHybridSearchService {
 
-export default class InsuranceMemberInput extends LightningElement {
+    private static final String ADL_SEARCH_PROMPT_TEMPLATE_API_NAME = 'AF_ADL_KA_Search_Template';
+    private static final String GET_JSON_FILEPATHS_FLOW_API_NAME = 'AF_Get_ADL_JSON_File_Paths';
 
-    // ─── API: readOnly ───────────────────────────────────────────────────────
-    @api
-    get readOnly() { return this._readOnly; }
-    set readOnly(value) { this._readOnly = value; }
-    _readOnly = false;
+    public class Request {
+        
+        @InvocableVariable(required=false)
+        public String employerName;
+        
+        @InvocableVariable(required=false)
+        public String searchQuery;
+        
+        @InvocableVariable(required=false)
+        public Boolean isEmployerSelected;
 
-    // ─── API: value (Agentforce state management) ────────────────────────────
-    @api
-    get value() { return this._value; }
-    set value(value) {
-        this._value = value;
-        if (value) {
-            this.existingMember = value.existingMember || false;
-            this.isSelected     = value.existingMember || false;
-            this.memberId       = value.memberId       || "";
-            this.selectedSchemeCategory = value.selectedSchemeCategory || "";
-            this.selectedAccountNumber  = value.selectedAccountNumber  || "";
-            this.selectedEmployer = value.selectedEmployer || "";
-            this.memberSummary = value.memberSummary || "";
-            this.products = value.products || [];
-        }
-    }
-    _value;
-    _dispatchDelay; // Tracks the debounce timeout to prevent Agentforce race conditions
+        @InvocableVariable(required=false)
+        public Boolean isExistingMember;
 
-    // ─── Internal State ──────────────────────────────────────────────────────
-    existingMember  = false;
-    memberId        = "";
-    isSelected      = false;
+        @InvocableVariable(required=false)
+        public Boolean isInsuranceSelected;
 
-    @track memberSummary  = "";      
-    @track products       = [];      
-    @track selectedSchemeCategory = "";
-    @track selectedAccountNumber = ""; // Unique radio value — the account identifier
-    
-    @track selectedEmployer = "";
-    @track employerOptions = [];
-    
-    // Store the pre-fetched employers mapped by category
-    employerMap = {}; 
-    
-    isEmployerLoading = false;
-    isLoading    = false;
-    runFlow      = false;
-    errorMessage = "";
+        @InvocableVariable(required=false)
+        public Boolean isProductSelected;
 
-    // ─── Computed helpers ────────────────────────────────────────────────────
-    get flowInputVariables() {
-        return [{ name: "memberId", type: "String", value: this.memberId }];
+        @InvocableVariable(required=false)
+        public String schemeCategory;
+
     }
 
-    get isExistingMember() { return this.existingMember === true; }
-    get isFetchDisabled() { return !this.memberId || this.memberId.trim() === "" || this.isLoading || this.readOnly; }
-    get hasMemberSummary() { return !!this.memberSummary; }
-    get hasProducts() { return this.products && this.products.length > 0; }
-    get hasEmployers() { return this.employerOptions && this.employerOptions.length > 0; }
+    public class Response {
+        @InvocableVariable(description='Resolved prompt passed to Agentforce reasoning engine')
+        public String Data;
 
-    get productOptions() {
-        return this.products.map((item) => {
-            const mainParts = item.split(" -- ");
-            const displayPart = mainParts[0] ? mainParts[0].trim() : item;
-            const schemeCategory = mainParts[1] ? mainParts[1].trim() : "";
-            // Use the account identifier (displayPart) as the unique radio value
-            // so that two accounts sharing the same scheme category stay independently selectable.
-            return { label: displayPart, value: displayPart, schemeCategory: schemeCategory };
-        });
-    }   
-
-    // ─── Step 1: Toggle member-specific button ───────────────────────────────
-    handleExistingMemberChange() {
-        this.isSelected     = !this.isSelected;
-        this.existingMember = this.isSelected;
-
-        if (!this.existingMember) {
-            this.resetState();
-        }
-        this.dispatchValueChangeEvent();
+        @InvocableVariable(description='Citation sources for inline references')
+        public AiCopilot.GenAiCitationInput sources;
     }
 
-    // ─── Step 2: Member ID input change ─────────────────────────────────────
-    handleInputChange(event) {
-        event.stopPropagation();
-        this[event.target.name] = event.target.value;
-        this.resetState();
-        this.dispatchValueChangeEvent();
-    }
-    
-    // Helper to clear out child state when ID or Member toggle changes
-    resetState() {
-        this.memberSummary   = "";
-        this.products        = [];
-        this.selectedSchemeCategory = "";
-        this.selectedAccountNumber  = "";
-        this.selectedEmployer = "";
-        this.employerOptions = [];
-        this.employerMap     = {};
-        this.runFlow         = false;
-        this.errorMessage    = "";
+    public static String GetJsonFilePaths(List<Request> requests){
+        Map<String, Object> flowInputs = new Map<String, Object>{
+            'EmployerName' => requests[0].employerName,
+            'IsEmployerSelected' => requests[0].isEmployerSelected,
+            'IsExistingMember' => requests[0].isExistingMember,
+            'IsInsuranceSelected' => requests[0].isInsuranceSelected,
+            'IsProductSelected' => requests[0].isProductSelected,
+            'SchemeCategory' => requests[0].schemeCategory
+
+        };
+        Flow.Interview flowInterview = Flow.Interview.createInterview(GET_JSON_FILEPATHS_FLOW_API_NAME, flowInputs);
+        flowInterview.start();
+        system.debug('flowInterview.getVariableValue(DCFilePaths)'+ flowInterview.getVariableValue('DCFilePaths'));
+        return JSON.serialize(flowInterview.getVariableValue('DCFilePaths'));
     }
 
-    // ─── Step 3: Launch the flow to fetch member summary ────────────────────
-    handleGetSummary() {
-        if (!this.memberId || this.memberId.trim() === "") return;
-
-        this.isLoading    = true;
-        this.resetState();
-
-        // eslint-disable-next-line @lwc/lwc/no-async-operation
-        setTimeout(() => { this.runFlow = true; }, 0);
+    @InvocableMethod(label='Agentforce Data Library Search Service')
+    public static List<Response> SearchRetriever(List<Request> requests) {
+        List<String> paths = (List<String>) JSON.deserialize(GetJsonFilePaths(requests), List<String>.class);
+        System.debug('paths: ' + paths);
+        String preFilterConditions = buildFilePathFilter(paths);
+        System.debug('preFilterConditions: ' + preFilterConditions);
+        List<Response> responses = new List<Response>();
+        responses.add(ExecuteSearch(requests[0].searchQuery, preFilterConditions));
+        return responses;
     }
 
-    // ─── Step 3b: Handle flow completion & PRE-FETCH EMPLOYERS ───────────────
-    async handleFlowStatusChange(event) {
-        const { status, outputVariables } = event.detail;
+    public static Response ExecuteSearch(String searchQuery, String preFilterConditions) {
+        Response executionResponse = new Response();
 
-        if (status === "FINISHED" || status === "FINISHED_SCREEN") {
-            this.isLoading = false;
-            this.runFlow   = false;
+        String sqlQuery =
+            'SELECT c.Chunk__c, d.FilePath__c, h.hybrid_score__c, h.keyword_score__c, h.vector_score__c FROM ' +
+            'hybrid_search(table(ADL_All_Documents_Custom_index__dlm), \'' + searchQuery + '\',' + preFilterConditions + ', 20) AS h ' +
+            'JOIN ADL_All_Documents_Custom_chunk__dlm AS c ON h.SourceRecordId__c = c.RecordId__c ' +
+            'JOIN ADL_All_Documents_L__dlm AS d ON c.SourceRecordId__c = d.FilePath__c ' +
+            'ORDER BY h.hybrid_score__c DESC';
 
-            // 1. Process standard flow outputs
-            if (outputVariables && outputVariables.length > 0) {
-                const summaryVar  = outputVariables.find((v) => v.name === "memberSummaryResponse");
-                const productsVar = outputVariables.find((v) => v.name === "schemeCategoryList");
+        ConnectApi.CdpQueryInput cdpInput = new ConnectApi.CdpQueryInput();
+        cdpInput.sql = sqlQuery;
+        ConnectApi.CdpQueryOutputV2 output = ConnectApi.CdpQuery.queryAnsiSqlV2(cdpInput);
 
-                this.memberSummary = summaryVar ? summaryVar.value : "Summary not available.";
+        Set<String> filePathSet    = new Set<String>();
+        List<List<Object>> rawRows = new List<List<Object>>();
 
-                if (productsVar && productsVar.value) {
-                    let rawValue = productsVar.value;
-                    if (Array.isArray(rawValue)) {
-                        this.products = rawValue;
-                    } else {
-                        rawValue = rawValue.replace(/^\[|\]$/g, "");
-                        this.products = rawValue.split(",").map((p) => p.trim()).filter(Boolean);
-                    }
-                }
-            } else {
-                this.memberSummary = "No summary returned by the flow.";
+        if (output.data != null && !output.data.isEmpty()) {
+            for (ConnectApi.CdpQueryV2Row rowObj : output.data) {
+                List<Object> row = rowObj.rowData;
+                rawRows.add(row);
+                if (row[1] != null) filePathSet.add((String) row[1]);
             }
-            
-            // 2. Pre-Fetch Employers immediately after flow finishes
-            if (this.hasProducts) {
-                this.isEmployerLoading = true;
-                try {
-                    // Extract unique Scheme Category values (NOT the radio value which is now the account number)
-                    const categoriesToFetch = [...new Set(this.productOptions.map(opt => opt.schemeCategory).filter(Boolean))];
-                    
-                    if(categoriesToFetch.length > 0) {
-                        this.employerMap = await getAllEmployers({ schemeCategories: categoriesToFetch });
-                    }
-                } catch (error) {
-                    console.error('Error pre-fetching employers:', error);
-                } finally {
-                    this.isEmployerLoading = false;
-                }
+        }
+
+        // Id added so sourceObjectRecordId shows the document Name in Agentforce citations
+        Map<String, Document_Detail__c> filePathToDocMap = new Map<String, Document_Detail__c>();
+        if (!filePathSet.isEmpty()) {
+            for (Document_Detail__c doc : [
+                SELECT Id, Name, Document_URL__c, Data_Cloud_File_Path__c
+                FROM Document_Detail__c
+                WHERE Data_Cloud_File_Path__c IN :filePathSet
+            ]) {
+                filePathToDocMap.put(doc.Data_Cloud_File_Path__c, doc);
+            }
+        }
+
+        Map<String, List<String>> filePathToChunks = new Map<String, List<String>>();
+        List<String> orderedFilePaths = new List<String>();
+        String formattedContext = '';
+
+
+        /* ====================================================================
+           BEGIN EXISTING FUNCTIONALITY (COMMENTED OUT)
+           Reason: Passing URLs directly into the JSON causes the LLM to format raw 
+                   links inconsistently, which breaks the Agentforce Citation Engine UI.
+           ==================================================================== 
+           
+        List<Map<String, Object>> contextList = new List<Map<String, Object>>();
+
+        for (List<Object> row : rawRows) {
+            String chunk    = (String) row[0];
+            String filePath = (String) row[1];
+            if (filePath == null) continue;
+
+            if (!filePathToChunks.containsKey(filePath)) {
+                filePathToChunks.put(filePath, new List<String>());
+                orderedFilePaths.add(filePath);
+            }
+            filePathToChunks.get(filePath).add(chunk);
+
+            Document_Detail__c doc = filePathToDocMap.get(filePath);
+            contextList.add(new Map<String, Object>{
+                'Name'    => doc != null ? doc.Name : filePath,
+                'URL'     => doc != null ? doc.Document_URL__c : '',
+                'Content' => chunk
+            });
+        }
+
+        formattedContext = JSON.serialize(contextList);
+
+        List<AiCopilot.GenAiSourceReference> sourceRefs = new List<AiCopilot.GenAiSourceReference>();
+
+        for (String filePath : orderedFilePaths) {
+            Document_Detail__c doc = filePathToDocMap.get(filePath);
+            String docUrl   = doc != null ? doc.Document_URL__c : null;
+            String docLabel = doc != null ? doc.Name : filePath;
+
+            List<AiCopilot.GenAiSourceContentInfo> contents = new List<AiCopilot.GenAiSourceContentInfo>();
+            for (String chunk : filePathToChunks.get(filePath)) {
+                contents.add(new AiCopilot.GenAiSourceContentInfo(null, 'ADL_All_Documents_L__dlm', chunk));
             }
 
-            this.dispatchValueChangeEvent();
+            List<AiCopilot.GenAiSourceReferenceInfo> metadata =
+                new List<AiCopilot.GenAiSourceReferenceInfo>{
+                    new AiCopilot.GenAiSourceReferenceInfo(docUrl, null, 'ADL_All_Documents_L__dlm', docLabel)
+                };
 
-        } else if (status === "ERROR") {
-            this.isLoading    = false;
-            this.runFlow      = false;
-            this.errorMessage = "Failed to retrieve member summary. Please try again.";
+            sourceRefs.add(new AiCopilot.GenAiSourceReference(null, contents, metadata));
         }
-    }
-
-    // ─── Step 4: Product selection (Sync UI update) ─────────────────────────
-    handleProductChange(event) {
-        // event.detail.value is now the unique account identifier (displayPart)
-        this.selectedAccountNumber = event.detail.value;
-
-        // Resolve the Scheme Category from the selected account number
-        const matchedOption = this.productOptions.find(opt => opt.value === this.selectedAccountNumber);
-        this.selectedSchemeCategory = matchedOption ? matchedOption.schemeCategory : "";
-
-        this.selectedEmployer = ""; 
-        this.employerOptions = [];
         
-        // Render employer buttons instantly using the pre-fetched map (keyed by Scheme Category)
-        const employers = this.employerMap[this.selectedSchemeCategory] || [];
+           ====================================================================
+           END EXISTING FUNCTIONALITY
+           ==================================================================== */
+
+
+        /* ====================================================================
+           BEGIN NEW FUNCTIONALITY
+           Fix: Group chunks properly, assign a 1-based Source Index, and pass 
+                the index as the Reference ID to guarantee standard citations.
+           ==================================================================== */
         
-        if (employers.length > 0) {
-            this.employerOptions = employers.map(emp => ({
-                label: emp,
-                value: emp,
-                selected: false
-            }));
-        }
+        List<Map<String, Object>> contextList = new List<Map<String, Object>>();
+        List<AiCopilot.GenAiSourceReference> sourceRefs = new List<AiCopilot.GenAiSourceReference>();
 
-        this.dispatchValueChangeEvent();
-    }
+        // 1. Group the chunks by file path first to maintain document order
+        for (List<Object> row : rawRows) {
+            String chunk    = (String) row[0];
+            String filePath = (String) row[1];
+            if (filePath == null) continue;
 
-    // ─── Step 5: Employer Selection handler ─────────────────────────────────
-    handleEmployerSelection(event) {
-        const selectedVal = event.target.dataset.value;
-        this.selectedEmployer = selectedVal;
-
-        // Toggle state visually so only one employer shows as selected
-        this.employerOptions = this.employerOptions.map(emp => ({
-            ...emp,
-            selected: emp.value === selectedVal
-        }));
-        
-        this.dispatchValueChangeEvent();
-    }
-
-    // ─── Core: Dispatch value back to Agentforce (DEBOUNCED) ────────────────
-    dispatchValueChangeEvent() {
-        // Clear the previous timeout if the user rapidly clicks
-        if (this._dispatchDelay) {
-            clearTimeout(this._dispatchDelay);
+            if (!filePathToChunks.containsKey(filePath)) {
+                filePathToChunks.put(filePath, new List<String>());
+                orderedFilePaths.add(filePath);
+            }
+            filePathToChunks.get(filePath).add(chunk);
         }
 
-        // Wait 150ms before firing to prevent Agentforce state from flickering
-        // eslint-disable-next-line @lwc/lwc/no-async-operation
-        this._dispatchDelay = setTimeout(() => {
-            // Keep selectedAccountNumber in _value for internal UI state (radio binding)
-            // but do NOT dispatch it — the Apex InsuranceMemberInput class has no such field.
-            const currentValue = {
-                existingMember:  this.existingMember,
-                memberId:        this.memberId,
-                memberSummary:   this.memberSummary,
-                selectedSchemeCategory: this.selectedSchemeCategory,
-                selectedAccountNumber:  this.selectedAccountNumber, // internal only
-                selectedEmployer: this.selectedEmployer,
-                products: this.products,
-            };
-            this._value = currentValue;
+        // 2. Iterate through ordered paths and build the references with a strict Index
+        Integer sourceIndex = 1; 
+
+        for (String filePath : orderedFilePaths) {
+            Document_Detail__c doc = filePathToDocMap.get(filePath);
+            String docUrl   = doc != null ? doc.Document_URL__c : null;
+            String docLabel = doc != null ? doc.Name : filePath;
+            String docId    = doc != null ? doc.Id : null;
+
+            List<AiCopilot.GenAiSourceContentInfo> contents = new List<AiCopilot.GenAiSourceContentInfo>();
             
-            // Only dispatch fields that exist in the Agentforce Flow/Apex Invocable variables
-            this.dispatchEvent(
-                new CustomEvent("valuechange", {
-                    detail: {
-                        value: {
-                            existingMember:  this.existingMember,
-                            memberId:        this.memberId,
-                            memberSummary:   this.memberSummary,
-                            selectedSchemeCategory: this.selectedSchemeCategory,
-                            selectedEmployer: this.selectedEmployer
-                        },
-                    },
-                })
+            for (String chunk : filePathToChunks.get(filePath)) {
+                // Pass the Source Index to the LLM (e.g. "[1]") instead of the URL.
+                contextList.add(new Map<String, Object>{
+                    'Source_Index' => '[' + sourceIndex + ']', 
+                    'Name'         => docLabel,
+                    'Content'      => chunk
+                });
+
+                contents.add(new AiCopilot.GenAiSourceContentInfo(docId, 'ADL_All_Documents_L__dlm', chunk));
+            }
+
+            List<AiCopilot.GenAiSourceReferenceInfo> metadata =
+                new List<AiCopilot.GenAiSourceReferenceInfo>{
+                    new AiCopilot.GenAiSourceReferenceInfo(docUrl, docId, 'ADL_All_Documents_L__dlm', docLabel)
+                };
+
+            // String.valueOf(sourceIndex) binds the "[1]" from the LLM directly to the URL dropdown UI
+            sourceRefs.add(new AiCopilot.GenAiSourceReference(String.valueOf(sourceIndex), contents, metadata));
+            
+            sourceIndex++;
+        }
+
+        formattedContext = JSON.serialize(contextList);
+
+        /* ====================================================================
+           END NEW FUNCTIONALITY
+           ==================================================================== */
+
+        // Agentforce reasoning engine generates a response from this, citation engine adds [1][2] markers
+        String resolvedPrompt = invokePromptTemplate(searchQuery, formattedContext);
+
+        executionResponse.Data    = resolvedPrompt;
+        executionResponse.sources = new AiCopilot.GenAiCitationInput(resolvedPrompt, sourceRefs);
+
+        return executionResponse;
+    }
+
+    private static String invokePromptTemplate(String searchQuery, String formattedContext) {
+        ConnectApi.EinsteinPromptTemplateGenerationsInput promptInput =
+            new ConnectApi.EinsteinPromptTemplateGenerationsInput();
+
+        Map<String, ConnectApi.WrappedValue> params = new Map<String, ConnectApi.WrappedValue>();
+
+        ConnectApi.WrappedValue qVal = new ConnectApi.WrappedValue();
+        qVal.value = searchQuery;
+        params.put('Input:Question', qVal);
+
+        ConnectApi.WrappedValue cVal = new ConnectApi.WrappedValue();
+        cVal.value = formattedContext;
+        params.put('Input:Context', cVal);
+
+        promptInput.inputParams                      = params;
+        promptInput.isPreview                        = false;
+        promptInput.additionalConfig                 = new ConnectApi.EinsteinLlmAdditionalConfigInput();
+        promptInput.additionalConfig.numGenerations  = 1;
+        promptInput.additionalConfig.applicationName = 'PromptBuilderPreview';
+
+        ConnectApi.EinsteinPromptTemplateGenerationsRepresentation result =
+            ConnectApi.EinsteinLLM.generateMessagesForPromptTemplate(
+                ADL_SEARCH_PROMPT_TEMPLATE_API_NAME,
+                promptInput
             );
-        }, 150);
+
+        return result.prompt;
+    }
+
+    public static String buildFilePathFilter(List<String> filePaths) {
+        if (filePaths == null || filePaths.isEmpty()) return '\'1=1\'';
+        List<String> escaped = new List<String>();
+        for (String fp : filePaths) {
+            escaped.add('\'\'' + fp.replace('\'', '\'\'') + '\'\'');
+        }
+        return '\'' + 'FilePath__c IN (' + String.join(escaped, ', ') + ')' + '\'';
     }
 }
