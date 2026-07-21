@@ -1,11 +1,1 @@
-                    Users:
-                    •	Soma Mishra
-                    •	James Mallon
-                    •	Gavin Ghag
-                     
-                    Access steps:
-                    1.	Check checkbox Unmetered User-Based AI permission under: Permission Set License Assignments
-                    2.	Assign Permission set : Agentforce AI Unmetered User Permission
-                    3.	Assign Permission set: Data Cloud User
-                    4.	Assign Permission set: Prompt Template User
-                    5.	Assign Permission Set: Sparkie Permission Set
+"When citing information, you MUST cite your sources using the exact Source_Index provided in the JSON context (e.g., [1], [2]). Do not write out URLs."
