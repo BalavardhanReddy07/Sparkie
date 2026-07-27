@@ -1,45 +1,13 @@
-SELECT
+Standard Salesforce reporting cannot be utilized for this requirement. The necessary query requires joining multiple Data Cloud (__dlm) objects to capture the complete feedback interaction details, which the standard CRM report builder does not support.
 
-GenAIGatewayRequest__dlm.prompt__c,
+However, the full query is already built, saved, and functioning in Data Cloud.
 
-GenAIGeneration__dlm.responseText__c,
+Steps to view the data:
 
-GenAIFeedback__dlm.action__c,
+Navigate to App Launcher > Data Cloud
 
-GenAIFeedback__dlm.feedbackId__c,
+Under Data Cloud Items, select Query Editor
 
-GenAIFeedback__dlm.userId__c,
+Open the saved query: Feedback search
 
-ssot__AiAgentInteractionMessage__dlm.ssot__AiAgentSessionId__c,
-
-GenAIFeedbackDetail__dlm.feedbackText__c,
-
-ssot__AiAgentInteractionMessage__dlm.ssot__AiAgentInteractionMessageType__c,
-
-ssot__AiAgentInteractionMessage__dlm.ssot__ContentText__c
-
-FROM
-
-GenAIGatewayRequest__dlm,
-
-GenAIGatewayResponse__dlm,
-
-GenAIGeneration__dlm,
-
-GenAIFeedback__dlm,
-
-GenAIFeedbackDetail__dlm,
-
-ssot__AiAgentInteractionMessage__dlm
-
-WHERE
-
-GenAIGeneration__dlm.generationResponseId__c = GenAIGatewayResponse__dlm.generationResponseId__c
-
-AND GenAIGatewayResponse__dlm.generationRequestId__c = GenAIGatewayRequest__dlm.gatewayRequestId__c
-
-AND GenAIGatewayRequest__dlm.generationGroupId__c = GenAIFeedback__dlm.generationGroupId__c
-
-AND GenAIFeedback__dlm.feedbackId__c = GenAIFeedbackDetail__dlm.parent__c
-
-Limit 100
+Click Run Report to view the results.
