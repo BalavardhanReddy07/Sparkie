@@ -1,5 +1,13 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<ApexClass xmlns="http://soap.sforce.com/2006/04/metadata">
-    <apiVersion>62.0</apiVersion>
-    <status>Active</status>
-</ApexClass>
+String testQuery = 'Members SFH application hasn\'t been processed what can I do?';
+
+// Use an empty list so buildFilePathFilter returns the '1=1' fallback -
+// removes the Flow/DCFilePaths dependency from this test entirely
+String preFilter = AF_ADLHybridSearchService.buildFilePathFilter(new List<String>());
+System.debug('##### preFilter: ' + preFilter);
+
+try {
+    AF_ADLHybridSearchService.Response resp = AF_ADLHybridSearchService.ExecuteSearch(testQuery, preFilter);
+    System.debug('##### SUCCESS - Response.Data: ' + resp.Data);
+} catch (Exception ex) {
+    System.debug('##### FAILED - Exception: ' + ex.getMessage());
+}
