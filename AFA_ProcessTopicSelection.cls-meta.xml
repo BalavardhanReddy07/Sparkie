@@ -131,11 +131,12 @@ public with sharing class AF_UnifiedSearchService {
     private static SearchResults runADLSearch(String searchQuery, List<String> filePaths) {
         SearchResults results = new SearchResults();
         String preFilterConditions = buildFilePathFilter(filePaths);
+        String safeSearchQuery = searchQuery != null ? searchQuery.replace('\'', '\'\'') : searchQuery;
 
         // Row layout: [0] Chunk  [1] FilePath  [2] hybrid_score  [3] keyword_score  [4] vector_score
         String sqlQuery =
             'SELECT c.Chunk__c, d.FilePath__c, h.hybrid_score__c, h.keyword_score__c, h.vector_score__c FROM ' +
-            'hybrid_search(table(ADL_All_Documents_Custom_index__dlm), \'' + searchQuery + '\',' + preFilterConditions + ', 20) AS h ' +
+            'hybrid_search(table(ADL_All_Documents_Custom_index__dlm), \'' + safeSearchQuery + '\',' + preFilterConditions + ', 20) AS h ' +
             'JOIN ADL_All_Documents_Custom_chunk__dlm AS c ON h.SourceRecordId__c = c.RecordId__c ' +
             'JOIN ADL_All_Documents_L__dlm AS d ON c.SourceRecordId__c = d.FilePath__c ' +
             'ORDER BY h.hybrid_score__c DESC';
@@ -213,6 +214,7 @@ public with sharing class AF_UnifiedSearchService {
 
     private static SearchResults runKASearch(String searchQuery, List<String> dataCategoryIds) {
         SearchResults results = new SearchResults();
+        String safeSearchQuery = searchQuery != null ? searchQuery.replace('\'', '\'\'') : searchQuery;
 
         List<String> quoteIds = new List<String>();
         for (String id : dataCategoryIds) {
@@ -223,7 +225,7 @@ public with sharing class AF_UnifiedSearchService {
         // Row layout: [0] hybrid_score  [1] ssot__Name__c  [2] Chunk  [3] ssot__Id__c
         String sqlQuery =
             'SELECT v.hybrid_score__c AS Score, kav.ssot__Name__c, c.Chunk__c AS Chunk, kav.ssot__Id__c, v.keyword_score__c, v.vector_score__c, c.SourceRecordId__c AS SourceRecordId, c.RecordId__c AS RecordId, c.DataSource__c AS DataSource, c.DataSourceObject__c AS DataSourceObject FROM ' +
-            'hybrid_search(TABLE(KA_Knowledge_Article_Data_Lib_index__dlm), \'' + searchQuery + '\', \'\', 20) AS v ' +
+            'hybrid_search(TABLE(KA_Knowledge_Article_Data_Lib_index__dlm), \'' + safeSearchQuery + '\', \'\', 20) AS v ' +
             'INNER JOIN KA_Knowledge_Article_Data_Lib_chunk__dlm AS c ON c.RecordId__c = v.RecordId__c ' +
             'INNER JOIN ssot__KnowledgeArticleVersion__dlm AS kav ON c.SourceRecordId__c = kav.ssot__Id__c ' +
             'AND kav.ssot__KnowledgePublicationStatus__c = \'Online\' ' +
