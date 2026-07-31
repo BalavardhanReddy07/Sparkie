@@ -1,13 +1,6 @@
-String testQuery = 'Members SFH application hasn\'t been processed what can I do?';
-
-// Use an empty list so buildFilePathFilter returns the '1=1' fallback -
-// removes the Flow/DCFilePaths dependency from this test entirely
-String preFilter = AF_ADLHybridSearchService.buildFilePathFilter(new List<String>());
-System.debug('##### preFilter: ' + preFilter);
-
-try {
-    AF_ADLHybridSearchService.Response resp = AF_ADLHybridSearchService.ExecuteSearch(testQuery, preFilter);
-    System.debug('##### SUCCESS - Response.Data: ' + resp.Data);
-} catch (Exception ex) {
-    System.debug('##### FAILED - Exception: ' + ex.getMessage());
-}
+18:25:26:014 USER_DEBUG [79]|DEBUG|##### Search Query (raw): Members SFH application hasn't been processed what can I do?
+18:25:26:014 USER_DEBUG [80]|DEBUG|##### safeSearchQuery (escaped): Members SFH application hasn''t been processed what can I do?
+18:25:26:014 USER_DEBUG [81]|DEBUG|##### FINAL sqlQuery sent to CDP: SELECT c.Chunk__c, d.FilePath__c, h.hybrid_score__c, h.keyword_score__c, h.vector_score__c FROM hybrid_search(table(ADL_All_Documents_Custom_index__dlm), 'Members SFH application hasn''t been processed what can I do?','1=1', 20) AS h JOIN ADL_All_Documents_Custom_chunk__dlm AS c ON h.SourceRecordId__c = c.RecordId__c JOIN ADL_All_Documents_L__dlm AS d ON c.SourceRecordId__c = d.FilePath__c ORDER BY h.hybrid_score__c DESC
+18:25:26:995 USER_DEBUG [90]|DEBUG|##### CDP query FAILED. sqlQuery was: SELECT c.Chunk__c, d.FilePath__c, h.hybrid_score__c, h.keyword_score__c, h.vector_score__c FROM hybrid_search(table(ADL_All_Documents_Custom_index__dlm), 'Members SFH application hasn''t been processed what can I do?','1=1', 20) AS h JOIN ADL_All_Documents_Custom_chunk__dlm AS c ON h.SourceRecordId__c = c.RecordId__c JOIN ADL_All_Documents_L__dlm AS d ON c.SourceRecordId__c = d.FilePath__c ORDER BY h.hybrid_score__c DESC
+18:25:26:995 USER_DEBUG [91]|DEBUG|##### Exception: {"timestamp":"2026-07-31T08:25:27.391Z","error":"400 BAD_REQUEST","message":"INVALID_ARGUMENT: Error communicating with foreign data source [TraceId:0fd399413a5197f98488458a5a67a10b]","path":"uri=/query/v2/queries","tenantId":"a360/prod4/12741320f6514fc4899683ece2eff7f2","internalErrorCode":"COMMON_ERROR_GENERIC","details":{}}
+18:25:26:995 USER_DEBUG [12]|DEBUG|##### FAILED - Exception: {"timestamp":"2026-07-31T08:25:27.391Z","error":"400 BAD_REQUEST","message":"INVALID_ARGUMENT: Error communicating with foreign data source [TraceId:0fd399413a5197f98488458a5a67a10b]","path":"uri=/query/v2/queries","tenantId":"a360/prod4/12741320f6514fc4899683ece2eff7f2","internalErrorCode":"COMMON_ERROR_GENERIC","details":{}}
