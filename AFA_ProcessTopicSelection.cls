@@ -54,6 +54,7 @@ public with sharing class AF_ADLHybridSearchService {
 
     @InvocableMethod(label='Agentforce Data Library Search Service')
     public static List<Response> SearchRetriever(List<Request> requests) {
+		System.debug('##### SearchRetriever ENTRY - raw searchQuery: ' + requests[0].searchQuery);
 		List<String> paths = (List<String>) JSON.deserialize(GetJsonFilePaths(requests), List<String>.class);
         System.debug('paths: ' + paths);
         String preFilterConditions = buildFilePathFilter(paths);
@@ -64,23 +65,32 @@ public with sharing class AF_ADLHybridSearchService {
     }
 
     public static Response ExecuteSearch(String searchQuery, String preFilterConditions) {
-    Response executionResponse = new Response();
+        Response executionResponse = new Response();
 
-    String safeSearchQuery = searchQuery != null ? searchQuery.replace('\'', '\'\'') : searchQuery;
+        String safeSearchQuery = searchQuery != null ? searchQuery.replace('\'', '\'\'') : searchQuery;
 
-    String sqlQuery =
-        'SELECT c.Chunk__c, d.FilePath__c, h.hybrid_score__c, h.keyword_score__c, h.vector_score__c FROM ' +
-        'hybrid_search(table(ADL_All_Documents_Custom_index__dlm), \'' + safeSearchQuery + '\',' + preFilterConditions + ', 20) AS h ' +
-        'JOIN ADL_All_Documents_Custom_chunk__dlm AS c ON h.SourceRecordId__c = c.RecordId__c ' +
-        'JOIN ADL_All_Documents_L__dlm AS d ON c.SourceRecordId__c = d.FilePath__c ' +
-        'ORDER BY h.hybrid_score__c DESC';
-        System.debug('Search Query ========================== '+ searchQuery );
-        System.debug('safeSearchQuery ========================== '+ safeSearchQuery );
-    
+        String sqlQuery =
+            'SELECT c.Chunk__c, d.FilePath__c, h.hybrid_score__c, h.keyword_score__c, h.vector_score__c FROM ' +
+            'hybrid_search(table(ADL_All_Documents_Custom_index__dlm), \'' + safeSearchQuery + '\',' + preFilterConditions + ', 20) AS h ' +
+            'JOIN ADL_All_Documents_Custom_chunk__dlm AS c ON h.SourceRecordId__c = c.RecordId__c ' +
+            'JOIN ADL_All_Documents_L__dlm AS d ON c.SourceRecordId__c = d.FilePath__c ' +
+            'ORDER BY h.hybrid_score__c DESC';
+
+        System.debug('##### Search Query (raw): ' + searchQuery);
+        System.debug('##### safeSearchQuery (escaped): ' + safeSearchQuery);
+        System.debug('##### FINAL sqlQuery sent to CDP: ' + sqlQuery);
 
         ConnectApi.CdpQueryInput cdpInput = new ConnectApi.CdpQueryInput();
         cdpInput.sql = sqlQuery;
-        ConnectApi.CdpQueryOutputV2 output = ConnectApi.CdpQuery.queryAnsiSqlV2(cdpInput);
+        ConnectApi.CdpQueryOutputV2 output;
+
+        try {
+            output = ConnectApi.CdpQuery.queryAnsiSqlV2(cdpInput);
+        } catch (Exception ex) {
+            System.debug('##### CDP query FAILED. sqlQuery was: ' + sqlQuery);
+            System.debug('##### Exception: ' + ex.getMessage());
+            throw ex;
+        }
 
         Set<String> filePathSet    = new Set<String>();
         List<List<Object>> rawRows = new List<List<Object>>();
