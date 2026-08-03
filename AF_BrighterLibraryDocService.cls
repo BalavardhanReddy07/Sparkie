@@ -1,63 +1,117 @@
 /**
- * AF_BrighterLibraryDocService
- *
- * Invocable Apex action for the Brighter Library Document selector.
- *
- * When wired to an Agent Action, set the input rendering component to
- * the Lightning Type backed by BrighterLibraryDocInputSchema and the
- * brighterlibrarydocselector LWC.
- *
- * The LWC lets the user pick documents; on submit the Lightning Type
- * passes BrighterLibraryDocInputSchema into this action. This class
- * extracts the selected Data Cloud file paths and returns them as the
- * action output so the agent can consume them downstream.
- */
-@JsonAccess(serializable='always' deserializable='always')
-global class AF_BrighterLibraryDocService {
-
-    // ─── Input wrapper (references the Lightning Type schema) ────────────────
-    @JsonAccess(serializable='always' deserializable='always')
-    global class InputRequest {
-        @InvocableVariable(label='Document Selection Input' required=true)
-        global BrighterLibraryDocInputSchema inputs;
+* @description Service for getting the Insurance Member ID via Agentforce Custom Lightning Types.
+* Contains wrappers for CLT data shapes and methods for fetching Employer Names.
+*/
+public with sharing class AF_InsuranceMemberInput {
+    
+    public class InsuranceMemberInput {
+        @InvocableVariable(label='Existing Member')
+        public Boolean existingMember;
+        
+        @InvocableVariable(label='Member ID')
+        public String memberId;
+        
+        @InvocableVariable(label='Member Summary')
+        public String memberSummary;
+        
+        @InvocableVariable(label='Selected Scheme Category')
+        public String selectedSchemeCategory;
+        
+        @InvocableVariable(label='Selected Employer')
+        public String selectedEmployer;
     }
-
-    // ─── Output wrapper ─────────────────────────────────────────────────────
-    @JsonAccess(serializable='always' deserializable='always')
-    global class ActionOutput {
-        @InvocableVariable(label='Selected File Paths' description='Comma-separated Data Cloud file paths of the selected documents')
-        global String selectedFilePaths;
-
-        @InvocableVariable(label='Selected Document Names' description='Comma-separated names of the selected documents')
-        global String selectedDocumentNames;
-
-        @InvocableVariable(label='Is Success')
-        global Boolean isSuccess;
+    
+    public class InsuranceMemberResult {
+        @InvocableVariable(label='Existing Member')
+        public Boolean existingMember;
+        
+        @InvocableVariable(label='Member ID')
+        public String memberId;
+        
+        @InvocableVariable(label='Member Summary')
+        public String memberSummary;
+        
+        @InvocableVariable(label='Selected Scheme Category')
+        public String selectedSchemeCategory;
+        
+        @InvocableVariable(label='Selected Employer')
+        public String selectedEmployer;
     }
-
-    // ─── Invocable entry point ───────────────────────────────────────────────
-    @InvocableMethod(label='Process Brighter Library Document Selection'
-                     description='Receives the user document selection from the Brighter Library LWC and returns the selected Data Cloud file paths.')
-    global static List<ActionOutput> processDocumentSelection(List<InputRequest> requests) {
-        List<ActionOutput> results = new List<ActionOutput>();
-
-        for (InputRequest req : requests) {
-            ActionOutput out = new ActionOutput();
-            out.isSuccess = true;
-
-            if (req.inputs != null) {
-                // Join file paths into a single comma-separated string
-                if (req.inputs.selectedFilePaths != null && !req.inputs.selectedFilePaths.isEmpty()) {
-                    out.selectedFilePaths = String.join(req.inputs.selectedFilePaths, ',');
+    
+    public class InsuranceMemberRequestInput {
+        @InvocableVariable(required=false)
+        public InsuranceMemberInput memberData;
+    }
+    
+    @InvocableMethod(label='Get Insurance Member ID' description='Ask if Existing Member and Get Member ID with optional Employer')
+    public static List<InsuranceMemberResult> getInsuranceMemberId(List<InsuranceMemberRequestInput> requests) {
+        List<InsuranceMemberResult> responses = new List<InsuranceMemberResult>();
+        
+        try {
+            InsuranceMemberResult res = new InsuranceMemberResult();
+            
+            res.existingMember = false;
+            res.memberId = '';
+            res.memberSummary = '';
+            res.selectedSchemeCategory = '';
+            res.selectedEmployer = '';
+            if (requests[0].memberData != null){
+                res.existingMember = requests[0].memberData.existingMember;
+                res.memberId = requests[0].memberData.memberId;
+                res.memberSummary = requests[0].memberData.memberSummary;
+                res.selectedSchemeCategory = requests[0].memberData.selectedSchemeCategory;
+                res.selectedEmployer = requests[0].memberData.selectedEmployer;
+            }                
+            responses.add(res);
+        } catch(Exception e) {
+            System.debug(LoggingLevel.ERROR, 'Error in getInsuranceMemberId: ' + e.getMessage() + '\n' + e.getStackTraceString());
+        }
+        
+        return responses;
+    }
+    
+    @AuraEnabled(cacheable=true)
+    public static Map<String, List<String>> getAllEmployers(List<String> schemeCategories) {
+        System.debug('--- getAllEmployers APEX STARTED ---');
+        System.debug('Input schemeCategories received from LWC: ' + schemeCategories);
+        
+        Map<String, Set<String>> empSetMap = new Map<String, Set<String>>();
+        Map<String, List<String>> resultMap = new Map<String, List<String>>();
+        
+        try {
+            if (schemeCategories != null && !schemeCategories.isEmpty()) {
+                
+                // Store the query results so we can debug the size
+                List<Topic_Document_Mapping__c> mappings = [
+                    SELECT Key_field_value__c, Sub_Topic__c 
+                    FROM Topic_Document_Mapping__c 
+                    WHERE Key_field_value__c IN :schemeCategories 
+                    AND Topic__c = 'Insurance'
+                    AND Sub_Topic__c != null 
+                    AND Sub_Topic__c != 'General Insurance'
+                    AND Sub_Topic__c != 'Member Specific Products'
+                ];
+                
+                System.debug('SOQL Query returned ' + mappings.size() + ' records.');
+                
+                for (Topic_Document_Mapping__c tdm : mappings) {
+                    if (!empSetMap.containsKey(tdm.Key_field_value__c)) {
+                        empSetMap.put(tdm.Key_field_value__c, new Set<String>());
+                    }
+                    empSetMap.get(tdm.Key_field_value__c).add(tdm.Sub_Topic__c);
                 }
-                // Join document names for agent reasoning / display
-                if (req.inputs.selectedDocumentNames != null && !req.inputs.selectedDocumentNames.isEmpty()) {
-                    out.selectedDocumentNames = String.join(req.inputs.selectedDocumentNames, ',');
+                
+                for (String key : empSetMap.keySet()) {
+                    resultMap.put(key, new List<String>(empSetMap.get(key)));
                 }
             }
-
-            results.add(out);
+        } catch(Exception e) {
+            System.debug(LoggingLevel.ERROR, 'Error fetching employers: ' + e.getMessage());
         }
-        return results;
+        
+        System.debug('Final resultMap returning to LWC: ' + resultMap);
+        System.debug('--- getAllEmployers APEX ENDED ---');
+        
+        return resultMap;
     }
 }
