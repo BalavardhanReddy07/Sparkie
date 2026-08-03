@@ -1,214 +1,262 @@
-public with sharing class AF_ADLHybridSearchService {
+import { api, LightningElement, track } from "lwc";
+import getAllEmployers from '@salesforce/apex/AF_InsuranceMemberInput.getAllEmployers';
 
-    private static final String ADL_SEARCH_PROMPT_TEMPLATE_API_NAME = 'AF_ADL_KA_Search_Template';
-	private static final String GET_JSON_FILEPATHS_FLOW_API_NAME = 'AF_Get_ADL_JSON_File_Paths';
+export default class InsuranceMemberInput extends LightningElement {
 
-    public class Request {
-		
-		@InvocableVariable(required=false)
-        public String employerName;
-		
-		@InvocableVariable(required=false)
-		public String searchQuery;
-		
-		@InvocableVariable(required=false)
-		public Boolean isEmployerSelected;
+    // ─── API: readOnly ───────────────────────────────────────────────────────
+    @api
+    get readOnly() { return this._readOnly; }
+    set readOnly(value) { this._readOnly = value; }
+    _readOnly = false;
 
-		@InvocableVariable(required=false)
-		public Boolean isExistingMember;
+    // ─── Internal Lock to Prevent Race Conditions ────────────────────────────
+    _isInternalUpdate = false; 
 
-		@InvocableVariable(required=false)
-		public Boolean isInsuranceSelected;
+    // ─── API: value (Agentforce state management) ────────────────────────────
+    @api
+    get value() { return this._value; }
+    set value(value) {
+        this._value = value;
+        
+        // Only accept state from Agentforce if we are NOT in the middle of our own update
+        if (value && !this._isInternalUpdate) {
+            this.existingMember = value.existingMember || false;
+            this.isSelected     = value.existingMember || false;
+            this.memberId       = value.memberId       || "";
+            this.selectedSchemeCategory = value.selectedSchemeCategory || "";
+            this.selectedAccountNumber  = value.selectedAccountNumber  || "";
+            this.selectedEmployer = value.selectedEmployer || "";
+            this.memberSummary = value.memberSummary || "";
+            this.products = value.products || [];
+        }
+    }
+    _value;
+    _dispatchDelay; 
 
-		@InvocableVariable(required=false)
-		public Boolean isProductSelected;
+    // ─── Internal State ──────────────────────────────────────────────────────
+    existingMember  = false;
+    memberId        = "";
+    isSelected      = false;
 
-		@InvocableVariable(required=false)
-		public String schemeCategory;
+    @track memberSummary  = "";     
+    @track products       = [];     
+    @track selectedSchemeCategory = "";
+    @track selectedAccountNumber = ""; 
+    
+    @track selectedEmployer = "";
+    @track employerOptions = [];
+    
+    employerMap = {}; 
+    
+    isEmployerLoading = false;
+    isLoading    = false;
+    runFlow      = false;
+    errorMessage = "";
 
+    // ─── Computed helpers ────────────────────────────────────────────────────
+    get flowInputVariables() {
+        return [{ name: "memberId", type: "String", value: this.memberId }];
     }
 
-    public class Response {
-        @InvocableVariable(description='Resolved prompt passed to Agentforce reasoning engine')
-        public String Data;
+    get isExistingMember() { return this.existingMember === true; }
+    get isFetchDisabled() { return !this.memberId || this.memberId.trim() === "" || this.isLoading || this.readOnly; }
+    
+    // RESTORED: Explicitly check for valid strings so the UI doesn't collapse
+    get hasMemberSummary() { return this.memberSummary && this.memberSummary.trim() !== ""; }
+    
+    get hasProducts() { return this.products && this.products.length > 0; }
+    get hasEmployers() { return this.employerOptions && this.employerOptions.length > 0; }
 
-        // @InvocableVariable(description='Citation sources for inline references')
-        // public AiCopilot.GenAiCitationInput sources;
+    get productOptions() {
+        return this.products.map((item) => {
+            const mainParts = item.split(" -- ");
+            const displayPart = mainParts[0] ? mainParts[0].trim() : item;
+            const schemeCategory = mainParts[1] ? mainParts[1].trim() : "";
+            return { label: displayPart, value: displayPart, schemeCategory: schemeCategory };
+        });
+    }   
+
+    // ─── Step 1: Toggle member-specific button ───────────────────────────────
+    handleExistingMemberChange() {
+        this.isSelected     = !this.isSelected;
+        this.existingMember = this.isSelected;
+
+        if (!this.existingMember) {
+            this.resetState();
+        }
+        this.dispatchValueChangeEvent();
     }
 
-	public static String GetJsonFilePaths(List<Request> requests){
-		Map<String, Object> flowInputs = new Map<String, Object>{
-			'EmployerName' => requests[0].employerName,
-			'IsEmployerSelected' => requests[0].isEmployerSelected,
-			'IsExistingMember' => requests[0].isExistingMember,
-			'IsInsuranceSelected' => requests[0].isInsuranceSelected,
-			'IsProductSelected' => requests[0].isProductSelected,
-			'SchemeCategory' => requests[0].schemeCategory
-
-		};
-		Flow.Interview flowInterview = Flow.Interview.createInterview(GET_JSON_FILEPATHS_FLOW_API_NAME, flowInputs);
-		flowInterview.start();
-		system.debug('flowInterview.getVariableValue(DCFilePaths)'+ flowInterview.getVariableValue('DCFilePaths'));
-		return JSON.serialize(flowInterview.getVariableValue('DCFilePaths'));
-	}
-
-    @InvocableMethod(label='Agentforce Data Library Search Service')
-    public static List<Response> SearchRetriever(List<Request> requests) {
-		System.debug('##### SearchRetriever ENTRY - raw searchQuery: ' + requests[0].searchQuery);
-		List<String> paths = (List<String>) JSON.deserialize(GetJsonFilePaths(requests), List<String>.class);
-        System.debug('paths: ' + paths);
-        String preFilterConditions = buildFilePathFilter(paths);
-        System.debug('preFilterConditions: ' + preFilterConditions);
-        List<Response> responses = new List<Response>();
-        responses.add(ExecuteSearch(requests[0].searchQuery, preFilterConditions));
-        return responses;
+    // ─── Step 2: Member ID input change ─────────────────────────────────────
+    handleInputChange(event) {
+        event.stopPropagation();
+        this[event.target.name] = event.target.value;
+        this.resetState();
+        this.dispatchValueChangeEvent();
+    }
+    
+    resetState() {
+        this.memberSummary   = "";
+        this.products        = [];
+        this.selectedSchemeCategory = "";
+        this.selectedAccountNumber  = "";
+        this.selectedEmployer = "";
+        this.employerOptions = [];
+        this.employerMap     = {};
+        this.runFlow         = false;
+        this.errorMessage    = "";
     }
 
-    public static Response ExecuteSearch(String searchQuery, String preFilterConditions) {
-        Response executionResponse = new Response();
+    // ─── Step 3: Launch the flow to fetch member summary ────────────────────
+    handleGetSummary() {
+        if (!this.memberId || this.memberId.trim() === "") return;
 
-        String safeSearchQuery = searchQuery != null ? searchQuery.replace('\'', '\'\'') : searchQuery;
+        this.isLoading    = true;
+        this.resetState();
 
-        String sqlQuery =
-            'SELECT c.Chunk__c, d.FilePath__c, h.hybrid_score__c, h.keyword_score__c, h.vector_score__c FROM ' +
-            'hybrid_search(table(ADL_All_Documents_Custom_index__dlm), \'' + safeSearchQuery + '\',' + preFilterConditions + ', 20) AS h ' +
-            'JOIN ADL_All_Documents_Custom_chunk__dlm AS c ON h.SourceRecordId__c = c.RecordId__c ' +
-            'JOIN ADL_All_Documents_L__dlm AS d ON c.SourceRecordId__c = d.FilePath__c ' +
-            'ORDER BY h.hybrid_score__c DESC';
-
-        System.debug('##### Search Query (raw): ' + searchQuery);
-        System.debug('##### safeSearchQuery (escaped): ' + safeSearchQuery);
-        System.debug('##### FINAL sqlQuery sent to CDP: ' + sqlQuery);
-
-        ConnectApi.CdpQueryInput cdpInput = new ConnectApi.CdpQueryInput();
-        cdpInput.sql = sqlQuery;
-        ConnectApi.CdpQueryOutputV2 output;
-
-        try {
-            output = ConnectApi.CdpQuery.queryAnsiSqlV2(cdpInput);
-        } catch (Exception ex) {
-            System.debug('##### CDP query FAILED. sqlQuery was: ' + sqlQuery);
-            System.debug('##### Exception: ' + ex.getMessage());
-            throw ex;
-        }
-
-        Set<String> filePathSet    = new Set<String>();
-        List<List<Object>> rawRows = new List<List<Object>>();
-
-        if (output.data != null && !output.data.isEmpty()) {
-            for (ConnectApi.CdpQueryV2Row rowObj : output.data) {
-                List<Object> row = rowObj.rowData;
-                rawRows.add(row);
-                if (row[1] != null) filePathSet.add((String) row[1]);
-            }
-        }
-
-        // Id added so sourceObjectRecordId shows the document Name in Agentforce citations
-        Map<String, Document_Detail__c> filePathToDocMap = new Map<String, Document_Detail__c>();
-        if (!filePathSet.isEmpty()) {
-            for (Document_Detail__c doc : [
-                SELECT Id, Name, Document_URL__c, Data_Cloud_File_Path__c
-                FROM Document_Detail__c
-                WHERE Data_Cloud_File_Path__c IN :filePathSet
-            ]) {
-                filePathToDocMap.put(doc.Data_Cloud_File_Path__c, doc);
-            }
-        }
-
-        Map<String, List<String>> filePathToChunks = new Map<String, List<String>>();
-        List<String> orderedFilePaths = new List<String>();
-        String formattedContext = '';
-
-        // Build context as JSON array - one entry per chunk
-        List<Map<String, Object>> contextList = new List<Map<String, Object>>();
-
-        for (List<Object> row : rawRows) {
-            String chunk    = (String) row[0];
-            String filePath = (String) row[1];
-            if (filePath == null) continue;
-
-            if (!filePathToChunks.containsKey(filePath)) {
-                filePathToChunks.put(filePath, new List<String>());
-                orderedFilePaths.add(filePath);
-            }
-            filePathToChunks.get(filePath).add(chunk);
-
-            Document_Detail__c doc = filePathToDocMap.get(filePath);
-            contextList.add(new Map<String, Object>{
-                'Name'    => doc != null ? doc.Name : filePath,
-                'URL'     => doc != null ? doc.Document_URL__c : '',
-                'Content' => chunk
-            });
-        }
-
-        formattedContext = JSON.serialize(contextList);
-
-        // One source reference per document, ALL its chunks as contents
-        List<AiCopilot.GenAiSourceReference> sourceRefs = new List<AiCopilot.GenAiSourceReference>();
-
-        for (String filePath : orderedFilePaths) {
-            Document_Detail__c doc = filePathToDocMap.get(filePath);
-            String docUrl   = doc != null ? doc.Document_URL__c : null;
-            String docLabel = doc != null ? doc.Name : filePath;
-
-            List<AiCopilot.GenAiSourceContentInfo> contents = new List<AiCopilot.GenAiSourceContentInfo>();
-            for (String chunk : filePathToChunks.get(filePath)) {
-                contents.add(new AiCopilot.GenAiSourceContentInfo(null, 'ADL_All_Documents_L__dlm', chunk));
-            }
-
-            List<AiCopilot.GenAiSourceReferenceInfo> metadata =
-                new List<AiCopilot.GenAiSourceReferenceInfo>{
-                    new AiCopilot.GenAiSourceReferenceInfo(docUrl, null, 'ADL_All_Documents_L__dlm', docLabel)
-                };
-
-            sourceRefs.add(new AiCopilot.GenAiSourceReference(null, contents, metadata));
-        }
-
-        // Agentforce reasoning engine generates a response from this, citation engine adds [1][2] markers
-        String resolvedPrompt = invokePromptTemplate(searchQuery, formattedContext);
-
-        executionResponse.Data    = resolvedPrompt;
-        // executionResponse.sources = new AiCopilot.GenAiCitationInput(resolvedPrompt, sourceRefs);
-
-        return executionResponse;
+        // eslint-disable-next-line @lwc/lwc/no-async-operation
+        setTimeout(() => { this.runFlow = true; }, 0);
     }
 
-    private static String invokePromptTemplate(String searchQuery, String formattedContext) {
-        ConnectApi.EinsteinPromptTemplateGenerationsInput promptInput =
-            new ConnectApi.EinsteinPromptTemplateGenerationsInput();
+    // ─── Step 3b: Handle flow completion & PRE-FETCH EMPLOYERS ───────────────
+    async handleFlowStatusChange(event) {
+        const { status, outputVariables } = event.detail;
 
-        Map<String, ConnectApi.WrappedValue> params = new Map<String, ConnectApi.WrappedValue>();
+        if (status === "FINISHED" || status === "FINISHED_SCREEN") {
+            
+            // FIXED: Engage the lock IMMEDIATELY so the component is protected during the upcoming `await` call
+            this._isInternalUpdate = true;
+            
+            this.isLoading = false;
+            this.runFlow   = false;
 
-        ConnectApi.WrappedValue qVal = new ConnectApi.WrappedValue();
-        qVal.value = searchQuery;
-        params.put('Input:Question', qVal);
+            if (outputVariables && outputVariables.length > 0) {
+                const summaryVar  = outputVariables.find((v) => v.name === "memberSummaryResponse");
+                const productsVar = outputVariables.find((v) => v.name === "schemeCategoryList");
 
-        ConnectApi.WrappedValue cVal = new ConnectApi.WrappedValue();
-        cVal.value = formattedContext;
-        params.put('Input:Context', cVal);
+                // Safely handle empty string responses from the flow
+                if (summaryVar && summaryVar.value && summaryVar.value.trim() !== "") {
+                    this.memberSummary = summaryVar.value;
+                } else {
+                    this.memberSummary = "Sorry, I am unable to find the member information.";
+                }
 
-        promptInput.inputParams                      = params;
-        promptInput.isPreview                        = false;
-        promptInput.additionalConfig                 = new ConnectApi.EinsteinLlmAdditionalConfigInput();
-        promptInput.additionalConfig.numGenerations  = 1;
-        promptInput.additionalConfig.applicationName = 'PromptBuilderPreview';
-        System.debug('################ '+promptInput);
-        ConnectApi.EinsteinPromptTemplateGenerationsRepresentation result =
-            ConnectApi.EinsteinLLM.generateMessagesForPromptTemplate(
-                ADL_SEARCH_PROMPT_TEMPLATE_API_NAME,
-                promptInput
+                if (productsVar && productsVar.value) {
+                    let rawValue = productsVar.value;
+                    if (Array.isArray(rawValue)) {
+                        this.products = rawValue;
+                    } else {
+                        rawValue = rawValue.replace(/^\[|\]$/g, "");
+                        this.products = rawValue.split(",").map((p) => p.trim()).filter(Boolean);
+                    }
+                }
+            } else {
+                this.memberSummary = "Sorry, I am unable to find the member information.";
+            }
+            
+            if (this.hasProducts) {
+                this.isEmployerLoading = true;
+                try {
+                    const categoriesToFetch = [...new Set(this.productOptions.map(opt => opt.schemeCategory).filter(Boolean))];
+                    if(categoriesToFetch.length > 0) {
+                        // The component is now completely locked and safe from Agentforce overwrites during this await
+                        this.employerMap = await getAllEmployers({ schemeCategories: categoriesToFetch });
+                    }
+                } catch (error) {
+                    console.error('Error pre-fetching employers:', error);
+                } finally {
+                    this.isEmployerLoading = false;
+                }
+            }
+
+            this.dispatchValueChangeEvent();
+
+        } else if (status === "ERROR") {
+            this.isLoading    = false;
+            this.runFlow      = false;
+            this.errorMessage = "Failed to retrieve member summary. Please try again.";
+        }
+    }
+
+    // ─── Step 4: Product selection (Sync UI update) ─────────────────────────
+    handleProductChange(event) {
+        this.selectedAccountNumber = event.detail.value;
+
+        const matchedOption = this.productOptions.find(opt => opt.value === this.selectedAccountNumber);
+        this.selectedSchemeCategory = matchedOption ? matchedOption.schemeCategory : "";
+
+        this.selectedEmployer = ""; 
+        this.employerOptions = [];
+        
+        const employers = this.employerMap[this.selectedSchemeCategory] || [];
+        
+        if (employers.length > 0) {
+            this.employerOptions = employers.map(emp => ({
+                label: emp,
+                value: emp,
+                selected: false
+            }));
+        }
+
+        this.dispatchValueChangeEvent();
+    }
+
+    // ─── Step 5: Employer Selection handler ─────────────────────────────────
+    handleEmployerSelection(event) {
+        const selectedVal = event.target.dataset.value;
+        this.selectedEmployer = selectedVal;
+
+        this.employerOptions = this.employerOptions.map(emp => ({
+            ...emp,
+            selected: emp.value === selectedVal
+        }));
+        
+        this.dispatchValueChangeEvent();
+    }
+
+    // ─── Core: Dispatch value back to Agentforce (DEBOUNCED & LOCKED) ───────
+    dispatchValueChangeEvent() {
+        if (this._dispatchDelay) {
+            clearTimeout(this._dispatchDelay);
+        }
+
+        // Lock is also applied here to protect standard UI clicks outside of the Flow
+        this._isInternalUpdate = true;
+
+        // eslint-disable-next-line @lwc/lwc/no-async-operation
+        this._dispatchDelay = setTimeout(() => {
+            const currentValue = {
+                existingMember:  this.existingMember,
+                memberId:        this.memberId,
+                memberSummary:   this.memberSummary,
+                selectedSchemeCategory: this.selectedSchemeCategory,
+                selectedAccountNumber:  this.selectedAccountNumber, 
+                selectedEmployer: this.selectedEmployer,
+                products: this.products,
+            };
+            this._value = currentValue;
+            
+            // Dispatched payload remains identical to your original code
+            this.dispatchEvent(
+                new CustomEvent("valuechange", {
+                    detail: {
+                        value: {
+                            existingMember:  this.existingMember,
+                            memberId:        this.memberId,
+                            memberSummary:   this.memberSummary,
+                            selectedSchemeCategory: this.selectedSchemeCategory,
+                            selectedEmployer: this.selectedEmployer
+                        },
+                    },
+                })
             );
-        System.debug('################ '+result.prompt);
-        return result.prompt;
 
-    }
+            // Release the lock slightly after dispatching so Agentforce catches up smoothly
+            // eslint-disable-next-line @lwc/lwc/no-async-operation
+            setTimeout(() => {
+                this._isInternalUpdate = false;
+            }, 100);
 
-    public static String buildFilePathFilter(List<String> filePaths) {
-        if (filePaths == null || filePaths.isEmpty()) return '\'1=1\'';
-        List<String> escaped = new List<String>();
-        for (String fp : filePaths) {
-            escaped.add('\'\'' + fp.replace('\'', '\'\'') + '\'\'');
-        }
-        return '\'' + 'FilePath__c IN (' + String.join(escaped, ', ') + ')' + '\'';
+        }, 150);
     }
 }
