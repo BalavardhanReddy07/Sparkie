@@ -1,467 +1,330 @@
-This is the Flow Debug log of the Sandbox : 
-
-How the Interview Started
-How the Interview Started
-Bala Reddy (0059r00000akLRw) started the flow interview.
-API Version for Running the Flow: 66
-Some of this flow's variables were set when the interview started.
-memberId = 250046714
-Flow start time: <b>7 August 2026 at 2:20 pm</b>.
-
-
-Get Records: Get Account Record
-We couldn't retrieve any records.
-Find all Account records where:
-Client_ID__c Equals {!memberId} (250046714)
-AND Record_Type_Name__c Equals Member
-AND Staff_Account__c Equals false
-Store the values of these fields in Get_Account_Record: Age__c, First_Nation_Postcode__c, Id, Name
-Result
-Failed to find records.
-SOQL queries: 1 out of 100
-
-
-Decision: Account Exists
-The  default  outcome was executed.
-$$:OutcomeNotExecuted:Member_Found
-Skipped this outcome because its conditions weren't met: Member_Found
-Outcome conditions: 
-1. {!Get_Account_Record} (null) Is null false
-2. {!Get_Account_Record} (null) Is Blank false
-Logic: All conditions must be true (AND)
-$$:DefaultOutcomeExecuted:
-Default outcome executed.
-
-
-Transaction Committed
-Any records that the flow was ready to create, update, or delete were committed to the database.
-
-
-How the Interview Finished
-The flow interview ran for 1.17 seconds and finished on 7 August 2026 at 2:20 pm.
-
-This is the Flow Debug Log of UAT ORg Fully working:
-How the Interview Started
-How the Interview Started
-Bala Reddy (0059j00000QLTDM) started the flow interview.
-API Version for Running the Flow: 66
-Some of this flow's variables were set when the interview started.
-memberId = 250046714
-Flow start time: <b>7 August 2026 at 2:21 pm</b>.
-
-
-Get Records: Get Account Record
-One or more  Account  records were retrieved.
-Find all Account records where:
-Client_ID__c Equals {!memberId} (250046714)
-AND Record_Type_Name__c Equals Member
-AND Staff_Account__c Equals false
-Store the values of these fields in Get_Account_Record: Age__c, First_Nation_Postcode__c, Id, Name
-Result
-Successfully found records.
-SOQL queries: 1 out of 100
-,SOQL query rows: 1 out of 50000
-
-
-Decision: Account Exists
-" Member_Found " outcome was executed.
-$$:OutcomeExecuted:Member_Found
-Outcome executed: Member_Found
-Outcome conditions: 
-1. {!Get_Account_Record} (Account (0018v000007UjqIAAS)) Is null false
-2. {!Get_Account_Record} (Account (0018v000007UjqIAAS)) Is Blank false
-Logic: All conditions must be true (AND)
-
-
-Get Records: Get Case Record Types
-One or more  RecordType  records were retrieved.
-Find all RecordType records where:
-SobjectType Equals Case
-AND IsActive Equals true
-AND Name Does not equal Enquiry
-AND Name Does not equal Partner
-AND Name Does not equal Return Mail
-Store the values of these fields in Get_Case_Record_Types: Id, Name
-Result
-Successfully found records.
-SOQL queries: 1 out of 100
-,SOQL query rows: 6 out of 50000
-
-
-Loop: Loop Over Case Record Types
-Iteration  0  of the loop through the  Get_Case_Record_Types  collection occurred.
-$$:LoopNext:
-Loop Through: [0125K0000004JjbQAE,0127F000000QEn0QAG,0127F000000QEn3QAG,012Ol000000bgJdIAI,012Ol000003SjOfIAK,012Ol000004VWvlIAG]
-Iteration: 0
-Current iteration item: 0125K0000004JjbQAE
-
-
-Assignment: Record Type Name List
-2 variables were updated.
-{!caseRecordTypeNameList} Add {!Loop_Over_Case_Record_Types.Name}
-{!caseRecordTypeIdsList} Add {!Loop_Over_Case_Record_Types.Id}
-Result
-{!caseRecordTypeNameList} = "[Disability and Terminal Claim]"
-{!caseRecordTypeIdsList} = "[0125K0000004JjbQAE]"
-
-
-Loop: Loop Over Case Record Types
-Iteration  1  of the loop through the  Get_Case_Record_Types  collection occurred.
-$$:LoopNext:
-Loop Through: [0125K0000004JjbQAE,0127F000000QEn0QAG,0127F000000QEn3QAG,012Ol000000bgJdIAI,012Ol000003SjOfIAK,012Ol000004VWvlIAG]
-Iteration: 1
-Current iteration item: 0127F000000QEn0QAG
-
-
-Assignment: Record Type Name List
-2 variables were updated.
-{!caseRecordTypeNameList} Add {!Loop_Over_Case_Record_Types.Name}
-{!caseRecordTypeIdsList} Add {!Loop_Over_Case_Record_Types.Id}
-Result
-{!caseRecordTypeNameList} = "[Disability and Terminal Claim,Complaint]"
-{!caseRecordTypeIdsList} = "[0125K0000004JjbQAE,0127F000000QEn0QAG]"
-
-
-Loop: Loop Over Case Record Types
-Iteration  2  of the loop through the  Get_Case_Record_Types  collection occurred.
-$$:LoopNext:
-Loop Through: [0125K0000004JjbQAE,0127F000000QEn0QAG,0127F000000QEn3QAG,012Ol000000bgJdIAI,012Ol000003SjOfIAK,012Ol000004VWvlIAG]
-Iteration: 2
-Current iteration item: 0127F000000QEn3QAG
-
-
-Assignment: Record Type Name List
-2 variables were updated.
-{!caseRecordTypeNameList} Add {!Loop_Over_Case_Record_Types.Name}
-{!caseRecordTypeIdsList} Add {!Loop_Over_Case_Record_Types.Id}
-Result
-{!caseRecordTypeNameList} = "[Disability and Terminal Claim,Complaint,Third Party Authority]"
-{!caseRecordTypeIdsList} = "[0125K0000004JjbQAE,0127F000000QEn0QAG,0127F000000QEn3QAG]"
-
-
-Loop: Loop Over Case Record Types
-Iteration  3  of the loop through the  Get_Case_Record_Types  collection occurred.
-$$:LoopNext:
-Loop Through: [0125K0000004JjbQAE,0127F000000QEn0QAG,0127F000000QEn3QAG,012Ol000000bgJdIAI,012Ol000003SjOfIAK,012Ol000004VWvlIAG]
-Iteration: 3
-Current iteration item: 012Ol000000bgJdIAI
-
-
-Assignment: Record Type Name List
-2 variables were updated.
-{!caseRecordTypeNameList} Add {!Loop_Over_Case_Record_Types.Name}
-{!caseRecordTypeIdsList} Add {!Loop_Over_Case_Record_Types.Id}
-Result
-{!caseRecordTypeNameList} = "[Disability and Terminal Claim,Complaint,Third Party Authority,Total and Permanent Disability Claim]"
-{!caseRecordTypeIdsList} = "[0125K0000004JjbQAE,0127F000000QEn0QAG,0127F000000QEn3QAG,012Ol000000bgJdIAI]"
-
-
-Loop: Loop Over Case Record Types
-Iteration  4  of the loop through the  Get_Case_Record_Types  collection occurred.
-$$:LoopNext:
-Loop Through: [0125K0000004JjbQAE,0127F000000QEn0QAG,0127F000000QEn3QAG,012Ol000000bgJdIAI,012Ol000003SjOfIAK,012Ol000004VWvlIAG]
-Iteration: 4
-Current iteration item: 012Ol000003SjOfIAK
-
-
-Assignment: Record Type Name List
-2 variables were updated.
-{!caseRecordTypeNameList} Add {!Loop_Over_Case_Record_Types.Name}
-{!caseRecordTypeIdsList} Add {!Loop_Over_Case_Record_Types.Id}
-Result
-{!caseRecordTypeNameList} = "[Disability and Terminal Claim,Complaint,Third Party Authority,Total and Permanent Disability Claim,Death Benefit Claim]"
-{!caseRecordTypeIdsList} = "[0125K0000004JjbQAE,0127F000000QEn0QAG,0127F000000QEn3QAG,012Ol000000bgJdIAI,012Ol000003SjOfIAK]"
-
-
-Loop: Loop Over Case Record Types
-Iteration  5  of the loop through the  Get_Case_Record_Types  collection occurred.
-$$:LoopNext:
-Loop Through: [0125K0000004JjbQAE,0127F000000QEn0QAG,0127F000000QEn3QAG,012Ol000000bgJdIAI,012Ol000003SjOfIAK,012Ol000004VWvlIAG]
-Iteration: 5
-Current iteration item: 012Ol000004VWvlIAG
-
-
-Assignment: Record Type Name List
-2 variables were updated.
-{!caseRecordTypeNameList} Add {!Loop_Over_Case_Record_Types.Name}
-{!caseRecordTypeIdsList} Add {!Loop_Over_Case_Record_Types.Id}
-Result
-{!caseRecordTypeNameList} = "[Disability and Terminal Claim,Complaint,Third Party Authority,Total and Permanent Disability Claim,Death Benefit Claim,Terminal Illness Claim]"
-{!caseRecordTypeIdsList} = "[0125K0000004JjbQAE,0127F000000QEn0QAG,0127F000000QEn3QAG,012Ol000000bgJdIAI,012Ol000003SjOfIAK,012Ol000004VWvlIAG]"
-
-
-Loop: Loop Over Case Record Types
-Loop was completed.
-$$:LoopEnd:
-End Loop.
-
-
-Get Records: Get Case Records
-We couldn't retrieve any records.
-Find all Case records where:
-AccountId Equals {!Get_Account_Record.Id} (0018v000007UjqIAAS)
-AND IsClosed Equals false
-AND RecordTypeId In {!caseRecordTypeIdsList} ([0125K0000004JjbQAE,0127F000000QEn0QAG,0127F000000QEn3QAG,012Ol000000bgJdIAI,012Ol000003SjOfIAK,012Ol000004VWvlIAG])
-Store the values of these fields in Get_Case_Records: RecordTypeId, Id
-Result
-Failed to find records.
-SOQL queries: 1 out of 100
-
-
-Loop: Existing Case Record Type Names
-Loop was completed.
-$$:LoopEnd:
-End Loop.
-
-
-Decision: Case Record Found?
-The  default  outcome was executed.
-$$:OutcomeNotExecuted:Found
-Skipped this outcome because its conditions weren't met: Found
-Outcome conditions: 
-1. {!Get_Case_Records} (null) Is null false
-2. {!Get_Case_Records} (null) Is Empty false
-Logic: All conditions must be true (AND)
-$$:DefaultOutcomeExecuted:
-Default outcome executed.
-
-
-Loop: Loop through Case Record Type Names
-Iteration  0  of the loop through the  caseRecordTypeNameList  collection occurred.
-$$:LoopNext:
-Loop Through: [Disability and Terminal Claim,Complaint,Third Party Authority,Total and Permanent Disability Claim,Death Benefit Claim,Terminal Illness Claim]
-Iteration: 0
-Current iteration item: Disability and Terminal Claim
-
-
-Assignment: Assign Current Case Record Type
-1 variable was updated.
-{!currentCaseRecordTypeName} Equals {!Loop_through_Case_Record_Type_Names_nocases}
-Result
-{!currentCaseRecordTypeName} = "Disability and Terminal Claim"
-
-
-Assignment: Assign Case Status
-2 variables were updated.
-{!caseExists} Equals No <br>
-{!caseStatusList} Add {!caseStatusDetails}
-Result
-{!caseExists} = "No <br>"
-{!caseStatusList} = "<ul><li><strong>Disability and Terminal Claim</strong>: No</li></ul>"
-
-
-Loop: Loop through Case Record Type Names
-Iteration  1  of the loop through the  caseRecordTypeNameList  collection occurred.
-$$:LoopNext:
-Loop Through: [Disability and Terminal Claim,Complaint,Third Party Authority,Total and Permanent Disability Claim,Death Benefit Claim,Terminal Illness Claim]
-Iteration: 1
-Current iteration item: Complaint
-
-
-Assignment: Assign Current Case Record Type
-1 variable was updated.
-{!currentCaseRecordTypeName} Equals {!Loop_through_Case_Record_Type_Names_nocases}
-Result
-{!currentCaseRecordTypeName} = "Complaint"
-
-
-Assignment: Assign Case Status
-2 variables were updated.
-{!caseExists} Equals No <br>
-{!caseStatusList} Add {!caseStatusDetails}
-Result
-{!caseExists} = "No <br>"
-{!caseStatusList} = "<ul><li><strong>Disability and Terminal Claim</strong>: No</li></ul><ul><li><strong>Complaint</strong>: No <br></li></ul>"
-
-
-Loop: Loop through Case Record Type Names
-Iteration  2  of the loop through the  caseRecordTypeNameList  collection occurred.
-$$:LoopNext:
-Loop Through: [Disability and Terminal Claim,Complaint,Third Party Authority,Total and Permanent Disability Claim,Death Benefit Claim,Terminal Illness Claim]
-Iteration: 2
-Current iteration item: Third Party Authority
-
-
-Assignment: Assign Current Case Record Type
-1 variable was updated.
-{!currentCaseRecordTypeName} Equals {!Loop_through_Case_Record_Type_Names_nocases}
-Result
-{!currentCaseRecordTypeName} = "Third Party Authority"
-
-
-Assignment: Assign Case Status
-2 variables were updated.
-{!caseExists} Equals No <br>
-{!caseStatusList} Add {!caseStatusDetails}
-Result
-{!caseExists} = "No <br>"
-{!caseStatusList} = "<ul><li><strong>Disability and Terminal Claim</strong>: No</li></ul><ul><li><strong>Complaint</strong>: No <br></li></ul><ul><li><strong>Third Party Authority</strong>: No <br></li></ul>"
-
-
-Loop: Loop through Case Record Type Names
-Iteration  3  of the loop through the  caseRecordTypeNameList  collection occurred.
-$$:LoopNext:
-Loop Through: [Disability and Terminal Claim,Complaint,Third Party Authority,Total and Permanent Disability Claim,Death Benefit Claim,Terminal Illness Claim]
-Iteration: 3
-Current iteration item: Total and Permanent Disability Claim
-
-
-Assignment: Assign Current Case Record Type
-1 variable was updated.
-{!currentCaseRecordTypeName} Equals {!Loop_through_Case_Record_Type_Names_nocases}
-Result
-{!currentCaseRecordTypeName} = "Total and Permanent Disability Claim"
-
-
-Assignment: Assign Case Status
-2 variables were updated.
-{!caseExists} Equals No <br>
-{!caseStatusList} Add {!caseStatusDetails}
-Result
-{!caseExists} = "No <br>"
-{!caseStatusList} = "<ul><li><strong>Disability and Terminal Claim</strong>: No</li></ul><ul><li><strong>Complaint</strong>: No <br></li></ul><ul><li><strong>Third Party Authority</strong>: No <br></li></ul><ul><li><strong>Total and Permanent Disability Claim</strong>: No <br></li></ul>"
-
-
-Loop: Loop through Case Record Type Names
-Iteration  4  of the loop through the  caseRecordTypeNameList  collection occurred.
-$$:LoopNext:
-Loop Through: [Disability and Terminal Claim,Complaint,Third Party Authority,Total and Permanent Disability Claim,Death Benefit Claim,Terminal Illness Claim]
-Iteration: 4
-Current iteration item: Death Benefit Claim
-
-
-Assignment: Assign Current Case Record Type
-1 variable was updated.
-{!currentCaseRecordTypeName} Equals {!Loop_through_Case_Record_Type_Names_nocases}
-Result
-{!currentCaseRecordTypeName} = "Death Benefit Claim"
-
-
-Assignment: Assign Case Status
-2 variables were updated.
-{!caseExists} Equals No <br>
-{!caseStatusList} Add {!caseStatusDetails}
-Result
-{!caseExists} = "No <br>"
-{!caseStatusList} = "<ul><li><strong>Disability and Terminal Claim</strong>: No</li></ul><ul><li><strong>Complaint</strong>: No <br></li></ul><ul><li><strong>Third Party Authority</strong>: No <br></li></ul><ul><li><strong>Total and Permanent Disability Claim</strong>: No <br></li></ul><ul><li><strong>Death Benefit Claim</strong>: No <br></li></ul>"
-
-
-Loop: Loop through Case Record Type Names
-Iteration  5  of the loop through the  caseRecordTypeNameList  collection occurred.
-$$:LoopNext:
-Loop Through: [Disability and Terminal Claim,Complaint,Third Party Authority,Total and Permanent Disability Claim,Death Benefit Claim,Terminal Illness Claim]
-Iteration: 5
-Current iteration item: Terminal Illness Claim
-
-
-Assignment: Assign Current Case Record Type
-1 variable was updated.
-{!currentCaseRecordTypeName} Equals {!Loop_through_Case_Record_Type_Names_nocases}
-Result
-{!currentCaseRecordTypeName} = "Terminal Illness Claim"
-
-
-Assignment: Assign Case Status
-2 variables were updated.
-{!caseExists} Equals No <br>
-{!caseStatusList} Add {!caseStatusDetails}
-Result
-{!caseExists} = "No <br>"
-{!caseStatusList} = "<ul><li><strong>Disability and Terminal Claim</strong>: No</li></ul><ul><li><strong>Complaint</strong>: No <br></li></ul><ul><li><strong>Third Party Authority</strong>: No <br></li></ul><ul><li><strong>Total and Permanent Disability Claim</strong>: No <br></li></ul><ul><li><strong>Death Benefit Claim</strong>: No <br></li></ul><ul><li><strong>Terminal Illness Claim</strong>: No <br></li></ul>"
-
-
-Loop: Loop through Case Record Type Names
-Loop was completed.
-$$:LoopEnd:
-End Loop.
-
-
-Get Records: Get Relationships
-One or more  Relationship__c  records were retrieved.
-Find all Relationship__c records where:
-Account__c Equals {!Get_Account_Record.Id} (0018v000007UjqIAAS)
-AND Type__c Equals Owner
-Store the values of these fields in Get_Relationships: Products__c, Id
-Result
-Successfully found records.
-SOQL queries: 1 out of 100
-,SOQL query rows: 1 out of 50000
-
-
-Loop: Loop Through Relationship Records
-Iteration  0  of the loop through the  Get_Relationships  collection occurred.
-$$:LoopNext:
-Loop Through: [a0GOl000004oYh7MAE]
-Iteration: 0
-Current iteration item: a0GOl000004oYh7MAE
-
-
-Assignment: Assign Scheme Category List
-1 variable was updated.
-{!schemeCategoryList} Add 900030091 - Accumulation -- CorpPerm>=15hrs 
-Result
-{!schemeCategoryList} = "[900030091 - Accumulation -- CorpPerm>=15hrs ]"
-
-
-Get Records: Get Product Record
-One or more  Product__c  records were retrieved.
-Find all Product__c records where:
-Id Equals {!Loop_Through_Relationship_Records.Products__c} (a0F8v000000GgxyEAC)
-Store the values of these fields in Get_Product_Record: Id
-Result
-Successfully found records.
-SOQL queries: 1 out of 100
-,SOQL query rows: 1 out of 50000
-
-
-Decision: Check Product List
-" First_Product " outcome was executed.
-$$:OutcomeExecuted:First_Product
-Outcome executed: First_Product
-Outcome conditions: 
-{!productList} () Is Blank true
-All conditions must be true (AND)
-
-
-Assignment: Add First Product
-1 variable was updated.
-{!productList} Add {!productDetail}
-Result
-{!productList} = "<p><strong>Account Name</strong>: SPSL Accumulation</p><p><strong>Account Number:</strong> 900030091</p><p><strong>Scheme Category:</strong> CorpPerm>=15hrs</p><p><strong>Account Type</strong>: Accumulation</p><p><strong>Status</strong>: Active</p>"
-
-
-Loop: Loop Through Relationship Records
-Loop was completed.
-$$:LoopEnd:
-End Loop.
-
-
-Assignment: Assign Output
-1 variable was updated.
-{!memberSummaryResponse} Equals {!memberSummary}
-Result
-{!memberSummaryResponse} = "<p><strong>Member Name</strong>: Catherine Ngin</p><p><strong>Age</strong>: 28</p><p><strong>First Nation Post Code: </strong>false</p><p><br></p><p><b>Account Summary</b>:</p><p><p><strong>Account Name</strong>: SPSL Accumulation</p><p><strong>Account Number:</strong> 900030091</p><p><strong>Scheme Category:</strong> CorpPerm>=15hrs</p><p><strong>Account Type</strong>: Accumulation</p><p><strong>Status</strong>: Active</p></p><p><br></p><p><strong>Open Case Summary:</strong></p><p><ul><li><strong>Disability and Terminal Claim</strong>: No</li></ul><ul><li><strong>Complaint</strong>: No <br></li></ul><ul><li><strong>Third Party Authority</strong>: No <br></li></ul><ul><li><strong>Total and Permanent Disability Claim</strong>: No <br></li></ul><ul><li><strong>Death Benefit Claim</strong>: No <br></li></ul><ul><li><strong>Terminal Illness Claim</strong>: No <br></li></ul></p>"
-
-
-Transaction Committed
-Any records that the flow was ready to create, update, or delete were committed to the database.
-
-
-How the Interview Finished
-The flow interview ran for 0.77 seconds and finished on 7 August 2026 at 2:22 pm.
-
-
-
-    Two Environments have the Record:
-
-    UAT ORG : "_","Id","IsDeleted","MasterRecordId","Name","LastName","FirstName","Salutation","MiddleName","Type","RecordTypeId","ParentId","BillingStreet","BillingCity","BillingState","BillingPostalCode","BillingCountry","BillingStateCode","BillingCountryCode","BillingLatitude","BillingLongitude","BillingGeocodeAccuracy","BillingAddress","BillingAddress.city","BillingAddress.country","BillingAddress.countryCode","BillingAddress.geocodeAccuracy","BillingAddress.latitude","BillingAddress.longitude","BillingAddress.postalCode","BillingAddress.state","BillingAddress.stateCode","BillingAddress.street","ShippingStreet","ShippingCity","ShippingState","ShippingPostalCode","ShippingCountry","ShippingStateCode","ShippingCountryCode","ShippingLatitude","ShippingLongitude","ShippingGeocodeAccuracy","ShippingAddress","Phone","Fax","AccountNumber","Website","PhotoUrl","Sic","Industry","AnnualRevenue","NumberOfEmployees","Ownership","TickerSymbol","Description","Rating","Site","OwnerId","CreatedDate","CreatedById","LastModifiedDate","LastModifiedById","SystemModstamp","LastActivityDate","LastViewedDate","LastReferencedDate","SourceSystemIdentifier","IsPartner","IsCustomerPortal","PersonContactId","IsPersonAccount","ChannelProgramName","ChannelProgramLevelName","PersonMailingStreet","PersonMailingCity","PersonMailingState","PersonMailingPostalCode","PersonMailingCountry","PersonMailingStateCode","PersonMailingCountryCode","PersonMailingLatitude","PersonMailingLongitude","PersonMailingGeocodeAccuracy","PersonMailingAddress","PersonMailingAddress.city","PersonMailingAddress.country","PersonMailingAddress.countryCode","PersonMailingAddress.geocodeAccuracy","PersonMailingAddress.latitude","PersonMailingAddress.longitude","PersonMailingAddress.postalCode","PersonMailingAddress.state","PersonMailingAddress.stateCode","PersonMailingAddress.street","PersonOtherStreet","PersonOtherCity","PersonOtherState","PersonOtherPostalCode","PersonOtherCountry","PersonOtherStateCode","PersonOtherCountryCode","PersonOtherLatitude","PersonOtherLongitude","PersonOtherGeocodeAccuracy","PersonOtherAddress","PersonOtherAddress.city","PersonOtherAddress.country","PersonOtherAddress.countryCode","PersonOtherAddress.geocodeAccuracy","PersonOtherAddress.latitude","PersonOtherAddress.longitude","PersonOtherAddress.postalCode","PersonOtherAddress.state","PersonOtherAddress.stateCode","PersonOtherAddress.street","PersonMobilePhone","PersonHomePhone","PersonOtherPhone","PersonAssistantPhone","PersonEmail","PersonTitle","PersonDepartment","PersonAssistantName","PersonLeadSource","PersonBirthdate","PersonHasOptedOutOfEmail","PersonHasOptedOutOfFax","PersonDoNotCall","PersonLastCURequestDate","PersonLastCUUpdateDate","PersonEmailBouncedReason","PersonEmailBouncedDate","PersonIndividualId","PersonPronouns","PersonGenderIdentity","Jigsaw","JigsawCompanyId","AccountSource","SicDesc","ABN__c","Account_Email__c","Account_Tier__c","Additional_Benefits__c","Advice_Member__c","Age_Demographic_Text__c","Billing_Address_Line_1__c","Billing_Address_Line_2__c","Billing_Address_Line_3__c","Billing_Address_Line_4__c","Billing_City__c","Billing_Country__c","Billing_Post_Code__c","Billing_State__c","Can_Solicit__c","Clearing_House__c","Client_ID__c","Client_Status__c","Commence_Date__c","Complaint_Status__c","Concatenated_Key_Roles__c","Contribution_Arrangement__c","Current_Default_Fund__c","Date_Death_Notified__c","Date_of_Birth_Search__c","Date_of_Death__c","Date_of_Last_Education_Activity__c","Date_of_Last_RM_Activity__c","EBA_Allow_LGIAsuper_as_Default__c","EBA_Details__c","EBA__c","Education_Team_Member__c","Education_Tier__c","Employer_Id__c","Employer_Status__c","Employer__c","Employment_Status__c","Entity_Type__c","Gender_Demographic_Text__c","Gender__c","Handle_with_Care__c","Hash_Account_Name__c","Hold_Correspondence__c","How_Many_Members__c","How_long_paying_to_LGIAsuper__c","ID_Check_Pass_Diff__c","Insurance_Flag__c","Is_Employer_Lead__c","Key_Role_Status__c","Laserfiche__c","Last_Activity_Date__c","Last_Complaint_Closed_Date__c","Last_Complaint_Date__c","Last_ID_Check_Fail__c","Last_ID_Check_Pass__c","Last_ID_Check_Performed_by__c","Last_ID_Check_To_A_Member_Fail__c","Last_ID_Check_To_A_Member_Pass__c","Legacy_ID__c","Legal_Entity_Name__c","Lost_Member__c","Mailing_Address_Line_1__c","Mailing_Address_Line_2__c","Mailing_Address_Line_3__c","Mailing_Address_Line_4__c","Mailing_City__c","Mailing_Country__c","Mailing_Post_Code__c","Mailing_State__c","Marital_Status__c","Member_Flags__c","Modern_Award_Details__c","Modern_Award__c","Modern_Award_allow_LGIAsuper_as_Default__c","Next_Education_Activity__c","Next_Employer_Activity_Date__c","Occupation_Date__c","Financial_Advisor__c","Occupation__c","Occupational_Code__c","Organisation_Size__c","Other_Payroll_System__c","Password__c","Payment_Frequency__c","Payroll_System__c","Planned_Retirement_Date__c","Private__c","Recent_Complaint__c","Record_Type_Formula__c","Record_Type_Name__c","Record__c","Relationship_Manager__c","SAFF_File__c","Salary__c","Secure_Salary__c","Staff_Account__c","TFN_Status__c","VIP__c","Workforce_Trend__c","Legacy_Details__c","Balance_Owner__c","Funds_Under_Management__c","No_of_Members__c","No_of_Products__c","Percent_of_Members_LGIAsuper__c","Member_Warning__c","Next_Contact_Status__c","Reconciliation__c","Main_TPA_ID__c","CSAT_Backend__c","CSAT__c","NPS_No__c","NPS__c","Email_Opt_Out__c","General_Communication__c","Partner__c","Partner_Community_Link__c","Account_Managed__c","Account_Manager__c","Branch__c","Work_Location__c","Is_Deceased__c","Adviser__c","Beneficiary_End_Date__c","Beneficiary_Type__c","Account_Manager_Formula__c","Account_Manager_Lookup__c","Segment__c","Event__c","Event_value__c","General_communicationC__c","Marketing_Values__c","Marketing__c","Account_Manager_Email_test__c","Account_Manager_Email__c","Account_Manager_Landline_Number__c","Account_Manager_Mobile_Number__c","Employment_Start_Date__c","Occupational_risk_rating__c","Spouse__c","IsActive__c","IsExited__c","Locale__c","SMS_opt_out__c","Eligibility__c","Product_Type__c","Tax_File_Number__c","Age__c","Mandatory_Communication__c","MarketResearch__c","Mobile__c","Notes_on_Handle_with_Care__c","Promocode__c","Promocode1__c","IsApproachingRetirement__c","Commence_Tenure__c","Consolidate_My_Super_Eligibility_Date__c","IsConsolidateSuper__c","Birthday_Eligibility_Date__c","Grow_My_Super_Eligibility_Date__c","IsBirthday__c","IsGrowMySuper__c","Family_Friends_Eligibility_Date__c","IsFamilyandFriends__c","IsNearingRetirement__c","Nearing_Retirement_Eligibility_Date__c","Change_of_Contribution_Pattern_Reason__c","Changing_Pattern_Eligibility_Date__c","IsChangeOfPattern__c","IsChangingJobs__c","IsOnboardingJourney__c","Fund_Origin__c","ASIC_Number__c","Date_Reminder_Sent__c","EBA_Expiry_Date__c","EBA_Mandated_IP_Units__c","Fund_Specified_in_Agreement__c","Latest_List_Received__c","Licensee_Brighter_Super_Number__c","MEA__c","NECA__c","No_Contact_from_Business_Growth__c","PMIF_Employer__c","Reporting_Frequency__c","Status__c","Third_Party_Type__c","Union_EBA__c","LGA_Name__c","ES_Employer_ID__c","ES_Plan_Employer_ID__c","ES_Plan_Employer_Reference__c","KYC_Date__c","Adviser_Category__c","Adviser_Number__c","Date_Last_Paid__c","Dealergroup_Client_ID__c","Account_Panel_Segmentation__c","Mobile_Clickable__c","Phone_Clickable__c","Aboriginal_or_Torres_Strait_Islander__c","Notes_on_Vulnerable_Member__c","Vulnerable_Member__c","EDW_AccATOSweepStatus__c","EDW_AccProduct__c","EDW_AccountRollinLast12Mths__c","EDW_AccountRolloutLast12Mths__c","EDW_MemberRollinEver__c","EDW_MemberRolloutEver__c","EDW_Product__c","EDW_ReceivedAdvice__c","EDW_Segment__c","EDW_SeminarLast12months__c","EDW_Tenure__c","EW_LastPaidPayerCategory__c","Employer_Name__c","Key_Member__c","Last_Paid_Council__c","Last_SHC_Date__c","Lead_Link__c","SHC_Completed__c","EDW_HasBrighter__c","EDW_HasEnergy__c","EDW_HasOptimiser__c","EDW_MySuper__c","Account_Manager_Name__c","Has_Email__c","Fraud_Alert__c","Supertick_Status__c","Supertick_Validation_Date__c","Growth_Priority_Member__c","Active_Claims__c","Consolidate_My_Super_Check__c","Growth_Priority_Member_Advised__c","Active_Complaint__c","Active_Closed_Claims__c","MOL_Registered__c","MOL_Last_Login_Date__c","Partner_Linked__c","Approaching_retirement_Check__c","IsGrowMySuperIn3Months__c","IsOnboardingJourneyWithin3Months__c","Nearing_retirement_Check__c","Approaching_Retirement_Eligibility_Date__c","Birthday_Check__c","Family_and_Friends_Check__c","IsChangeofJob_In_3_Months__c","IsChangeofPattern_In_3_Months__c","SHC_Follow_Up_Chcek__c","HasPartnerLinkEver__c","First_Nation_Postcode__c","Adviser_Number_of_TPAs__c","Adviser_Registration_Date__c","Adviser_Registration_Status__c","Category__c","External_ID__c","Licensee_Name__c","Number_Balance_Owner__c","Practice_Name__c","Third_Party_Authority_New__c","Total_Approved_Member_Balance_Owner__c","Approved_TPA_Member_Account_Balance__c","Automated_Email_Has_Been_Triggered__c","Manual_Email_Has_Been_Triggered__c","Online_Advertising__c","RHC_Meeting_Date__c","Retirement_Advice_Meeting_Date__c","Super_Advice_Meeting_Date__c","GA_Promocode_URL__c","GA_Super_Advice_Completed__c","GA_RHC_Completed__c","GA_Retirement_Advice_Completed__c","Next_Best_Advice_Offer__c","Next_Best_Advice_Offer_Details__c","EDW_WebinarLast12months__c","Contact_Influence__pc","Contact_Status__pc","Current_Age__pc","Do_Not_Contact__pc","General_Communication__pc","Key_Role__pc","Mandatory_Communication__pc","Market_Research__pc","Marketing_Material_Preference__pc","Next_Birthday__pc","Personal_Communication__pc","Preferred_Name__pc","Hash_Email__pc","Contact_Legacy_Id__pc","Is_Candidate__pc","ASF_Commission_Paid__pc","et4ae5__HasOptedOutOfMobile__pc","et4ae5__Mobile_Country_Code__pc","ASF_Funds_Under_Advice_FUA__pc","ASF_Members__pc","ASIC_Number__pc","Brighter_Super_Adviser_ID__pc","Brighter_Super_Adviser_Number__pc","Brighter_Super_Adviser__pc","Brighter_Super_TPA_FUA__pc","Brighter_Super_TPA_Members__pc","Brighter_Super_TPA__pc","Contact_Type__pc","Licensee_Name__pc","Panel_Segmentation__pc","Role__pc","SPSL_Funds_Under_Advice_FUA__pc","SPSL_Members__pc","SPSL_Super_Adviser__pc","Wealth_Adviser_Number__pc","ES_Employer_ID__pc","ES_Member_Number__pc","ES_Salesforce_Process_Builder__pc","Employer_PMIF_Contact__pc","ES_Plan_Employer_ID__pc","ES_Plan_Employer_Reference__pc","Is_Member__pc","Mobile_Formatted__pc","Client_Status__pc"
-"[Account]","0018v000007UjqIAAS","false","","Catherine Ngin","Ngin","Catherine","Miss","","Personal, Ind","0127F0000009AqGQAU","","142 David Collins Drive","ENDEAVOUR HILLS","Victoria","3802","Australia","VIC","AU","","","","[object Object]","ENDEAVOUR HILLS","Australia","AU","","","","3802","Victoria","VIC","142 David Collins Drive","","","","","","","","","","","","","","","","/services/images/photo/0018v000007UjqIAAS","","","","","","","","","","0057F0000073XaqQAE","2023-06-06T10:07:50.000+0000","0057F0000073XaqQAE","2026-08-07T02:25:34.000+0000","005Ol00000092fLIAQ","2026-08-07T02:25:34.000+0000","","","","","false","false","0038v000002dvEVAAY","true","","","","","","","Australia","","AU","","","","[object Object]","","Australia","AU","","","","","","","","","","","","Australia","","AU","","","","[object Object]","","Australia","AU","","","","","","","","","","","","250046714@invalid.lgiasuper.com.au","","","","","1998-06-21","false","false","false","","","","","","","","","","","","","250046714@invalid.lgiasuper.com.au","","","false","","142 David Collins Drive","","","","ENDEAVOUR HILLS","Australia","3802","VIC","No","","250046714","Alive","2021-09-06","","","","","","21/06/1998","","","","","","","","","210080159","Prospect","0018v00000542iAAAQ","Active","","","Female","false","5p73aZdVIG/JTcTTimn+IfsbixcAItmSjp3pyJyrKjs=","No","","","","","false","No contacts with key roles","<a href=""https://CSP.internal.lgsuper.org/laserfiche/Browse.aspx?repo=LFCSP#?view=search&amp;search=%7BLF:Name%3D%22*%22,%20Type%3D%22DF%22%7D%20%26%20(%7BLF:LOOKIN%3D%22%5CEntity%22%7D)%20%26%20%7B%5B%5D:%5BEntity%20ID%5D%20%3D%20%22250046714%22%7D"" target=""_blank"">Open Laserfiche Folder</a>","","","","","","","","","","","Found - Contact","","","","","","","","","","","","","","","","","","","","","","","","","","N","false","Member","Member","<img src=""/servlet/servlet.FileDownload?file=0157F000000Mliv"" alt=""Member"" style=""height:30px; width:30px;"" border=""0""/>","","","","No","false","TFN is Valid","false","","","35103.4","0","1","1","","","Up to date","false","","","<img src=""/resource/Stars_White"" alt=""Stars"" style=""height:17px; width:40px;"" border=""0""/>","","<img src=""/resource/Stars_White"" alt=""Stars"" style=""height:17px; width:40px;"" border=""0""/>","false","Do Not Want","","https://lgiasuper.force.com/s/detail/0018v000007UjqI","false","","","","false","","","","","","Standard Member","Events/Seminars","EMAL;PHNE;SMS","true","PHNE;SMS;EMAL","Marketing","","","","","2021-09-06","Professional","","true","false","en-AU","false","NBO8","","","28","Email","Opt In","","","cb16da","cb16da","false","60","","false","2025-06-21","2026-07-01","false","false","","false","false","","","","false","false","false","SPSL","","","","","","","","false","false","false","","","Active","","","Casey","","","","","","","2026-07-02","","","<a href=""tel:"" target=""_blank""> </a>","<a href=""tel:"" target=""_blank""> </a>","false","","false","false","Optimiser Corporate","true","false","true","false","Accumulation","No","Segment 1 - 18 to 44","No","C) 3-5 Years","Participating - Other","AHM","false","","","","false","false","false","true","MySuper Only","","Yes","false","MATC","2021-09-06","false","false","false","false","false","false","true","","","false","false","false","false","","false","false","false","false","false","false","false","0","","","","","","","","","","0","","","Online Advertising","","","","https://www.brightersuper.com.au/familyandfriends?code=cb16da","false","false","false","IFA","","No","","","28","false","Do Not Want","","Email","Opt In","","2027-06-21","","","HPEWjuxQJ/LwEzj3eWPFuj3C0E7/RwDKJ8HxUzaC+8c=","","false","","false","US","","","","","","false","","","","","","","","","","false","","","","","false","","","true","61","Alive"
-
-
-    Sandbox ORG: "_","Id","IsDeleted","MasterRecordId","Name","LastName","FirstName","Salutation","MiddleName","Type","RecordTypeId","ParentId","BillingStreet","BillingCity","BillingState","BillingPostalCode","BillingCountry","BillingStateCode","BillingCountryCode","BillingLatitude","BillingLongitude","BillingGeocodeAccuracy","BillingAddress","ShippingStreet","ShippingCity","ShippingState","ShippingPostalCode","ShippingCountry","ShippingStateCode","ShippingCountryCode","ShippingLatitude","ShippingLongitude","ShippingGeocodeAccuracy","ShippingAddress","Phone","Fax","AccountNumber","Website","PhotoUrl","Sic","Industry","AnnualRevenue","NumberOfEmployees","Ownership","TickerSymbol","Description","Rating","Site","OwnerId","CreatedDate","CreatedById","LastModifiedDate","LastModifiedById","SystemModstamp","LastActivityDate","LastViewedDate","LastReferencedDate","SourceSystemIdentifier","IsPartner","IsCustomerPortal","PersonContactId","IsPersonAccount","ChannelProgramName","ChannelProgramLevelName","PersonMailingStreet","PersonMailingCity","PersonMailingState","PersonMailingPostalCode","PersonMailingCountry","PersonMailingStateCode","PersonMailingCountryCode","PersonMailingLatitude","PersonMailingLongitude","PersonMailingGeocodeAccuracy","PersonMailingAddress","PersonMailingAddress.city","PersonMailingAddress.country","PersonMailingAddress.countryCode","PersonMailingAddress.geocodeAccuracy","PersonMailingAddress.latitude","PersonMailingAddress.longitude","PersonMailingAddress.postalCode","PersonMailingAddress.state","PersonMailingAddress.stateCode","PersonMailingAddress.street","PersonOtherStreet","PersonOtherCity","PersonOtherState","PersonOtherPostalCode","PersonOtherCountry","PersonOtherStateCode","PersonOtherCountryCode","PersonOtherLatitude","PersonOtherLongitude","PersonOtherGeocodeAccuracy","PersonOtherAddress","PersonOtherAddress.city","PersonOtherAddress.country","PersonOtherAddress.countryCode","PersonOtherAddress.geocodeAccuracy","PersonOtherAddress.latitude","PersonOtherAddress.longitude","PersonOtherAddress.postalCode","PersonOtherAddress.state","PersonOtherAddress.stateCode","PersonOtherAddress.street","PersonMobilePhone","PersonHomePhone","PersonOtherPhone","PersonAssistantPhone","PersonEmail","PersonTitle","PersonDepartment","PersonAssistantName","PersonLeadSource","PersonBirthdate","PersonHasOptedOutOfEmail","PersonHasOptedOutOfFax","PersonDoNotCall","PersonLastCURequestDate","PersonLastCUUpdateDate","PersonEmailBouncedReason","PersonEmailBouncedDate","PersonIndividualId","PersonPronouns","PersonGenderIdentity","Jigsaw","JigsawCompanyId","AccountSource","SicDesc","ABN__c","Account_Email__c","Account_Tier__c","Additional_Benefits__c","Advice_Member__c","Age_Demographic_Text__c","Billing_Address_Line_1__c","Billing_Address_Line_2__c","Billing_Address_Line_3__c","Billing_Address_Line_4__c","Billing_City__c","Billing_Country__c","Billing_Post_Code__c","Billing_State__c","Can_Solicit__c","Clearing_House__c","Client_ID__c","Client_Status__c","Commence_Date__c","Complaint_Status__c","Concatenated_Key_Roles__c","Contribution_Arrangement__c","Current_Default_Fund__c","Date_Death_Notified__c","Date_of_Birth_Search__c","Date_of_Death__c","Date_of_Last_Education_Activity__c","Date_of_Last_RM_Activity__c","EBA_Allow_LGIAsuper_as_Default__c","EBA_Details__c","EBA__c","Education_Team_Member__c","Education_Tier__c","Employer_Id__c","Employer_Status__c","Employer__c","Employment_Status__c","Entity_Type__c","Gender_Demographic_Text__c","Gender__c","Handle_with_Care__c","Hash_Account_Name__c","Hold_Correspondence__c","How_Many_Members__c","How_long_paying_to_LGIAsuper__c","ID_Check_Pass_Diff__c","Insurance_Flag__c","Is_Employer_Lead__c","Key_Role_Status__c","Laserfiche__c","Last_Activity_Date__c","Last_Complaint_Closed_Date__c","Last_Complaint_Date__c","Last_ID_Check_Fail__c","Last_ID_Check_Pass__c","Last_ID_Check_Performed_by__c","Last_ID_Check_To_A_Member_Fail__c","Last_ID_Check_To_A_Member_Pass__c","Legacy_ID__c","Legal_Entity_Name__c","Lost_Member__c","Mailing_Address_Line_1__c","Mailing_Address_Line_2__c","Mailing_Address_Line_3__c","Mailing_Address_Line_4__c","Mailing_City__c","Mailing_Country__c","Mailing_Post_Code__c","Mailing_State__c","Marital_Status__c","Member_Flags__c","Modern_Award_Details__c","Modern_Award__c","Modern_Award_allow_LGIAsuper_as_Default__c","Next_Education_Activity__c","Next_Employer_Activity_Date__c","Occupation_Date__c","Financial_Advisor__c","Occupation__c","Occupational_Code__c","Organisation_Size__c","Other_Payroll_System__c","Password__c","Payment_Frequency__c","Payroll_System__c","Planned_Retirement_Date__c","Private__c","Recent_Complaint__c","Record_Type_Formula__c","Record_Type_Name__c","Record__c","Relationship_Manager__c","SAFF_File__c","Salary__c","Secure_Salary__c","Staff_Account__c","TFN_Status__c","VIP__c","Workforce_Trend__c","Legacy_Details__c","Balance_Owner__c","Funds_Under_Management__c","No_of_Members__c","No_of_Products__c","Percent_of_Members_LGIAsuper__c","Member_Warning__c","Next_Contact_Status__c","Reconciliation__c","Main_TPA_ID__c","CSAT_Backend__c","CSAT__c","NPS_No__c","NPS__c","Email_Opt_Out__c","General_Communication__c","Partner__c","Partner_Community_Link__c","Account_Managed__c","Account_Manager__c","Branch__c","Work_Location__c","Is_Deceased__c","Adviser__c","Beneficiary_End_Date__c","Beneficiary_Type__c","Account_Manager_Formula__c","Account_Manager_Lookup__c","Segment__c","Event__c","Event_value__c","General_communicationC__c","Marketing_Values__c","Marketing__c","Account_Manager_Email_test__c","Account_Manager_Email__c","Account_Manager_Landline_Number__c","Account_Manager_Mobile_Number__c","Employment_Start_Date__c","Occupational_risk_rating__c","Spouse__c","IsActive__c","IsExited__c","Locale__c","SMS_opt_out__c","Eligibility__c","Product_Type__c","Tax_File_Number__c","Age__c","Mandatory_Communication__c","MarketResearch__c","Mobile__c","Notes_on_Handle_with_Care__c","Promocode__c","Promocode1__c","IsApproachingRetirement__c","Commence_Tenure__c","Consolidate_My_Super_Eligibility_Date__c","IsConsolidateSuper__c","Birthday_Eligibility_Date__c","Grow_My_Super_Eligibility_Date__c","IsBirthday__c","IsGrowMySuper__c","Family_Friends_Eligibility_Date__c","IsFamilyandFriends__c","IsNearingRetirement__c","Nearing_Retirement_Eligibility_Date__c","Change_of_Contribution_Pattern_Reason__c","Changing_Pattern_Eligibility_Date__c","IsChangeOfPattern__c","IsChangingJobs__c","IsOnboardingJourney__c","Fund_Origin__c","ASIC_Number__c","Date_Reminder_Sent__c","EBA_Expiry_Date__c","EBA_Mandated_IP_Units__c","Fund_Specified_in_Agreement__c","Latest_List_Received__c","Licensee_Brighter_Super_Number__c","MEA__c","NECA__c","No_Contact_from_Business_Growth__c","PMIF_Employer__c","Reporting_Frequency__c","Status__c","Third_Party_Type__c","Union_EBA__c","LGA_Name__c","ES_Employer_ID__c","ES_Plan_Employer_ID__c","ES_Plan_Employer_Reference__c","KYC_Date__c","Adviser_Category__c","Adviser_Number__c","Date_Last_Paid__c","Dealergroup_Client_ID__c","Account_Panel_Segmentation__c","Mobile_Clickable__c","Phone_Clickable__c","Aboriginal_or_Torres_Strait_Islander__c","Notes_on_Vulnerable_Member__c","Vulnerable_Member__c","EDW_AccATOSweepStatus__c","EDW_AccProduct__c","EDW_AccountRollinLast12Mths__c","EDW_AccountRolloutLast12Mths__c","EDW_MemberRollinEver__c","EDW_MemberRolloutEver__c","EDW_Product__c","EDW_ReceivedAdvice__c","EDW_Segment__c","EDW_SeminarLast12months__c","EDW_Tenure__c","EW_LastPaidPayerCategory__c","Employer_Name__c","Key_Member__c","Last_Paid_Council__c","Last_SHC_Date__c","Lead_Link__c","SHC_Completed__c","EDW_HasBrighter__c","EDW_HasEnergy__c","EDW_HasOptimiser__c","EDW_MySuper__c","Account_Manager_Name__c","Has_Email__c","Fraud_Alert__c","Supertick_Status__c","Supertick_Validation_Date__c","Growth_Priority_Member__c","Active_Claims__c","Consolidate_My_Super_Check__c","Growth_Priority_Member_Advised__c","Active_Complaint__c","Active_Closed_Claims__c","MOL_Registered__c","MOL_Last_Login_Date__c","Partner_Linked__c","Approaching_retirement_Check__c","IsGrowMySuperIn3Months__c","IsOnboardingJourneyWithin3Months__c","Nearing_retirement_Check__c","Approaching_Retirement_Eligibility_Date__c","Birthday_Check__c","Family_and_Friends_Check__c","IsChangeofJob_In_3_Months__c","IsChangeofPattern_In_3_Months__c","SHC_Follow_Up_Chcek__c","HasPartnerLinkEver__c","First_Nation_Postcode__c","Adviser_Number_of_TPAs__c","Adviser_Registration_Date__c","Adviser_Registration_Status__c","Category__c","External_ID__c","Licensee_Name__c","Number_Balance_Owner__c","Practice_Name__c","Third_Party_Authority_New__c","Total_Approved_Member_Balance_Owner__c","Approved_TPA_Member_Account_Balance__c","Automated_Email_Has_Been_Triggered__c","Manual_Email_Has_Been_Triggered__c","Online_Advertising__c","RHC_Meeting_Date__c","Retirement_Advice_Meeting_Date__c","Super_Advice_Meeting_Date__c","GA_Promocode_URL__c","GA_RHC_Completed__c","GA_Retirement_Advice_Completed__c","GA_Super_Advice_Completed__c","EDW_WebinarLast12months__c","Next_Best_Advice_Offer__c","Next_Best_Advice_Offer_Details__c","Contact_Influence__pc","Contact_Status__pc","Current_Age__pc","Do_Not_Contact__pc","General_Communication__pc","Key_Role__pc","Mandatory_Communication__pc","Market_Research__pc","Marketing_Material_Preference__pc","Next_Birthday__pc","Personal_Communication__pc","Preferred_Name__pc","Hash_Email__pc","Contact_Legacy_Id__pc","Is_Candidate__pc","ASF_Commission_Paid__pc","et4ae5__HasOptedOutOfMobile__pc","et4ae5__Mobile_Country_Code__pc","ASF_Funds_Under_Advice_FUA__pc","ASF_Members__pc","ASIC_Number__pc","Brighter_Super_Adviser_ID__pc","Brighter_Super_Adviser_Number__pc","Brighter_Super_Adviser__pc","Brighter_Super_TPA_FUA__pc","Brighter_Super_TPA_Members__pc","Brighter_Super_TPA__pc","Contact_Type__pc","Licensee_Name__pc","Panel_Segmentation__pc","Role__pc","SPSL_Funds_Under_Advice_FUA__pc","SPSL_Members__pc","SPSL_Super_Adviser__pc","Wealth_Adviser_Number__pc","ES_Employer_ID__pc","ES_Member_Number__pc","ES_Salesforce_Process_Builder__pc","Employer_PMIF_Contact__pc","ES_Plan_Employer_ID__pc","ES_Plan_Employer_Reference__pc","Is_Member__pc","Mobile_Formatted__pc","Client_Status__pc"
-"[Account]","0019r00001AKXDEAA5","false","","Catherine Ngin","Ngin","Catherine","","","","0127F0000009AqGQAU","","","","","","","","","","","","","","","","","","","","","","","","","","","","/services/images/photo/0019r00001AKXDEAA5","","","","","","","","","","005Ol000003QMZRIA4","2026-08-07T01:02:13.000+0000","005Ol000003QMZRIA4","2026-08-07T01:55:13.000+0000","005Ol000003QMZRIA4","2026-08-07T01:55:13.000+0000","","2026-08-07T04:11:06.000+0000","2026-08-07T04:11:06.000+0000","","false","false","0039r00001Qn1AQAAZ","true","","","","","","","Australia","","AU","","","","[object Object]","","Australia","AU","","","","","","","","","","","","Australia","","AU","","","","[object Object]","","Australia","AU","","","","","","","","","","","","","","","","","2008-07-31","false","false","false","","","","","","","","","","","","","","","","false","","","","","","","","","","","","250046714","Active","","","","","","","31/07/2008","","","","","","","","","","","","","","","","false","5p73aZdVIG/JTcTTimn+IfsbixcAItmSjp3pyJyrKjs=","","","","","","false","No contacts with key roles","<a href=""https://CSP.internal.lgsuper.org/laserfiche/Browse.aspx?repo=LFCSP#?view=search&amp;search=%7BLF:Name%3D%22*%22,%20Type%3D%22DF%22%7D%20%26%20(%7BLF:LOOKIN%3D%22%5CEntity%22%7D)%20%26%20%7B%5B%5D:%5BEntity%20ID%5D%20%3D%20%22250046714%22%7D"" target=""_blank"">Open Laserfiche Folder</a>","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","N","false","Member","","<img src=""/servlet/servlet.FileDownload?file=0157F000000Mliv"" alt=""Member"" style=""height:30px; width:30px;"" border=""0""/>","","","0","","false","TFN is Valid","false","","","0","0","1","1","","","Up to date","false","","","<img src=""/resource/Stars_White"" alt=""Stars"" style=""height:17px; width:40px;"" border=""0""/>","","<img src=""/resource/Stars_White"" alt=""Stars"" style=""height:17px; width:40px;"" border=""0""/>","false","","","https://lgiasuper.force.com/s/detail/0019r00001AKXDE","false","","","","false","","","","","","Standard Member","","","false","","","","","","","","","","true","false","en-AU","false","NBO8","","","18","","","","","","","false","","","false","","","false","false","","false","false","","","","false","false","false","SPSL","","","","","","","","false","false","false","","","Active","","","","","","","","","","","","","<a href=""tel:"" target=""_blank""> </a>","<a href=""tel:"" target=""_blank""> </a>","false","","false","false","","","","","","","","","","","","","false","","","","false","","","","","","No","false","","","false","false","false","false","false","false","false","","","false","false","false","false","","false","false","false","false","false","false","false","","","","","","","","","","","0","","","","","","","https://www.brightersuper.com.au/familyandfriends?code=","false","false","false","","","","","","18","false","","","","","","2027-07-31","","","","","false","","false","US","","","","","","false","","","","","","","","","","false","","","","","false","","","true","61","Active"
-
-
-    So based on this tell me what's tehe Issue, I am very confused why it is failing in Sandbox when it is successfully running in UAT
-
-
+public with sharing class AF_UnifiedSearchService {
+
+    private static final String PROMPT_TEMPLATE_API_NAME        = 'AF_ADL_KA_Search_Template';
+    private static final String GET_SEARCH_PARAMS_FLOW_API_NAME = 'AF_Get_ADL_KA_Search_Parameters';
+
+    // ===== INPUT =====
+    public class Request {
+        @InvocableVariable(required=true)
+        public String searchQuery;
+
+        @InvocableVariable(required=false)
+        public String employerName;
+
+        @InvocableVariable(required=false)
+        public Boolean isExistingMember;
+
+        @InvocableVariable(required=false)
+        public Boolean isInsuranceSelected;
+
+        @InvocableVariable(required=false)
+        public Boolean isProductSelected;
+
+        @InvocableVariable(required=false)
+        public String schemeCategory;
+
+        @InvocableVariable(required=false)
+        public String selectedL2DocumentFilePath;
+    }
+
+    // ===== OUTPUT =====
+    public class Response {
+        @InvocableVariable(description='LLM response with inline citations')
+        public String Data;
+
+        @InvocableVariable(description='Citation sources for inline references')
+        public AiCopilot.GenAiCitationInput sources;
+    }
+
+    // Holds DCFilePaths and KADataCategories returned from the unified flow
+    private class SearchParameters {
+        List<String> dcFilePaths;
+        List<String> kaDataCategories;
+    }
+
+    // Holds context and source references produced by each search
+    private class SearchResults {
+        List<Map<String, Object>>            contextList = new List<Map<String, Object>>();
+        List<AiCopilot.GenAiSourceReference> sourceRefs  = new List<AiCopilot.GenAiSourceReference>();
+    }
+
+    @InvocableMethod(label='AF Unified ADL and KA Hybrid Search Service')
+    public static List<Response> SearchRetriever(List<Request> requests) {
+        Request req = requests[0];
+        // Step 1: Call unified flow to get both ADL file paths and KA data categories
+        SearchParameters params = getSearchParameters(req);
+
+        Boolean hasADL = params.dcFilePaths     != null && !params.dcFilePaths.isEmpty();
+        Boolean hasKA  = params.kaDataCategories != null && !params.kaDataCategories.isEmpty();
+
+        if (!hasADL && !hasKA) {
+            return new List<Response>{ new Response() };
+        }
+
+        // Step 2: Run applicable searches based on what the flow returned
+        List<Map<String, Object>>            combinedContext    = new List<Map<String, Object>>();
+        List<AiCopilot.GenAiSourceReference> combinedSourceRefs = new List<AiCopilot.GenAiSourceReference>();
+
+        if (hasADL) {
+            SearchResults adlResults = runADLSearch(req.searchQuery, params.dcFilePaths);
+            combinedContext.addAll(adlResults.contextList);
+            combinedSourceRefs.addAll(adlResults.sourceRefs);
+        }
+
+        if (hasKA) {
+            SearchResults kaResults = runKASearch(req.searchQuery, params.kaDataCategories);
+            combinedContext.addAll(kaResults.contextList);
+            combinedSourceRefs.addAll(kaResults.sourceRefs);
+        }
+
+        // Step 3: Single PT call with all combined context
+        String llmResponse = invokePromptTemplate(req.searchQuery, JSON.serialize(combinedContext));
+
+        Response response = new Response();
+        response.Data     = llmResponse;
+        response.sources  = new AiCopilot.GenAiCitationInput(null, combinedSourceRefs);
+
+        system.debug('output>>>'  + response);
+        return new List<Response>{ response };
+    }
+
+    // ── Unified Flow ──────────────────────────────────────────────────────────
+
+    private static SearchParameters getSearchParameters(Request req) {
+        
+        if (req.selectedL2DocumentFilePath != null && !String.isEmpty(req.selectedL2DocumentFilePath)){
+            SearchParameters params = new SearchParameters();
+            params.dcFilePaths = new List<String> { req.selectedL2DocumentFilePath };
+            System.debug('DCFilePaths: '      + params.dcFilePaths);
+            return params;
+        }
+        else {
+            Map<String, Object> flowInputs = new Map<String, Object>{
+                'EmployerName'        => req.employerName,
+                'IsExistingMember'    => req.isExistingMember,
+                'IsInsuranceSelected' => req.isInsuranceSelected,
+                'IsProductSelected'   => req.isProductSelected,
+                'SchemeCategory'      => req.schemeCategory
+            };
+
+            Flow.Interview flowInterview = Flow.Interview.createInterview(GET_SEARCH_PARAMS_FLOW_API_NAME, flowInputs);
+            flowInterview.start();
+
+            SearchParameters params = new SearchParameters();
+
+            params.dcFilePaths = (List<String>) JSON.deserialize(
+                JSON.serialize(flowInterview.getVariableValue('DCFilePaths')), List<String>.class
+            );
+            params.kaDataCategories = (List<String>) JSON.deserialize(
+                JSON.serialize(flowInterview.getVariableValue('KADataCategories')), List<String>.class
+            );
+
+            System.debug('DCFilePaths: '      + params.dcFilePaths);
+            System.debug('KADataCategories: ' + params.kaDataCategories);
+
+            return params;
+        }
+    }
+
+    // ── ADL Search ────────────────────────────────────────────────────────────
+
+    private static SearchResults runADLSearch(String searchQuery, List<String> filePaths) {
+        SearchResults results = new SearchResults();
+        String preFilterConditions = buildFilePathFilter(filePaths);
+        String safeSearchQuery = searchQuery != null ? searchQuery.replace('\'', '\'\'') : searchQuery;
+
+        // Row layout: [0] Chunk  [1] FilePath  [2] hybrid_score  [3] keyword_score  [4] vector_score
+        String sqlQuery =
+            'SELECT c.Chunk__c, d.FilePath__c, h.hybrid_score__c, h.keyword_score__c, h.vector_score__c FROM ' +
+            'hybrid_search(table(ADL_All_Documents_Custom_index__dlm), \'' + safeSearchQuery + '\',' + preFilterConditions + ', 20) AS h ' +
+            'JOIN ADL_All_Documents_Custom_chunk__dlm AS c ON h.SourceRecordId__c = c.RecordId__c ' +
+            'JOIN ADL_All_Documents_L__dlm AS d ON c.SourceRecordId__c = d.FilePath__c ' +
+            'ORDER BY h.hybrid_score__c DESC';
+
+        ConnectApi.CdpQueryInput cdpInput = new ConnectApi.CdpQueryInput();
+        cdpInput.sql = sqlQuery;
+        ConnectApi.CdpQueryOutputV2 output = ConnectApi.CdpQuery.queryAnsiSqlV2(cdpInput);
+
+        Set<String>        filePathSet = new Set<String>();
+        List<List<Object>> rawRows     = new List<List<Object>>();
+
+        if (output.data != null && !output.data.isEmpty()) {
+            for (ConnectApi.CdpQueryV2Row rowObj : output.data) {
+                List<Object> row = rowObj.rowData;
+                rawRows.add(row);
+                if (row[1] != null) filePathSet.add((String) row[1]);
+            }
+        }
+
+        Map<String, Document_Detail__c> filePathToDocMap = new Map<String, Document_Detail__c>();
+        if (!filePathSet.isEmpty()) {
+            for (Document_Detail__c doc : [
+                SELECT Name, Document_URL__c, Data_Cloud_File_Path__c
+                FROM Document_Detail__c
+                WHERE Data_Cloud_File_Path__c IN :filePathSet
+            ]) {
+                filePathToDocMap.put(doc.Data_Cloud_File_Path__c, doc);
+            }
+        }
+
+        Map<String, List<String>> filePathToChunks = new Map<String, List<String>>();
+        List<String>              orderedFilePaths  = new List<String>();
+
+        for (List<Object> row : rawRows) {
+            String chunk    = (String) row[0];
+            String filePath = (String) row[1];
+            if (filePath == null) continue;
+
+            if (!filePathToChunks.containsKey(filePath)) {
+                filePathToChunks.put(filePath, new List<String>());
+                orderedFilePaths.add(filePath);
+            }
+            filePathToChunks.get(filePath).add(chunk);
+
+            Document_Detail__c doc = filePathToDocMap.get(filePath);
+            results.contextList.add(new Map<String, Object>{
+                'Name'    => doc != null ? doc.Name : filePath,
+                'URL'     => doc != null ? doc.Document_URL__c : '',
+                'Content' => chunk
+            });
+        }
+
+        for (String filePath : orderedFilePaths) {
+            Document_Detail__c doc    = filePathToDocMap.get(filePath);
+            String             docUrl = doc != null ? doc.Document_URL__c : null;
+            String             label  = doc != null ? doc.Name : filePath;
+
+            List<AiCopilot.GenAiSourceContentInfo> contents = new List<AiCopilot.GenAiSourceContentInfo>();
+            for (String chunk : filePathToChunks.get(filePath)) {
+                contents.add(new AiCopilot.GenAiSourceContentInfo(null, 'ADL_All_Documents_L__dlm', chunk));
+            }
+
+            results.sourceRefs.add(new AiCopilot.GenAiSourceReference(
+                null, contents,
+                new List<AiCopilot.GenAiSourceReferenceInfo>{
+                    new AiCopilot.GenAiSourceReferenceInfo(docUrl, null, 'ADL_All_Documents_L__dlm', label)
+                }
+            ));
+        }
+
+        return results;
+    }
+
+    // ── KA Search ─────────────────────────────────────────────────────────────
+
+    private static SearchResults runKASearch(String searchQuery, List<String> dataCategoryIds) {
+        SearchResults results = new SearchResults();
+        String safeSearchQuery = searchQuery != null ? searchQuery.replace('\'', '\'\'') : searchQuery;
+
+        List<String> quoteIds = new List<String>();
+        for (String id : dataCategoryIds) {
+            quoteIds.add('\'' + String.escapeSingleQuotes(id) + '\'');
+        }
+        String dataCategoryIdsLiteral = String.join(quoteIds, ', ');
+
+        // Row layout: [0] hybrid_score  [1] ssot__Name__c  [2] Chunk  [3] ssot__Id__c
+        String sqlQuery =
+            'SELECT v.hybrid_score__c AS Score, kav.ssot__Name__c, c.Chunk__c AS Chunk, kav.ssot__Id__c, v.keyword_score__c, v.vector_score__c, c.SourceRecordId__c AS SourceRecordId, c.RecordId__c AS RecordId, c.DataSource__c AS DataSource, c.DataSourceObject__c AS DataSourceObject FROM ' +
+            'hybrid_search(TABLE(KA_Knowledge_Article_Data_Lib_index__dlm), \'' + safeSearchQuery + '\', \'\', 20) AS v ' +
+            'INNER JOIN KA_Knowledge_Article_Data_Lib_chunk__dlm AS c ON c.RecordId__c = v.RecordId__c ' +
+            'INNER JOIN ssot__KnowledgeArticleVersion__dlm AS kav ON c.SourceRecordId__c = kav.ssot__Id__c ' +
+            'AND kav.ssot__KnowledgePublicationStatus__c = \'Online\' ' +
+            'AND c.SourceRecordId__c IN (SELECT DISTINCT kds.ParentId__c FROM DataCategorySelectionCustom__dlm AS kds WHERE kds.DataCategoryId__c IN (' + dataCategoryIdsLiteral + ')) ' +
+            'ORDER BY Score DESC LIMIT 20';
+
+        ConnectApi.CdpQueryInput cdpInput = new ConnectApi.CdpQueryInput();
+        cdpInput.sql = sqlQuery;
+        ConnectApi.CdpQueryOutputV2 output = ConnectApi.CdpQuery.queryAnsiSqlV2(cdpInput);
+
+        List<List<Object>> rawRows = new List<List<Object>>();
+        if (output.data != null && !output.data.isEmpty()) {
+            for (ConnectApi.CdpQueryV2Row rowObj : output.data) {
+                rawRows.add(rowObj.rowData);
+            }
+        }
+
+        Map<String, List<String>> articleIdToChunks = new Map<String, List<String>>();
+        Map<String, String>       articleIdToNameMap = new Map<String, String>();
+        List<String>              orderedArticleIds  = new List<String>();
+
+        for (List<Object> row : rawRows) {
+            String chunk       = (String) row[2];
+            String articleId   = (String) row[3];
+            String articleName = (String) row[1];
+            if (articleId == null) continue;
+
+            articleIdToNameMap.put(articleId, articleName);
+
+            if (!articleIdToChunks.containsKey(articleId)) {
+                articleIdToChunks.put(articleId, new List<String>());
+                orderedArticleIds.add(articleId);
+            }
+            articleIdToChunks.get(articleId).add(chunk);
+
+            results.contextList.add(new Map<String, Object>{
+                'Name'    => articleName,
+                'URL'     => System.Url.getOrgDomainUrl().toExternalForm() + '/lightning/r/Knowledge__kav/' + articleId + '/view',
+                'Content' => chunk
+            });
+        }
+
+        for (String articleId : orderedArticleIds) {
+            String articleUrl   = System.Url.getOrgDomainUrl().toExternalForm() + '/lightning/r/Knowledge__kav/' + articleId + '/view';
+            String articleLabel = articleIdToNameMap.get(articleId);
+
+            List<AiCopilot.GenAiSourceContentInfo> contents = new List<AiCopilot.GenAiSourceContentInfo>();
+            for (String chunk : articleIdToChunks.get(articleId)) {
+                contents.add(new AiCopilot.GenAiSourceContentInfo(null, 'ssot__KnowledgeArticleVersion__dlm', chunk));
+            }
+
+            results.sourceRefs.add(new AiCopilot.GenAiSourceReference(
+                null, contents,
+                new List<AiCopilot.GenAiSourceReferenceInfo>{
+                    new AiCopilot.GenAiSourceReferenceInfo(articleUrl, null, 'ssot__KnowledgeArticleVersion__dlm', articleLabel)
+                }
+            ));
+        }
+
+        return results;
+    }
+
+    // ── Shared: Prompt Template ───────────────────────────────────────────────
+
+    private static String invokePromptTemplate(String searchQuery, String formattedContext) {
+        ConnectApi.EinsteinPromptTemplateGenerationsInput promptInput =
+            new ConnectApi.EinsteinPromptTemplateGenerationsInput();
+
+        Map<String, ConnectApi.WrappedValue> params = new Map<String, ConnectApi.WrappedValue>();
+
+        ConnectApi.WrappedValue qVal = new ConnectApi.WrappedValue();
+        qVal.value = searchQuery;
+        params.put('Input:Question', qVal);
+
+        ConnectApi.WrappedValue cVal = new ConnectApi.WrappedValue();
+        cVal.value = formattedContext;
+        params.put('Input:Context', cVal);
+
+        promptInput.inputParams                      = params;
+        promptInput.isPreview                        = true;
+        promptInput.additionalConfig                 = new ConnectApi.EinsteinLlmAdditionalConfigInput();
+        promptInput.additionalConfig.numGenerations  = 1;
+        promptInput.additionalConfig.applicationName = 'PromptBuilderPreview';
+
+        ConnectApi.EinsteinPromptTemplateGenerationsRepresentation result =
+            ConnectApi.EinsteinLLM.generateMessagesForPromptTemplate(
+                PROMPT_TEMPLATE_API_NAME, promptInput
+            );
+        return result.prompt;
+    }
+
+    // ── Shared: ADL File Path Filter ─────────────────────────────────────────
+
+    private static String buildFilePathFilter(List<String> filePaths) {
+        if (filePaths == null || filePaths.isEmpty()) return '\'1=1\'';
+        List<String> escaped = new List<String>();
+        for (String fp : filePaths) {
+            escaped.add('\'\'' + fp.replace('\'', '\'\'') + '\'\'');
+        }
+        return '\'' + 'FilePath__c IN (' + String.join(escaped, ', ') + ')' + '\'';
+    }
+}
