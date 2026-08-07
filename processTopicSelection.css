@@ -1,47 +1,24 @@
-/* ── Heading ── */
-.heading-text {
-    font-size: 15px;
-    font-weight: 700;
-    color: #444;
-}
+When I run this UAT Org : 
+SELECT
+    RecordId__c,
+    Chunk__c,
+    SourceRecordId__c
+FROM ADL_All_Documents_Custom_chunk__dlm
+LIMIT 2
 
-/* ── Pill button row ── */
-.button-wrapper {
-    display: flex;
-    flex-direction: row;
-    gap: 16px;
-    align-items: center;
-}
+I am getting response : 
+"_","RecordId__c","Chunk__c","SourceRecordId__c"
+"[ADL_All_Documents_Custom_chunk__dlm]","019f835e-8b84-7dc0-b65a-7a1bb57aa27c","**Contact Information** - **Phone**: 1800 444 396 - **Web**: brightersuper.com.au - **Email**: info@brightersuper.com.au - **Post**: GPO Box 264, Brisbane, QLD 4001 --- **Tax on Super** Superannuation is one of the most tax-effective ways of saving for your retirement. --- **Tax is Payable Under These Conditions****Money Going In** - Before-tax (concessional) contributions to your super, from you or your employer, are taxed at 15%. - The 15% tax rate applies to amounts below the 2026/27 cap of $32,500. - If your combined income, including concessional contributions, exceeds $250,000 per year, an additional tax of 15% will apply to the concessional contributions above that threshold. - Rollovers from most super funds are generally not taxed. However, rollovers from some super funds may contain an untaxedelement, which may be taxed when transferred to Brighter Super. - After-tax (non-concessional) contributions are tax-free up to $130,000 per year. On amounts above the 2026/27 cap ($130,000 per year), you may pay up to 47% in tax.**Investment Earnings** - Income from investment returns in the accumulation phase is generally taxed at 15% for total super balances below $3 million. - The effective tax rate may be lower due to allowable deductions, tax credits, and offsets. - The investment earnings you receive are the amount after the deduction of tax on investment income. **From 1 July 2026** Income from investment returns on the portion of a member's total super balance that exceeds the large super balance threshold of $3million (2026/27) will be subject to Division 296 tax of an additional 15%. Additionally, income from investment returns on the portion of the balance that exceeds the very large super balance of $10 million will be taxed a further additional 10%.","1JD9j000001btWPGAY/Tax on super _ Brighter Super FY26-27.pdf"
+"[ADL_All_Documents_Custom_chunk__dlm]","019f835e-8b85-727f-a871-17901a25561e","**Contact Information** - **Phone:** 1800 444 396 - **Web:** brightersuper.com.au - **Email:** info@brightersuper.com.au - **Post:** GPO Box 264, Brisbane, QLD 4001 ---Making Extra Contributions** Adding to your Brighter Super account, whether through one-off payments or contributing small amounts regularly, can help grow your super savings faster and give you more money to live off in retirement. It doesn’t matter whether you’re working, not working, or self-employed; anybody aged under 75 can make personal contributions to super either as a lump sum or regular payments. Most people can also claim a tax deduction for their contribution.Even if you’re already receiving **employer contributions** (Superannuation Guarantee) from your employer, topping up your super through extra contributions can make a big difference to your final benefit. --- **How Do I Make a Personal Contribution?** Personal contributions are paid from after tax money and are also referred to as non concessional super contributions. You can make one off payments at any time or contribute small amounts regularly.**BPAY ** Pay as often as you like through BPAY. Log in to your Brighter Super account securely through**Member Online ** for the biller code and reference number, then start making payments. --- **Claim a Tax Deduction** If you make extra contributions from your after-tax pay, you may be entitled to a tax deduction. By making top-up payments, you could get a tax deduction now and have more money to enjoy in retirement. Everyone under age 67 (and those aged 67 to 74 who satisfy the work test) can claim a tax deduction for personal contributions.If you are between 67 and 74, to meet the work test, you need to be working at least 40 hours over a consecutive 30 day period to claim a tax deduction. Extra contributions from your after-tax pay for which you do not claim a tax deduction are called non-concessional contributions and are taxed differently. You can learn about the difference between **concessional and non-concessional contributions**. ---","1JD9j000001btWPGAY/Making Extra Contributions _ Brighter Super FY26-27.pdf"
 
-/* ── Pill base ── */
-.topic-pill {
-    border: 1px solid #0176D3;
-    border-radius: 20px;
-    padding: 6px 24px;
-    background-color: white;
-    color: #0176D3;
-    font-size: 14px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.2s ease-in-out;
-    white-space: nowrap;
-}
 
-.topic-pill:hover {
-    background-color: #F3F3F3;
-}
 
-/* ── Selected state ── */
-.topic-pill.selected {
-    background-color: #0176D3;
-    color: white;
-}
+When I Running this in Sandbox Org : 
+SELECT
+    RecordId__c,
+    Chunk__c,
+    SourceRecordId__c
+FROM ADL_All_Documents_chunk__dlm
+LIMIT 20
 
-/* ── Disabled state ── */
-.topic-pill:disabled {
-    opacity: 0.6;
-    cursor: not-allowed;
-    background-color: #E5E5E5;
-    border-color: #C9C9C9;
-    color: #747474;
-}
+response : sObject type 'ADL_All_Documents_chunk__dlm' is not supported. If you are attempting to use a custom object, be sure to append the '__c' after the entity name. Please reference your WSDL or the describe call for the appropriate names.
