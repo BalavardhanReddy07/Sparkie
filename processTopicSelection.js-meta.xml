@@ -328,3 +328,6 @@ public with sharing class AF_UnifiedSearchService {
         return '\'' + 'FilePath__c IN (' + String.join(escaped, ', ') + ')' + '\'';
     }
 }
+
+
+            Error  :Execution Error: [{"statusCode":"UNKNOWN_EXCEPTION","message":"An Apex error occurred: ConnectApi.ConnectApiException: {"timestamp":"2026-08-07T04:55:15.743Z","error":"400 BAD_REQUEST","message":"INVALID_ARGUMENT: table \"ADL_All_Documents_Custom_index__dlm\" does not exist [TraceId:02b38c11df2e2dab]","path":"uri=/query/v2/queries","tenantId":"a360/prod4/b6c5bc812e2e480b9c6faf2410c2a628","internalErrorCode":"COMMON_ERROR_GENERIC","details":{}}","fields":null}]
