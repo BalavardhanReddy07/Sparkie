@@ -1,65 +1,80 @@
-[98]|DEBUG|DCFilePaths: (ADL/Insurance/Member's_Guide.pdf)
+	
+Sort
+Configuration Name
+Sorted Ascending
 
-[70]|WARN|SearchRetriever could not complete in this org: ConnectApi.ConnectApiException - {"timestamp":"2026-08-10T08:36:22.337Z","error":"400 BAD_REQUEST","message":"INVALID_ARGUMENT Error communicating with foreign data source"}
+Sort
+Data Space
 
-[98]|DEBUG|DCFilePaths: (1JD9j000001btWPGAY/Corp Plan - NRI.pdf)
+Sort
+Search Type
 
-[70]|WARN|SearchRetriever could not complete in this org: ConnectApi.ConnectApiException - Failed to generate Einstein LLM generations response
+Sort
+API Name
 
-[70]|WARN|SearchRetriever could not complete in this org: System.FlowException - This error occurred when the flow tried to look up records: An unexpected error occurred. Please include this ErrorId if you contact support:
-961585056-204235 (1894744155)
+Sort
+Source Data Model Object
 
-[70]|WARN|SearchRetriever could not complete in this org: System.FlowException - This error occurred when the flow tried to look up records: An unexpected error occurred. Please include this ErrorId if you contact support:
-961585056-204237 (1894744155)
+Sort
+Index Data Model Object
 
-[70]|WARN|SearchRetriever could not complete in this org: System.FlowException - This error occurred when the flow tried to look up records: An unexpected error occurred. Please include this ErrorId if you contact support:
-961585056-204239 (1894744155)
+Sort
+Chunk Data Model Object
 
-[70]|WARN|SearchRetriever could not complete in this org: System.FlowException - This error occurred when the flow tried to look up records: An unexpected error occurred. Please include this ErrorId if you contact support:
-961585056-204240 (1894744155)
+Sort
+File Attachments Data Model Object
 
-[70]|WARN|SearchRetriever could not complete in this org: System.FlowException - This error occurred when the flow tried to look up records: An unexpected error occurred. Please include this ErrorId if you contact support:
-961585056-204241 (1894744155)
+Sort
+Last Modified Date
 
-[70]|WARN|SearchRetriever could not complete in this org: System.FlowException - This error occurred when the flow tried to look up records: An unexpected error occurred. Please include this ErrorId if you contact support:
-961585056-204243 (1894744155)
+Sort
+Search Index Refreshed On
 
-[70]|WARN|SearchRetriever could not complete in this org: System.FlowException - This error occurred when the flow tried to look up records: An unexpected error occurred. Please include this ErrorId if you contact support:
-961585056-204246 (1894744155)
+Sort
+Search Index Last Run Status
 
-[98]|DEBUG|DCFilePaths: (1JD9j000001btWPGAY/Corp Plan - NRI.pdf)
+Action
 
-[87]|DEBUG|output>>Response:[Data=#
+ADL All Documents Custom
+default
+Hybrid
+ADL_All_Documents_Custom
+ADL_All_Documents_L__dlm
+ADL_All_Documents_Custom_index__dlm
+ADL_All_Documents_Custom_chunk__dlm
+4/6/2026, 2:18 pm
+21/7/2026, 11:42 pm
+Ready
 
-ROLE
+ADL_All_Documents_L
+default
+Hybrid
+ADL_All_Documents_L
+ADL_All_Documents_L__dlm
+ADL_All_Documents_L_index__dlm
+ADL_All_Documents_L_chunk__dlm
+23/5/2026, 5:47 am
+21/7/2026, 11:53 pm
+Ready
 
-You are a knowledgeable assistant helping employees find accurate information from official company documents and knowledge articles.
+ADL_Test_doc_librar
+default
+Hybrid
+ADL_Test_doc_librar
+ADL_Test_doc_librar__dlm
+ADL_Test_doc_librar_index__dlm
+ADL_Test_doc_librar_chunk__dlm
+11/6/2026, 4:01 pm
+11/6/2026, 4:26 pm
+Ready
 
-### KNOWLEDGE
-
-The following JSON array contains document chunks retrieved from company documents and knowledge articles. Each item has three fields:
-
-- "Name": the document or article name
-- "URL": the source link
-- "Content": the relevant text chunk
-
-[{"Content":"### **If you leave NRI Australia Limited** - When you leave NRI Australia Limited, your account will remain in Brighter Super as an individual member. Refer to the **Investment and Fees Guide** and the **Corporate Offer Insurance Guide** for applicable fees and costs."}]
-
-### QUESTION
-
-Tell me About NRI plan?
-
-### INSTRUCTIONS
-
-1. Read all document chunks in the KNOWLEDGE section carefully.
-2. Answer the employee's question using ONLY information found in those chunks.
-3. Use language that closely reflects the source text – do not paraphrase heavily.
-4. Be concise, accurate, and professional.
-5. If the question cannot be answered from the provided KNOWLEDGE, respond only with:
-   "I'm sorry, I couldn't find relevant information to answer your question."
-6. Do not add citation numbers, footnotes, or a Sources section — these are handled automatically.
-7. Do not make up or infer information not present in the provided chunks.
-
-### RESPONSE
-
-If you leave NRI Australia Limited, your account will remain in Brighter Super as an individual member. Refer to the Investment and Fees Guide and the Corporate Offer Insurance Guide for applicable fees and costs.
+KA_Knowledge_Article_Data_Lib
+default
+Hybrid
+KA_Knowledge_Article_Data_Lib
+KnowledgeArticleVersion__dlm
+KA_Knowledge_Article_Data_Lib_index__dlm
+KA_Knowledge_Article_Data_Lib_chunk__dlm
+11/6/2026, 9:21 pm
+30/7/2026, 10:15 am
+Ready
