@@ -16,10 +16,11 @@
 @IsTest(SeeAllData=true)
 private class AF_UnifiedSearchService_Test {
 
-    // Replace with a Data_Cloud_File_Path__c that exists on a real Document_Detail__c record.
-    // A path that matches indexed ADL content lets runADLSearch return rows and cover its
-    // chunk-grouping and citation-building loops; an unmatched path still covers the entry path.
-    private static final String L2_DOCUMENT_PATH = 'ADL/Insurance/Death_and_TPD_Guide.pdf';
+    // A real Data_Cloud_File_Path__c with indexed ADL content behind it. This is what lets
+    // runADLSearch return rows and cover its chunk-grouping and citation-building loops,
+    // and what carries execution through to invokePromptTemplate.
+    // If this document is ever removed from Data Cloud, replace it with another indexed path.
+    private static final String L2_DOCUMENT_PATH = '1JD9j000001btWPGAY/Corp Plan - NRI.pdf';
 
     // Live UAT values. AF_Get_ADL_KA_Search_Parameters resolves these to real DCFilePaths
     // and KADataCategories, which is what drives coverage of runADLSearch and runKASearch.
@@ -244,6 +245,100 @@ private class AF_UnifiedSearchService_Test {
 
         Test.startTest();
         List<AF_UnifiedSearchService.Response> responses = runSearch(req);
+        Test.stopTest();
+
+        assertResponseShape(responses);
+    }
+
+    // ── Injected search parameters ───────────────────────────────────────────
+    //
+    // AF_Get_ADL_KA_Search_Parameters looks up records from a foreign data source, which
+    // Apex tests are not permitted to query, so Flow.Interview.start() always throws in a
+    // test. These tests set AF_UnifiedSearchService.testSearchParameters directly with the
+    // values that flow returns in UAT, which is the only way to reach the KA search branch.
+
+    // Real DataCategoryIds as returned by AF_Get_ADL_KA_Search_Parameters for
+    // SchemeCategory 'CorpPerm>=15hrs' / Employer 'NRI'.
+    private static List<String> knowledgeArticleCategoryIds() {
+        return new List<String>{
+            '02n9j000001eXBFAA2',
+            '02n9j000001eTXIAA2',
+            '02n9j000001eXBBAA2',
+            '02n9j000001eWwoAAE',
+            '02n9j000001eWwtAAE'
+        };
+    }
+
+    /**
+     * @description Knowledge Article search only. Covers runKASearch end to end: the data
+     * category literal, the article chunk grouping, and the citation references it builds.
+     */
+    @IsTest
+    static void searchRunsKnowledgeArticleSearch() {
+        AF_UnifiedSearchService.SearchParameters params = new AF_UnifiedSearchService.SearchParameters();
+        params.kaDataCategories = knowledgeArticleCategoryIds();
+        AF_UnifiedSearchService.testSearchParameters = params;
+
+        Test.startTest();
+        List<AF_UnifiedSearchService.Response> responses = runSearch(buildRequest(SEARCH_QUERY));
+        Test.stopTest();
+
+        assertResponseShape(responses);
+    }
+
+    /**
+     * @description Both sources resolved at once — the combination the flow normally produces.
+     * Covers the merge of ADL and KA context and source references before the single
+     * prompt template call.
+     */
+    @IsTest
+    static void searchCombinesDocumentAndKnowledgeArticleResults() {
+        AF_UnifiedSearchService.SearchParameters params = new AF_UnifiedSearchService.SearchParameters();
+        params.dcFilePaths = new List<String>{ L2_DOCUMENT_PATH };
+        params.kaDataCategories = knowledgeArticleCategoryIds();
+        AF_UnifiedSearchService.testSearchParameters = params;
+
+        Test.startTest();
+        List<AF_UnifiedSearchService.Response> responses = runSearch(buildRequest(SEARCH_QUERY));
+        Test.stopTest();
+
+        assertResponseShape(responses);
+    }
+
+    /**
+     * @description Neither source resolves. Covers the early return that hands back an empty
+     * response without calling the prompt template.
+     */
+    @IsTest
+    static void searchReturnsEmptyResponseWhenBothSourcesAreEmpty() {
+        AF_UnifiedSearchService.SearchParameters params = new AF_UnifiedSearchService.SearchParameters();
+        params.dcFilePaths = new List<String>();
+        params.kaDataCategories = new List<String>();
+        AF_UnifiedSearchService.testSearchParameters = params;
+
+        Test.startTest();
+        List<AF_UnifiedSearchService.Response> responses =
+            AF_UnifiedSearchService.SearchRetriever(
+                new List<AF_UnifiedSearchService.Request>{ buildRequest(SEARCH_QUERY) }
+            );
+        Test.stopTest();
+
+        Assert.areEqual(1, responses.size(), 'One empty response is returned when nothing resolves.');
+        Assert.isNull(responses[0].Data, 'No prompt template call should have been made.');
+        Assert.isNull(responses[0].sources, 'No citations should have been built.');
+    }
+
+    /**
+     * @description A null search query on the KA branch must survive the sanitisation ternary.
+     */
+    @IsTest
+    static void searchRunsKnowledgeArticleSearchWithNullQuery() {
+        AF_UnifiedSearchService.SearchParameters params = new AF_UnifiedSearchService.SearchParameters();
+        params.kaDataCategories = knowledgeArticleCategoryIds();
+        AF_UnifiedSearchService.testSearchParameters = params;
+
+        Test.startTest();
+        List<AF_UnifiedSearchService.Response> responses = runSearch(buildRequest(null));
         Test.stopTest();
 
         assertResponseShape(responses);
