@@ -1,11 +1,2 @@
-Map<String, Object> flowInputs = new Map<String, Object>{
-    'EmployerName'        => 'NRI',
-    'IsExistingMember'    => true,
-    'IsInsuranceSelected' => true,
-    'IsProductSelected'   => false,
-    'SchemeCategory'      => 'CorpPerm>=15hrs'
-};
-Flow.Interview fi = Flow.Interview.createInterview('AF_Get_ADL_KA_Search_Parameters', flowInputs);
-fi.start();
-System.debug('>>> DCFilePaths: ' + fi.getVariableValue('DCFilePaths'));
-System.debug('>>> KADataCategories: ' + fi.getVariableValue('KADataCategories'));
+18:30:32:743 USER_DEBUG [1]|DEBUG|>>> DCFilePaths: (1JD9j000001btWPGAY/Corp Plan - NRI.pdf, 1JD9j000001btWPGAY/Guide to Claiming a Death Benefit.pdf, 1JD9j000001btWPGAY/Accessing Superannuation Early _ Brighter Super FY26-27.pdf)
+18:30:32:743 USER_DEBUG [1]|DEBUG|>>> KADataCategories: (02n9j000001eXBFAA2, 02n9j000001eTXIAA2, 02n9j000001eXBBAA2, 02n9j000001eWwoAAE, 02n9j000001eWwtAAE, 02n9j000001eWwsAAE, 02n9j000001eWwnAAE, 02n9j000001eWwqAAE, 02n9j000001eX6LAAU, 02n9j000001eTXHAA2, ...)
