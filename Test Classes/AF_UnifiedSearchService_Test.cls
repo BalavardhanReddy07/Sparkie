@@ -16,7 +16,17 @@
 @IsTest(SeeAllData=true)
 private class AF_UnifiedSearchService_Test {
 
+    // Replace with a Data_Cloud_File_Path__c that exists on a real Document_Detail__c record.
+    // A path that matches indexed ADL content lets runADLSearch return rows and cover its
+    // chunk-grouping and citation-building loops; an unmatched path still covers the entry path.
     private static final String L2_DOCUMENT_PATH = 'ADL/Insurance/Death_and_TPD_Guide.pdf';
+
+    // Live UAT values. AF_Get_ADL_KA_Search_Parameters resolves these to real DCFilePaths
+    // and KADataCategories, which is what drives coverage of runADLSearch and runKASearch.
+    // If the flow's routing data changes, refresh these three constants.
+    private static final String SCHEME_CATEGORY = 'CorpPerm>=15hrs';
+    private static final String EMPLOYER_NAME = 'NRI';
+    private static final String SEARCH_QUERY = 'Tell me About NRI plan?';
 
     /**
      * @description Builds a request with only a search query set.
@@ -24,6 +34,26 @@ private class AF_UnifiedSearchService_Test {
     private static AF_UnifiedSearchService.Request buildRequest(String searchQuery) {
         AF_UnifiedSearchService.Request req = new AF_UnifiedSearchService.Request();
         req.searchQuery = searchQuery;
+        return req;
+    }
+
+    /**
+     * @description Builds a request that carries no L2 document, so the search parameters
+     * are resolved through AF_Get_ADL_KA_Search_Parameters.
+     */
+    private static AF_UnifiedSearchService.Request buildFlowRequest(
+        Boolean isExistingMember,
+        Boolean isInsuranceSelected,
+        Boolean isProductSelected,
+        String employerName,
+        String schemeCategory
+    ) {
+        AF_UnifiedSearchService.Request req = buildRequest(SEARCH_QUERY);
+        req.isExistingMember = isExistingMember;
+        req.isInsuranceSelected = isInsuranceSelected;
+        req.isProductSelected = isProductSelected;
+        req.employerName = employerName;
+        req.schemeCategory = schemeCategory;
         return req;
     }
 
@@ -66,14 +96,7 @@ private class AF_UnifiedSearchService_Test {
      */
     @IsTest
     static void searchUsesSelectedL2DocumentPath() {
-        Document_Detail__c doc = new Document_Detail__c(
-            Name = 'Death and TPD Guide',
-            Document_URL__c = 'https://example.my.site.com/docs/death-and-tpd-guide',
-            Data_Cloud_File_Path__c = L2_DOCUMENT_PATH
-        );
-        insert doc;
-
-        AF_UnifiedSearchService.Request req = buildRequest('What cover do I have for total and permanent disability?');
+        AF_UnifiedSearchService.Request req = buildRequest(SEARCH_QUERY);
         req.selectedL2DocumentFilePath = L2_DOCUMENT_PATH;
 
         Test.startTest();
@@ -122,7 +145,8 @@ private class AF_UnifiedSearchService_Test {
      */
     @IsTest
     static void searchTreatsBlankL2PathAsNotSelected() {
-        AF_UnifiedSearchService.Request req = buildRequest('How do I make an insurance claim?');
+        AF_UnifiedSearchService.Request req =
+            buildFlowRequest(true, true, false, EMPLOYER_NAME, SCHEME_CATEGORY);
         req.selectedL2DocumentFilePath = '';
 
         Test.startTest();
@@ -135,40 +159,76 @@ private class AF_UnifiedSearchService_Test {
     // ── Flow path: parameters resolved by AF_Get_ADL_KA_Search_Parameters ─────
 
     /**
-     * @description The full insurance context, with no L2 document selected, resolves its
-     * file paths and data categories through the flow. Covers the else branch of
-     * getSearchParameters and, where the org returns categories, the KA search.
+     * @description Existing member, insurance topic, with an employer. This is the
+     * combination the flow resolves to the Insurance and Employers data categories,
+     * so it is the one that drives runKASearch.
      */
     @IsTest
     static void searchResolvesParametersThroughFlowForInsuranceMember() {
-        AF_UnifiedSearchService.Request req = buildRequest('What insurance cover comes with my account?');
-        req.employerName = 'Employer Alpha';
-        req.isExistingMember = true;
-        req.isInsuranceSelected = true;
-        req.isProductSelected = false;
-        req.schemeCategory = 'AFT Corporate Super';
-
         Test.startTest();
-        List<AF_UnifiedSearchService.Response> responses = runSearch(req);
+        List<AF_UnifiedSearchService.Response> responses = runSearch(
+            buildFlowRequest(true, true, false, EMPLOYER_NAME, SCHEME_CATEGORY)
+        );
         Test.stopTest();
 
         assertResponseShape(responses);
     }
 
     /**
-     * @description The product context takes the same flow branch with a different set of
-     * flags, which the flow uses to select a different set of search parameters.
+     * @description Existing member on the product topic — the flow selects a different
+     * set of parameters for the same scheme category.
      */
     @IsTest
     static void searchResolvesParametersThroughFlowForProductEnquiry() {
-        AF_UnifiedSearchService.Request req = buildRequest('What are the fees on this product?');
-        req.isExistingMember = false;
-        req.isInsuranceSelected = false;
-        req.isProductSelected = true;
-        req.schemeCategory = 'AFT Personal Super';
-
         Test.startTest();
-        List<AF_UnifiedSearchService.Response> responses = runSearch(req);
+        List<AF_UnifiedSearchService.Response> responses = runSearch(
+            buildFlowRequest(true, false, true, EMPLOYER_NAME, SCHEME_CATEGORY)
+        );
+        Test.stopTest();
+
+        assertResponseShape(responses);
+    }
+
+    /**
+     * @description Existing member with neither topic flag set — the general member
+     * context, which the flow resolves to the Member data category.
+     */
+    @IsTest
+    static void searchResolvesParametersThroughFlowForGeneralMemberEnquiry() {
+        Test.startTest();
+        List<AF_UnifiedSearchService.Response> responses = runSearch(
+            buildFlowRequest(true, false, false, EMPLOYER_NAME, SCHEME_CATEGORY)
+        );
+        Test.stopTest();
+
+        assertResponseShape(responses);
+    }
+
+    /**
+     * @description A non-member asking about the same scheme category. The flow routes
+     * public enquiries to a different parameter set than member enquiries.
+     */
+    @IsTest
+    static void searchResolvesParametersThroughFlowForNonMember() {
+        Test.startTest();
+        List<AF_UnifiedSearchService.Response> responses = runSearch(
+            buildFlowRequest(false, true, false, null, SCHEME_CATEGORY)
+        );
+        Test.stopTest();
+
+        assertResponseShape(responses);
+    }
+
+    /**
+     * @description An employer named with no scheme category, which is how the flow is
+     * reached when the member has identified their employer but not their scheme.
+     */
+    @IsTest
+    static void searchResolvesParametersThroughFlowForEmployerOnly() {
+        Test.startTest();
+        List<AF_UnifiedSearchService.Response> responses = runSearch(
+            buildFlowRequest(true, true, false, EMPLOYER_NAME, null)
+        );
         Test.stopTest();
 
         assertResponseShape(responses);
