@@ -1,11 +1,1 @@
-Process Topic Selection
-CLT_Process_Topic_Selection
-
-Product Member Input
-memberInput
-
-Insurance Member Input
-insuranceMemberInput
-
-SparkieL2DocumentSelectorBrighterLibrary
-SparkieL2DocumentSelectorBrighterLibrary
+SELECT RecordId__c, Chunk__c, SourceRecordId__c FROM ADL_All_Documents_Custom_chunk__dlm LIMIT 20
