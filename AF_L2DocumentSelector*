@@ -1,0 +1,46 @@
+public class AF_L2DocumentSelector {
+
+    public class SelectorInput {
+
+        @InvocableVariable
+        public String selectedL2Document;
+
+    }
+
+    public class SelectorResult {
+
+        @InvocableVariable(label='Selected L2 Document' description='This variable stores the filepath of selected L2 Document')
+        public String selectedL2Document;
+    }
+
+    /**
+     * @description Invocable request wrapper — field names must match AgentScript action input names
+     */
+    public class SelectorRequestInput {
+        @InvocableVariable
+        public SelectorInput selectorData;
+    }
+
+    /**
+     * @description returns the captured values from the user
+     */
+    @InvocableMethod(label='Select L2 Document' description= 'This action is used for getting the L2 Document Selection using the Input Rendering Component.')
+    public static List<SelectorResult> getSelectedDocument(List<SelectorRequestInput> requests) {
+        
+
+        List<SelectorResult> responses = new List<SelectorResult>();
+        SelectorResult response = new SelectorResult();
+        try{
+
+            response.selectedL2Document = requests[0].selectorData.selectedL2Document;
+            responses.add(response);
+        }
+        catch(Exception e){
+            system.debug(e.getCause()+ ' '+ e.getLineNumber()+ ' '+ e.getStackTraceString() + ' '+ e.getMessage());
+        }
+        
+        return responses;
+    }
+
+
+}
