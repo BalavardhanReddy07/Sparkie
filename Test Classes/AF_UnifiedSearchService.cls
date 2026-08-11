@@ -48,6 +48,21 @@ public with sharing class AF_UnifiedSearchService {
     @TestVisible
     private static SearchParameters testSearchParameters;
 
+    // Test-only overrides for the platform calls this class cannot mock: the two Data Cloud
+    // hybrid searches and the prompt template generation. Like testSearchParameters these are
+    // always null outside a test, so every runtime path below is unchanged. They exist so that
+    // code coverage comes from injected rows rather than from whether the org running the tests
+    // happens to have indexed Data Cloud content — a deployment's test context is not the same
+    // as Developer Console, and coverage must not depend on the difference.
+    @TestVisible
+    private static List<List<Object>> testAdlRows;
+
+    @TestVisible
+    private static List<List<Object>> testKaRows;
+
+    @TestVisible
+    private static String testPromptResponse;
+
     // Holds context and source references produced by each search
     private class SearchResults {
         List<Map<String, Object>>            contextList = new List<Map<String, Object>>();
@@ -148,19 +163,11 @@ public with sharing class AF_UnifiedSearchService {
             'JOIN ADL_All_Documents_L__dlm AS d ON c.SourceRecordId__c = d.FilePath__c ' +
             'ORDER BY h.hybrid_score__c DESC';
 
-        ConnectApi.CdpQueryInput cdpInput = new ConnectApi.CdpQueryInput();
-        cdpInput.sql = sqlQuery;
-        ConnectApi.CdpQueryOutputV2 output = ConnectApi.CdpQuery.queryAnsiSqlV2(cdpInput);
+        List<List<Object>> rawRows = testAdlRows != null ? testAdlRows : runCdpQuery(sqlQuery);
 
-        Set<String>        filePathSet = new Set<String>();
-        List<List<Object>> rawRows     = new List<List<Object>>();
-
-        if (output.data != null && !output.data.isEmpty()) {
-            for (ConnectApi.CdpQueryV2Row rowObj : output.data) {
-                List<Object> row = rowObj.rowData;
-                rawRows.add(row);
-                if (row[1] != null) filePathSet.add((String) row[1]);
-            }
+        Set<String> filePathSet = new Set<String>();
+        for (List<Object> row : rawRows) {
+            if (row[1] != null) filePathSet.add((String) row[1]);
         }
 
         Map<String, Document_Detail__c> filePathToDocMap = new Map<String, Document_Detail__c>();
@@ -239,16 +246,7 @@ public with sharing class AF_UnifiedSearchService {
             'AND c.SourceRecordId__c IN (SELECT DISTINCT kds.ParentId__c FROM DataCategorySelectionCustom__dlm AS kds WHERE kds.DataCategoryId__c IN (' + dataCategoryIdsLiteral + ')) ' +
             'ORDER BY Score DESC LIMIT 20';
 
-        ConnectApi.CdpQueryInput cdpInput = new ConnectApi.CdpQueryInput();
-        cdpInput.sql = sqlQuery;
-        ConnectApi.CdpQueryOutputV2 output = ConnectApi.CdpQuery.queryAnsiSqlV2(cdpInput);
-
-        List<List<Object>> rawRows = new List<List<Object>>();
-        if (output.data != null && !output.data.isEmpty()) {
-            for (ConnectApi.CdpQueryV2Row rowObj : output.data) {
-                rawRows.add(rowObj.rowData);
-            }
-        }
+        List<List<Object>> rawRows = testKaRows != null ? testKaRows : runCdpQuery(sqlQuery);
 
         Map<String, List<String>> articleIdToChunks = new Map<String, List<String>>();
         Map<String, String>       articleIdToNameMap = new Map<String, String>();
@@ -295,6 +293,26 @@ public with sharing class AF_UnifiedSearchService {
         return results;
     }
 
+    // ── Shared: Data Cloud ────────────────────────────────────────────────────
+
+    // The only place this class talks to Data Cloud. Deliberately kept to the smallest possible
+    // body: these are the lines that no Apex test can cover, so nothing but the call and the
+    // row unwrap belongs here. Callers work with the plain List<List<Object>> it returns, which
+    // is what makes them injectable via testAdlRows / testKaRows.
+    private static List<List<Object>> runCdpQuery(String sqlQuery) {
+        ConnectApi.CdpQueryInput cdpInput = new ConnectApi.CdpQueryInput();
+        cdpInput.sql = sqlQuery;
+        ConnectApi.CdpQueryOutputV2 output = ConnectApi.CdpQuery.queryAnsiSqlV2(cdpInput);
+
+        List<List<Object>> rawRows = new List<List<Object>>();
+        if (output.data != null && !output.data.isEmpty()) {
+            for (ConnectApi.CdpQueryV2Row rowObj : output.data) {
+                rawRows.add(rowObj.rowData);
+            }
+        }
+        return rawRows;
+    }
+
     // ── Shared: Prompt Template ───────────────────────────────────────────────
 
     private static String invokePromptTemplate(String searchQuery, String formattedContext) {
@@ -316,6 +334,10 @@ public with sharing class AF_UnifiedSearchService {
         promptInput.additionalConfig                 = new ConnectApi.EinsteinLlmAdditionalConfigInput();
         promptInput.additionalConfig.numGenerations  = 1;
         promptInput.additionalConfig.applicationName = 'PromptBuilderPreview';
+
+        // Placed after the input is fully built so that a test still covers the parameter
+        // wiring above, and only the generation call itself is bypassed.
+        if (testPromptResponse != null) { return testPromptResponse; }
 
         ConnectApi.EinsteinPromptTemplateGenerationsRepresentation result =
             ConnectApi.EinsteinLLM.generateMessagesForPromptTemplate(
