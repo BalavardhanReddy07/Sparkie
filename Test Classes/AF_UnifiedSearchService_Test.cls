@@ -378,4 +378,173 @@ private class AF_UnifiedSearchService_Test {
         Assert.areEqual('Your death cover is $250,000.', res.Data, 'Data should round-trip.');
         Assert.isNull(res.sources, 'sources is only populated once a search produces citations.');
     }
+
+    // ── Deterministic coverage: injected Data Cloud rows ─────────────────────
+    //
+    // Everything above this point is a live smoke test: it covers more when the org has the
+    // Data Cloud content behind it and silently covers less when it does not, because runSearch
+    // swallows the platform exception. That is why coverage read 85% in Developer Console but
+    // collapsed during change set validation, where the tests run queued and in parallel.
+    //
+    // The tests below inject rows through testAdlRows / testKaRows / testPromptResponse instead
+    // of calling Data Cloud or the prompt template. They touch no org data, make no callouts,
+    // and assert real behaviour, so they produce identical coverage in every org and under
+    // parallel execution. These are what carry the class over the 75% deployment gate.
+
+    private static final String STUB_PROMPT_RESPONSE = 'Stubbed LLM answer with [1] citation.';
+
+    // Row layout expected by runADLSearch: [0] Chunk [1] FilePath [2..4] scores
+    private static List<Object> adlRow(String chunk, String filePath) {
+        return new List<Object>{ chunk, filePath, 0.91, 0.42, 0.55 };
+    }
+
+    // Row layout expected by runKASearch: [0] Score [1] ssot__Name__c [2] Chunk [3] ssot__Id__c
+    private static List<Object> kaRow(String articleName, String chunk, String articleId) {
+        return new List<Object>{
+            0.91, articleName, chunk, articleId, 0.42, 0.55, null, null, null, null
+        };
+    }
+
+    private static AF_UnifiedSearchService.SearchParameters injectedParameters(
+        List<String> dcFilePaths,
+        List<String> kaDataCategories
+    ) {
+        AF_UnifiedSearchService.SearchParameters params = new AF_UnifiedSearchService.SearchParameters();
+        params.dcFilePaths      = dcFilePaths;
+        params.kaDataCategories = kaDataCategories;
+        AF_UnifiedSearchService.testSearchParameters = params;
+        AF_UnifiedSearchService.testPromptResponse   = STUB_PROMPT_RESPONSE;
+        return params;
+    }
+
+    /**
+     * @description Two chunks from one file path, plus a row with a null path that must be
+     * skipped. Covers the chunk-grouping loop, the ordered file path list, the citation
+     * builder, and the doc==null fallbacks that use the raw file path as the label.
+     */
+    @IsTest
+    static void adlSearchGroupsChunksAndFallsBackWhenFilePathIsUnmapped() {
+        injectedParameters(new List<String>{ 'Stub/Unmapped.pdf' }, null);
+        AF_UnifiedSearchService.testAdlRows = new List<List<Object>>{
+            adlRow('First chunk of the unmapped document.',  'Stub/Unmapped.pdf'),
+            adlRow('Second chunk of the unmapped document.', 'Stub/Unmapped.pdf'),
+            adlRow('This row has no file path and is skipped.', null)
+        };
+
+        Test.startTest();
+        List<AF_UnifiedSearchService.Response> responses = AF_UnifiedSearchService.SearchRetriever(
+            new List<AF_UnifiedSearchService.Request>{ buildRequest(SEARCH_QUERY) }
+        );
+        Test.stopTest();
+
+        Assert.areEqual(1, responses.size(), 'SearchRetriever always returns exactly one response.');
+        Assert.areEqual(
+            STUB_PROMPT_RESPONSE,
+            responses[0].Data,
+            'The injected prompt response should be handed back unchanged.'
+        );
+        Assert.isNotNull(responses[0].sources, 'Citations should be built from the injected rows.');
+    }
+
+    /**
+     * @description The same ADL path, but with a Document_Detail__c record behind the file path
+     * so the SOQL lookup resolves. Covers the branch that labels citations with the document's
+     * Name and Document_URL__c instead of the raw path.
+     */
+    @IsTest
+    static void adlSearchUsesDocumentDetailNameAndUrlWhenFilePathIsMapped() {
+        Document_Detail__c doc = new Document_Detail__c(
+            Name                    = 'Stub Corp Plan',
+            Data_Cloud_File_Path__c = 'Stub/Mapped.pdf',
+            Document_URL__c         = 'https://example.com/stub-corp-plan.pdf'
+        );
+        insert doc;
+
+        injectedParameters(new List<String>{ 'Stub/Mapped.pdf' }, null);
+        AF_UnifiedSearchService.testAdlRows = new List<List<Object>>{
+            adlRow('A chunk from the mapped document.', 'Stub/Mapped.pdf')
+        };
+
+        Test.startTest();
+        List<AF_UnifiedSearchService.Response> responses = AF_UnifiedSearchService.SearchRetriever(
+            new List<AF_UnifiedSearchService.Request>{ buildRequest(SEARCH_QUERY) }
+        );
+        Test.stopTest();
+
+        Assert.areEqual(STUB_PROMPT_RESPONSE, responses[0].Data, 'The injected response is returned.');
+        Assert.isNotNull(responses[0].sources, 'A citation should be built for the mapped document.');
+    }
+
+    /**
+     * @description Two chunks from one article plus a null-id row that must be skipped. Covers
+     * runKASearch end to end: the data category literal, article grouping, the Knowledge URL
+     * construction and the citation builder.
+     */
+    @IsTest
+    static void knowledgeArticleSearchGroupsChunksByArticle() {
+        injectedParameters(null, knowledgeArticleCategoryIds());
+        AF_UnifiedSearchService.testKaRows = new List<List<Object>>{
+            kaRow('Insurance Cover Basics', 'First KA chunk.',  'ka0000000000001AAA'),
+            kaRow('Insurance Cover Basics', 'Second KA chunk.', 'ka0000000000001AAA'),
+            kaRow('Skipped Article',        'No id on this row.', null)
+        };
+
+        Test.startTest();
+        List<AF_UnifiedSearchService.Response> responses = AF_UnifiedSearchService.SearchRetriever(
+            new List<AF_UnifiedSearchService.Request>{ buildRequest(SEARCH_QUERY) }
+        );
+        Test.stopTest();
+
+        Assert.areEqual(STUB_PROMPT_RESPONSE, responses[0].Data, 'The injected response is returned.');
+        Assert.isNotNull(responses[0].sources, 'Citations should be built from the injected KA rows.');
+    }
+
+    /**
+     * @description Both sources resolved at once — the combination the flow normally produces.
+     * Covers the merge of ADL and KA context and source references ahead of the single
+     * prompt template call.
+     */
+    @IsTest
+    static void searchMergesInjectedDocumentAndKnowledgeArticleResults() {
+        injectedParameters(new List<String>{ 'Stub/Unmapped.pdf' }, knowledgeArticleCategoryIds());
+        AF_UnifiedSearchService.testAdlRows = new List<List<Object>>{
+            adlRow('An ADL chunk.', 'Stub/Unmapped.pdf')
+        };
+        AF_UnifiedSearchService.testKaRows = new List<List<Object>>{
+            kaRow('Insurance Cover Basics', 'A KA chunk.', 'ka0000000000001AAA')
+        };
+
+        Test.startTest();
+        List<AF_UnifiedSearchService.Response> responses = AF_UnifiedSearchService.SearchRetriever(
+            new List<AF_UnifiedSearchService.Request>{ buildRequest(SEARCH_QUERY) }
+        );
+        Test.stopTest();
+
+        Assert.areEqual(STUB_PROMPT_RESPONSE, responses[0].Data, 'The injected response is returned.');
+        Assert.isNotNull(responses[0].sources, 'Citations from both sources should be merged.');
+    }
+
+    /**
+     * @description An apostrophe in the query and in the file path must survive the escaping
+     * branches without breaking the generated SQL, on the injected path where the SQL is still
+     * built in full but never sent to Data Cloud.
+     */
+    @IsTest
+    static void injectedSearchStillEscapesQuotesWhileBuildingSql() {
+        injectedParameters(new List<String>{ 'Stub/Member\'s_Guide.pdf' }, knowledgeArticleCategoryIds());
+        AF_UnifiedSearchService.testAdlRows = new List<List<Object>>{
+            adlRow('A chunk.', 'Stub/Member\'s_Guide.pdf')
+        };
+        AF_UnifiedSearchService.testKaRows = new List<List<Object>>();
+
+        Test.startTest();
+        List<AF_UnifiedSearchService.Response> responses = AF_UnifiedSearchService.SearchRetriever(
+            new List<AF_UnifiedSearchService.Request>{
+                buildRequest('What is the member\'s default cover?')
+            }
+        );
+        Test.stopTest();
+
+        Assert.areEqual(STUB_PROMPT_RESPONSE, responses[0].Data, 'Escaping should not affect the result.');
+    }
 }
